@@ -4,17 +4,23 @@
 
 categories:
     # soils
-    SSURGO: "https://www.sciencebase.gov/catalog/file/get/537a6a01e4b0efa8af081544?f=__disk__4c%2F33%2F5f%2F4c335f3e695810495a4f507816c82bd3328ff022"
+    - SSURGO
     # landcover
-    NLCD2001: "https://www.sciencebase.gov/catalog/file/get/537a6a10e4b0efa8af081547?f=__disk__c0%2Ffc%2F9b%2Fc0fc9b0e523a4b7a5187642bba4b692a71594abc"
+    - NLCD2001
     # topography
-    NHDPLUSDEM: "https://www.sciencebase.gov/catalog/file/get/537a6a24e4b0efa8af08154a?f=__disk__58%2F50%2F0e%2F58500e3c049f6dd168b67cb8b78b2f853cd2f17d"
+    - NHDPLUSDEM
     # geography
-    Geog: "https://www.sciencebase.gov/catalog/file/get/537a59ece4b0efa8af081526?f=__disk__d6%2Fc7%2F61%2Fd6c76104941c7a435f3738647c3fa7ab909c87ad"
+    - Geog
     # surface_depressions
-    MacDNLCD01: "https://www.sciencebase.gov/catalog/file/get/537a6a51e4b0efa8af081550?f=__disk__95%2Fc8%2F36%2F95c836f2c06997cf3447ffa8721a5dbe55c9216e"
+    - MacDNLCD01
     # subsurface_flux
+    - Gleeson
+    
+urls:
+    SSURGO: "https://www.sciencebase.gov/catalog/file/get/537a6a01e4b0efa8af081544?f=__disk__4c%2F33%2F5f%2F4c335f3e695810495a4f507816c82bd3328ff022"
+    NLCD2001: "https://www.sciencebase.gov/catalog/file/get/537a6a10e4b0efa8af081547?f=__disk__c0%2Ffc%2F9b%2Fc0fc9b0e523a4b7a5187642bba4b692a71594abc"
+    NHDPLUSDEM: "https://www.sciencebase.gov/catalog/file/get/537a6a24e4b0efa8af08154a?f=__disk__58%2F50%2F0e%2F58500e3c049f6dd168b67cb8b78b2f853cd2f17d"
+    Geog: "https://www.sciencebase.gov/catalog/file/get/537a59ece4b0efa8af081526?f=__disk__d6%2Fc7%2F61%2Fd6c76104941c7a435f3738647c3fa7ab909c87ad"
+    MacDNLCD01: "https://www.sciencebase.gov/catalog/file/get/537a6a51e4b0efa8af081550?f=__disk__95%2Fc8%2F36%2F95c836f2c06997cf3447ffa8721a5dbe55c9216e"
     Gleeson: "https://www.sciencebase.gov/catalog/file/get/537a6a33e4b0efa8af08154d?f=__disk__42%2F56%2F82%2F425682a10d55489cf550ca1651b2cb5615c808a0"
-
-
 
