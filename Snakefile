@@ -6,9 +6,9 @@ cat_att_dir = 'cat_attr'
 
 rule all:
     input:
-        combined_data = expand("{fldr}/combined_categories_{region}.feather",
-                               fldr=cat_att_dir, region=regions),
-        metadata = f"{cat_att_dir}/combined_metadata.csv"
+        metadata = f"{cat_att_dir}/combined_metadata.csv",
+        seg_attr = expand("{fldr}/combined_seg_attr_{region}.feather", fldr=cat_att_dir, region=regions),
+        subset_attr = f"{cat_att_dir}/subset_seg_attr_drb.feather"
 
 
 params_out_fmt = "{fldr}/GeospatialFabricAttributes-PRMS_{category}_{region}.gdb"
@@ -26,9 +26,39 @@ rule combine_categories:
         expand(params_out_fmt, fldr=cat_att_dir, category=config['categories'],
                region=regions)
     output:
-        rules.all.input[0]
+        "{fldr}/combined_categories_{region}.feather"
     run:
         catch_attr.combine_categories(input[1:], output[0])
+
+rule add_ids_and_seg_attributes:
+    input:
+        'gis/nsegmentNationalIdentifier.csv',
+        'gis/nhruNationalIdentifier.csv',
+        rules.combine_categories.output
+    output:
+        "{fldr}/combined_cats_w_ids_{region}.feather"
+    run:
+        catch_attr.add_ids_and_seg_attr(input[0], input[1], input[2], wildcards.region, output[0])
+
+rule relate_to_segments:
+    input:
+        rules.add_ids_and_seg_attributes.output
+    output:
+        "{fldr}/combined_seg_attr_{region}.feather"
+    run:
+        catch_attr.relate_attr_to_segments(input[0], output[0], True)
+
+rule subset_attr_to_drb:
+    input:
+        "gis/Segments_subset.shp",
+        f"{cat_att_dir}/combined_seg_attr_02.feather"
+
+    output:
+        rules.all.input.subset_attr
+    run:
+        catch_attr.subset_for_drb(input[0], input[1], output[0])
+        
+
 
 metadata_file_fmt = "{fldr}/{category}_metadata.xml"
 rule get_metadata_xml_files:
