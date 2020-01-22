@@ -1,14 +1,19 @@
+import sys
+scripts_path =  os.path.abspath("20_catchment_attributes/src")
+sys.path.insert(0, scripts_path)
+
 import catch_attr
 
 configfile: 'catchment_attr_links.yaml'
 regions = ['02']
-cat_att_dir = 'cat_attr'
+cat_att_dir = '20_catchment_attributes/out'
 
 rule all:
     input:
         metadata = f"{cat_att_dir}/combined_metadata.csv",
         seg_attr = expand("{fldr}/combined_seg_attr_{region}.feather", fldr=cat_att_dir, region=regions),
-        subset_attr = f"{cat_att_dir}/subset_seg_attr_drb.feather"
+        drb_attr = f"{cat_att_dir}/seg_attr_drb.feather",
+        subset_drb_attr = f"{cat_att_dir}/seg_attr_drb_subset.feather"
 
 
 params_out_fmt = "{fldr}/GeospatialFabricAttributes-PRMS_{category}_{region}.gdb"
@@ -32,8 +37,8 @@ rule combine_categories:
 
 rule add_ids_and_seg_attributes:
     input:
-        'gis/nsegmentNationalIdentifier.csv',
-        'gis/nhruNationalIdentifier.csv',
+        '10_spatial_data/out/nsegmentNationalIdentifier.csv',
+        '10_spatial_data/out/nhruNationalIdentifier.csv',
         rules.combine_categories.output
     output:
         "{fldr}/combined_cats_w_ids_{region}.feather"
@@ -50,15 +55,23 @@ rule relate_to_segments:
 
 rule subset_attr_to_drb:
     input:
-        "gis/Segments_subset.shp",
+        # this is a shapefile of the entire DRB cutout
+        "10_spatial_data/out/Segments_subset.shp",
         f"{cat_att_dir}/combined_seg_attr_02.feather"
-
     output:
-        rules.all.input.subset_attr
+        rules.all.input.drb_attr
     run:
         catch_attr.subset_for_drb(input[0], input[1], output[0])
-        
 
+rule subset_attr_drb_subset:
+    input:
+        # this is a list of link ids that are in the subset of the DRB (the small subset Xiaowei started with)
+        "10_spatial_data/out/drb_subset_links.csv",
+        f"{cat_att_dir}/combined_seg_attr_02.feather"
+    output:
+        rules.all.input.subset_drb_attr
+    run:
+        catch_attr.subset_for_drb_subset(input[0], input[1], output[0])
 
 metadata_file_fmt = "{fldr}/{category}_metadata.xml"
 rule get_metadata_xml_files:

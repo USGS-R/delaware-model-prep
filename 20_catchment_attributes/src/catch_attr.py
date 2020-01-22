@@ -258,18 +258,40 @@ def relate_attr_to_segments(attr_w_id_file, out_file, rm_other_ids=True):
     return by_seg_mean
 
 
-def subset_for_drb(subset_file, seg_attr_file, out_file):
+def subset_by_links(subset_links, seg_attr_file, out_file):
     """
     subset the segment attributes just for the drb 
-    :param subset_file: [str] path to shapefile with the segment subset
+    :param subset_links: [list] list of links that you want attribute data for
     :parm seg_attr_file: [str] path to file with the segment attributes by
     national segment id
     :out_file: [str] path to where the data should be written
     """
     seg_att_df = pd.read_feather(seg_attr_file)
-    subset_gdf = gpd.read_file(subset_file)
-    seg_subset = seg_att_df.loc[subset_gdf['seg_id_nat']]
+    seg_subset = seg_att_df.loc[subset_links]
     seg_subset.reset_index(inplace=True)
     seg_subset.to_feather(out_file)
 
+
+def subset_for_drb(drb_file, seg_attr_file, out_file):
+    """
+    :param drb_file: [str] path to shapefile with the drb segment subset with
+    'seg_id_nat' as the links to subset by
+    :parm seg_attr_file: [str] path to file with the segment attributes by
+    national segment id
+    :out_file: [str] path to where the data should be written
+    """
+    subset_gdf = gpd.read_file(drb_file)
+    link_ids = subset_gdf['seg_id_nat']
+    subset_by_links(link_ids, seg_attr_file, out_file)
+
+
+def subset_for_drb_subset(subset_links_file, seg_attr_file, out_file):
+    """
+    :param subset_links_file: [list] path to file with the drb subset link ids 
+    :parm seg_attr_file: [str] path to file with the segment attributes by
+    national segment id
+    :out_file: [str] path to where the data should be written
+    """
+    seg_ids = pd.read_csv(subset_links_file, header=None)[0]
+    subset_by_links(seg_ids, seg_attr_file, out_file)
 
