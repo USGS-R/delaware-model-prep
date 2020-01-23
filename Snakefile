@@ -1,7 +1,16 @@
+# import global scripts
 import sys
-scripts_path =  os.path.abspath("20_catchment_attributes/src")
-sys.path.insert(0, scripts_path)
+import os
 
+# add all the src directories to the path so that we have access to the scripts
+def add_all_src_dir():
+    for contents in os.walk('.'):
+        directory = contents[0]
+        if directory.endswith('src'):
+            scripts_path =  os.path.abspath("20_catchment_attributes/src")
+            sys.path.insert(0, scripts_path)
+
+# import local scripts
 import catch_attr
 
 configfile: 'catchment_attr_links.yaml'
@@ -14,7 +23,6 @@ rule all:
         seg_attr = expand("{fldr}/combined_seg_attr_{region}.feather", fldr=cat_att_dir, region=regions),
         drb_attr = f"{cat_att_dir}/seg_attr_drb.feather",
         subset_drb_attr = f"{cat_att_dir}/seg_attr_drb_subset.feather"
-
 
 params_out_fmt = "{fldr}/GeospatialFabricAttributes-PRMS_{category}_{region}.gdb"
 rule get_all_catchment_params:
@@ -88,4 +96,5 @@ rule combine_metadata_files:
         rules.all.input.metadata
     run:
         catch_attr.consolidate_metdata(input, output[0])
+
 
