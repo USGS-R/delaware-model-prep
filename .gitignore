@@ -1,0 +1,14 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+*/in/*
+*.rds
+*.Rds
+*.feather
+*.Feather
+*.geojson
+
+# remake
+.remake/
