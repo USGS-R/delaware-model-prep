@@ -1,0 +1,53 @@
+target_default: 1_network
+
+packages:
+  - sf
+  - tidyverse
+  - lwgeom
+  - smoothr
+  - igraph
+  - purrr
+  - geojsonio
+  - geojsonsf
+
+sources:
+  - 1_network/src/geo_fabric_functions.R
+  - 1_network/src/get_national_gf.R
+
+
+targets:
+  1_network:
+    depends:
+     - 1_network/out/boundary.rds.ind
+     - 1_network/out/network.rds.ind
+  
+  # placeholder for function to download and indicate the national geospatial fabric
+  # for now, downloaded to "in" from here: https://www.sciencebase.gov/catalog/item/5362b683e4b0c409c6289bf6
+  #1_network/in/GeospatialFabric_National.gdb.ind:
+  #  command: get_national_gf(sb_id = '5362b683e4b0c409c6289bf6', sb_name = 'GeospatialFabric_National.gdb.zip')
+    
+  1_network/out/network.rds.ind:
+    command: revise_raw_network(
+      out_ind = target_name, 
+      subset_network = I('1_network/in/delaware_stream_temp_by_segment/delaware_segments/delaware_segments.shp'),
+      national_network = I('1_network/in/GeospatialFabric_National.gdb'))
+  
+  1_network/out/network.rds:
+    command: gd_get('1_network/out/network.rds.ind')
+    
+  1_network/out/boundary.rds.ind:
+    command: create_boundary(
+      out_ind = target_name, 
+      subset_network = I('1_network/in/delaware_stream_temp_by_segment/delaware_segments/delaware_segments.shp'),
+      national_network = I('1_network/in/GeospatialFabric_National.gdb'))
+      
+  1_network/out/boundary.rds:
+    command: gd_get('1_network/out/boundary.rds.ind')
+    
+  # generate distance matrix
+  
+  1_network/out/distance_matrix.rds.ind:
+    command: calc_dist_matrices(network_ind = '1_network/out/network.rds', out_ind = target_name)
+   
+  1_network/out/distance_matrix.rds:
+    command: gd_get('1_network/out/distance_matrix.rds.ind')
