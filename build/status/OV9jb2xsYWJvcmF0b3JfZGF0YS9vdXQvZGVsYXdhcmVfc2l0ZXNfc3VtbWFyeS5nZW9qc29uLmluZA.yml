@@ -1,0 +1,12 @@
+version: 0.3.0
+name: 9_collaborator_data/out/delaware_sites_summary.geojson.ind
+type: file
+hash: e648fa5652d61ae86fd8e4cfc7b43bb2
+time: 2020-01-27 21:27:48 UTC
+depends:
+  9_collaborator_data/out/delaware_sites_summary.rds.ind: 4d91425ee52b498d8666d3b2b58825d8
+fixed: aef885ea3fc67634836775979f245d08
+code:
+  functions:
+    generate_site_geojson: 726aaeb95bf15c917dbfd55b5bdbb2b8
+
