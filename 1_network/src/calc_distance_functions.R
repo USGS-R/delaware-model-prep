@@ -134,6 +134,8 @@ plot_dists <- function(from_reach, dist_mat_ind, direction, labels=c('subseg_id'
 save_dist_matrices <- function(dist_mat_ind, out_ind) {
   np <- reticulate::import('numpy')
   
+  dist_mat_list <- readRDS(sc_retrieve(dist_mat_ind))
+  
   out_file <- as_data_file(out_ind)
   np$savez_compressed(
     file=out_file,
@@ -145,6 +147,8 @@ save_dist_matrices <- function(dist_mat_ind, out_ind) {
   # loaded <- np$load('out/dists.npz')
   # loaded$files
   # loaded$f[['updown']]
+  
+  gd_put(out_ind)
   
   
 }

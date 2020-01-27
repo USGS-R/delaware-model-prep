@@ -7,12 +7,12 @@ packages:
   - smoothr
   - igraph
   - purrr
-  - geojsonio
-  - geojsonsf
+  - scipiper
 
 sources:
   - 1_network/src/geo_fabric_functions.R
   - 1_network/src/get_national_gf.R
+  - 1_network/src/calc_distance_functions.R
 
 
 targets:
@@ -22,6 +22,7 @@ targets:
      - 1_network/out/network.rds.ind
   
   # placeholder for function to download and indicate the national geospatial fabric
+  # also, should maybe store the DRB network from Steve in the google drive folder and fetch it
   # for now, downloaded to "in" from here: https://www.sciencebase.gov/catalog/item/5362b683e4b0c409c6289bf6
   #1_network/in/GeospatialFabric_National.gdb.ind:
   #  command: get_national_gf(sb_id = '5362b683e4b0c409c6289bf6', sb_name = 'GeospatialFabric_National.gdb.zip')
@@ -44,10 +45,10 @@ targets:
   1_network/out/boundary.rds:
     command: gd_get('1_network/out/boundary.rds.ind')
     
-  # generate distance matrix
+  # generate network distance matrix
   
   1_network/out/distance_matrix.rds.ind:
-    command: calc_dist_matrices(network_ind = '1_network/out/network.rds', out_ind = target_name)
+    command: calc_dist_matrices(network_ind = '1_network/out/network.rds.ind', out_ind = target_name)
    
   1_network/out/distance_matrix.rds:
     command: gd_get('1_network/out/distance_matrix.rds.ind')

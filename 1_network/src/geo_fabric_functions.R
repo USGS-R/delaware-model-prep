@@ -282,8 +282,12 @@ create_boundary <- function(subset_network, national_network, out_ind) {
 #' sites <- drb_sites # build drb_sites in map_sites_to_reaches.R
 
 make_subnetwork <- function(lower_reach, exclude_reaches = c(), 
-                            network_ind, dists, labels=c('subseg_id','seg_id_nat'), out_ind) {
+                            network_ind, distance_ind, summary_ind, labels=c('subseg_id','seg_id_nat'), out_ind) {
   labels <- match.arg(labels)
+  
+  dists <- readRDS(sc_retrieve(distance_ind))
+  drb_net <- readRDS(sc_retrieve(network_ind))
+  summary <- readRDS(sc_retrieve(summary_ind))
   
   up_from_lowermost <- names(which(dists$upstream[lower_reach,] < Inf))
   if(length(exclude_reaches) > 0) {
@@ -302,27 +306,33 @@ make_subnetwork <- function(lower_reach, exclude_reaches = c(),
   subnet_reaches <- subnet_reaches %>% mutate(to_subseg = ifelse(subseg_id==lower_reach, NA, to_subseg))
   subnet_points <- filter(drb_net$vertices, point_ids %in% c(subnet_reaches$end_pt, subnet_reaches$start_pt))
   
-  explore_subnetwork()
-  saveRDS(as_data_file(out_ind), list(edges=subnet_reaches, vertices=subnet_points, lower_reach=lower_reach, exclude_reaches=exclude_reaches))
+  subnet <- list(edges=subnet_reaches, vertices=subnet_points, lower_reach=lower_reach, exclude_reaches=exclude_reaches)
+  # print out a map and some network statistics
+  explore_subnetwork(subnet = subnet, crosswalk = summary, drb_net = drb_net)
+  
+  # write subnet
+  saveRDS(subnet, as_data_file(out_ind))
   gd_put(out_ind)
   }
 
 explore_subnetwork <- function(subnet, crosswalk, drb_net) {
-  # g <- ggplot(drb_net$edges) + geom_sf(color='lightgray') +
-  #   geom_sf(data=subnet$edges, color='seagreen') +
-  #   geom_sf(data=crosswalk, aes(color=n_obs_bin), size=1) +
-  #   geom_sf(data=filter(drb_net$vertices, point_ids %in% subnet$exclude_reaches), shape=4, color='red') +
-  #   scale_color_brewer('Number of Observations', palette=3) +
-  #   theme_bw() +
-  #   ggtitle('Filtered by bird and fish distance; showing observation counts')
-  # print(g)
+  
+  crosswalk_sf <- st_as_sf(crosswalk, coords = c('longitude', 'latitude'), crs = 4326)
+  g <- ggplot(drb_net$edges) + geom_sf(color='lightgray') +
+    geom_sf(data=subnet$edges, color='seagreen') +
+    geom_sf(data=crosswalk_sf, aes(color=nobsBin), size=1) +
+    geom_sf(data=filter(drb_net$vertices, point_ids %in% subnet$exclude_reaches), shape=4, color='red') +
+    scale_color_brewer('Number of Observations', palette=3) +
+    theme_bw() +
+    ggtitle('Filtered by bird and fish distance; showing observation counts')
+  print(g)
   
   message(sprintf('%d edges, %d vertices', nrow(subnet$vertices), nrow(subnet$edges)))
   
   obs_count <- subnet$edges %>%
     st_drop_geometry() %>%
-    left_join(st_drop_geometry(crosswalk), by='subseg_id') %>%
-    group_by(subseg_id) %>%
+    left_join(st_drop_geometry(crosswalk_sf), by=c('subseg_id' = 'matched_subseg_id')) %>%
+    group_by(subseg_seg) %>%
     summarize(n_sites=length(which(!is.na(site_id))), n_obs=sum(n_obs))
   
   message(sprintf('%d observed reaches, %d observations total', length(which(obs_count$n_sites > 0)), sum(obs_count$n_obs, na.rm=TRUE)))
