@@ -7,8 +7,6 @@ packages:
   - smoothr
   - igraph
   - purrr
-  - geojsonio
-  - geojsonsf
 
 sources:
   - 2_observations/src/crosswalk_functions.R
@@ -17,13 +15,13 @@ sources:
 targets:
   2_observations:
     depends:
-     - 2_observations/out/boundary.rds.ind
-     - 2_observations/out/network.rds.ind
-     - 2_observations/out/crosswalk_site_reach.rds.ind
+     - 2_observations/out/basin_temp_data.rds.ind
      
+  # temperature sites
   2_observations/in/all_sites.rds:
     command: gd_get('2_observations/in/all_sites.rds.ind')
     
+  # munged temperature data
   2_observations/in/daily_temperatures.rds:
     command: gd_get('2_observations/in/daily_temperatures.rds.ind')
      
@@ -39,102 +37,26 @@ targets:
   2_observations/out/crosswalk_site_reach.rds:
     command: gd_get('2_observations/out/crosswalk_site_reach.rds.ind')
 
-  2_observations/out/basin_data.rds.ind:
+  2_observations/out/basin_temp_data.rds.ind:
     command: subset_data(
       out_ind = target_name, 
       crosswalk_ind = '2_observations/out/crosswalk_site_reach.rds.ind', 
-      dat_ind = '5_data_munge/out/daily_temperatures.rds.ind')
+      dat_ind = '2_observations/in/daily_temperatures.rds.ind')
       
-  2_observations/out/basin_data.rds:
-    command: gd_get('2_observations/out/basin_data.rds.ind')
-      
-  # generate file for Makerspace to load for map (http://delaware-basin-test-website.s3-website-us-west-2.amazonaws.com/)
+  2_observations/out/basin_temp_data.rds:
+    command: gd_get('2_observations/out/basin_temp_data.rds.ind')
+ 
+  # placeholder for discharge data
+  # either pull from Jeff's repo, or make DRB-specific pull from NWIS
+  # note - should include step above to go get flow sites, add to all sites, 
+  # then crosswalk flow and temp sites
+  # then get dv and uv flow data
   
-  2_observations/out/delaware_sites_summary.rds.ind:
-    command: generate_site_summary(
-      dat_ind = '2_observations/out/basin_data.rds.ind',
-      crosswalk_ind = '2_observations/out/crosswalk_site_reach.rds.ind',
-      out_ind = target_name)
-   
-  2_observations/out/delaware_sites_summary.rds:
-    command: gd_get('2_observations/out/delaware_sites_summary.rds.ind')
+  # 2_observations/out/basin_flow_sites.rds.ind:
+    # command: whatNWISsites(...)
+  # 2_observations/out/basin_flow_data.rds.ind:
+    # command: readNWISdv(...)
 
-  # convert summary to geojson
-
-  2_observations/out/delaware_sites_summary.geojson.ind:
-    command: generate_site_geojson(summary_ind = '2_observations/out/delaware_sites_summary.rds.ind', out_ind = target_name)
-      
-  2_observations/out/delaware_sites_summary.geojson:
-    command: gd_get('2_observations/out/delaware_sites_summary.geojson.ind')
-
-  # generate data products for collaborators
-  2_observations/out/distance_matrix.rds.ind:
-    command: calc_dist_matrices(network_ind = '2_observations/out/network.rds', out_ind = target_name)
-   
-  2_observations/out/distance_matrix.rds:
-    command: gd_get('2_observations/out/distance_matrix.rds.ind')
-    
-  # npy version of distance matrix
-  2_observations/out/distance_matrix.npz.ind:
-    command: save_dist_matrices(dist_mat_ind = '2_observations/out/distance_matrix.rds.ind', out_ind = target_name)
-   
-  2_observations/out/distance_matrix.npz:
-    command: gd_get(' 2_observations/out/distance_matrix.npz.ind')
-    
-  2_observations/out/network_subset.rds.ind:
-    command: make_subnetwork(
-      lower_reach = I('2748_1'), 
-      network_ind = '2_observations/out/network.rds.ind', 
-      distance_ind = '2_observations/out/distance_matrix.rds.ind',
-      out_ind = target_name)
-      
-  2_observations/out/network_subset.rds:
-    command: gd_get('2_observations/out/network_subset.ind')
-    
-  # create distance matrix of subset
-  2_observations/out/distance_matrix_subset.rds.ind:
-    command: calc_dist_matrices(network_ind = '2_observations/out/network_subset.rds', out_ind = target_name)
-   
-  2_observations/out/distance_matrix_subset.rds:
-    command: gd_get('2_observations/out/distance_matrix_subset.rds.ind')
-    
-  2_observations/out/distance_matrix_subset.npz.ind:
-    command: save_dist_matrices(dist_mat_ind = '2_observations/out/distance_matrix_subset.rds.ind', out_ind = target_name)
-   
-  2_observations/out/distance_matrix.npz:
-    command: gd_get(' 2_observations/out/distance_matrix_subset.npz.ind')
-    
-  # map of network and subset
-  2_observations/out/map_network_subset.png:
-    command: plot_subnet(
-      subnet_ind = '2_observations/out/network_subset.rds.ind', 
-      network_ind = '2_observations/out/network.rds.ind', 
-      crosswalk_ind = '2_observations/out/crosswalk_site_reach.rds.ind',
-      out_file = target_name)
-      
-  # plot distances from a particular reach
-  2_observations/out/map_distance_down_from_2018.png:
-    command: plot_dists(
-      from_reach = I(2018), 
-      dist_mat_ind = '2_observations/out/distance_matrix_subset.rds.ind',
-      direction = I('downstream'), 
-      label = I('seg_id_nat'), 
-      network_ind = '2_observations/out/network_subset.rds.ind', 
-      title = I('Subnetwork - Downstream'), 
-      out_file = target_name)
-      
-  2_observations/out/map_distance_up_from_2018.png:
-    command: plot_dists(
-      from_reach = I(2018), 
-      dist_mat_ind = '2_observations/out/distance_matrix_subset.rds.ind',
-      direction = I('upstream'), 
-      label = I('seg_id_nat'), 
-      network_ind = '2_observations/out/network_subset.rds.ind', 
-      title = I('Subnetwork - Upstream'), 
-      out_file = target_name)
-      
-    # have Alison point me to discharge data
-    # last plot is distance heatmaps that uses dist_heatmap
     
   
 

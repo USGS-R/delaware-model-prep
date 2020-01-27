@@ -1,0 +1,15 @@
+version: 0.3.0
+name: 2_observations/out/crosswalk_site_reach.rds.ind
+type: file
+hash: 6b09d1b0076da8d6e5213cb44668c7d7
+time: 2020-01-24 23:06:17 UTC
+depends:
+  2_observations/in/all_sites.rds.ind: 460e7b4b92fb8859b8f3ff1c709e63b3
+  1_network/out/boundary.rds.ind: bfeabb362af0ed4c106bfb2a647413b0
+  1_network/out/network.rds.ind: a2cb3b67100dcba93764d7a8025ade27
+  2_observations/src/subset_closest.R: 8180c97825dfb0a5e4cf06dadc20f1b7
+fixed: 8c7c06704515b69a18aaf879f7581f05
+code:
+  functions:
+    crosswalk_sites_to_reaches: a73fd312dfd6035f34097e55132a0adc
+

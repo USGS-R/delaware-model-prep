@@ -25,24 +25,12 @@ generate_site_summary <- function(dat_ind, crosswalk_ind, out_ind) {
       latitude,
       longitude,
       dist_to_reach_km,
-      matched_reach_id = seg_id_nat,
+      matched_seg_id_nat = seg_id_nat,
+      matched_subseg_id = subseg_id,
       n_obs,
       nobsBin)
   
   saveRDS(delaware_pts, as_data_file(out_ind))
   gd_put(out_ind, as_data_file(out_ind))
     
-}
-
-generate_site_geojson <- function(summary_ind, out_ind) {
-  
-  dat_write <- readRDS(sc_retrieve(summary_ind)) %>%
-    st_as_sf(coords = c('longitude', 'latitude')) %>%
-    st_set_crs(4326) %>%
-    sf::st_transform(crs = 4326) %>%
-    geojsonsf::sf_geojson()
-  
-  geojsonio::geojson_write(dat_write, file = as_data_file(out_ind), convert_wgs84 = TRUE)
-  gd_put(out_ind, as_data_file(out_ind))
-  
 }

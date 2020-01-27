@@ -23,7 +23,7 @@ crosswalk_sites_to_reaches <- function(network_ind, boundary_ind, sites_ind, out
   
   #### Match sites to reaches ####
   
-  source('8_delaware/src/subset_closest.R')
+  source('2_observations/src/subset_closest.R')
   system.time({ # 97 seconds
     crosswalk <- subset_closest(sites=drb_sites, reaches=drb_net$edges, vertices=drb_net$vertices)
     # warns: site USGS-01433005 has diverse coordinates across databases, with bbox diagonal = 6.261 m
