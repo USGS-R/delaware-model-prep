@@ -1,0 +1,74 @@
+target_default: 8_visualize
+
+packages:
+  - sf
+  - tidyverse
+  - lwgeom
+  - smoothr
+  - igraph
+  - purrr
+
+sources:
+  - 8_visualize/src/visualization_functions.R
+
+targets:
+  8_visualize:
+    depends:
+     
+      
+
+  # map of network and subset
+  8_visualize/out/map_network_subset.png:
+    command: plot_subnet(
+      out_file = target_name,
+      subnet_ind = '9_collaborator_data/out/network_subset.rds.ind', 
+      network_ind = '1_network/out/network.rds.ind', 
+      summary_ind = '9_collaborator_data/out/delaware_sites_summary.rds.ind')
+      
+  # plot distances from a particular reach
+  8_visualize/out/map_distance_down_from_579.png:
+    command: plot_dists(
+      out_file = target_name,
+      from_reach = I('579_1'), 
+      dist_mat_ind = '9_collaborator_data/out/distance_matrix_subset.rds.ind',
+      direction = I('downstream'), 
+      labels = I('subseg_id'), 
+      network_ind = '9_collaborator_data/out/network_subset.rds.ind', 
+      title = I('Subnetwork - Downstream'))
+      
+  8_visualize/out/map_distance_up_from_579.png:
+    command: plot_dists(
+      out_file = target_name,
+      from_reach = I('579_1'), 
+      dist_mat_ind = '9_collaborator_data/out/distance_matrix_subset.rds.ind',
+      direction = I('upstream'), 
+      label = I('subseg_id'), 
+      network_ind = '9_collaborator_data/out/network_subset.rds.ind', 
+      title = I('Subnetwork - Upstream'))
+      
+    # last plot is distance heatmaps that uses dist_heatmap
+      
+  8_visualize/out/distance_heatmap_full_up.png:
+    command: dist_heatmap(
+      out_file = target_name,
+      dist_ind = '1_network/out/distance_matrix.rds.ind',
+      labels = I('seg_id_nat'),
+      title = I('Full Network - upstream'),
+      direction = I('upstream'))
+      
+  8_visualize/out/distance_heatmap_full_down.png:
+    command: dist_heatmap(
+      out_file = target_name,
+      dist_ind = '1_network/out/distance_matrix.rds.ind',
+      labels = I('seg_id_nat'),
+      title = I('Full Network - upstream'),
+      direction = I('downstream'))
+      
+  8_visualize/out/distance_heatmap_full_updown.png:
+    command: dist_heatmap(
+      out_file = target_name,
+      dist_ind = '1_network/out/distance_matrix.rds.ind',
+      labels = I('seg_id_nat'),
+      title = I('Full Network - Upstream & Downstream'),
+      direction = I('updown'))
+      
