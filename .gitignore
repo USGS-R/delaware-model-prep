@@ -3,12 +3,18 @@
 .RData
 .Ruserdata
 
-*/in/*
 *.rds
 *.Rds
 *.feather
 *.Feather
 *.geojson
+*.npz
+*.geojson
+*.png
+*.csv
 
 # remake
 .remake/
+
+# in folder for 1_network
+1_network/in/*
