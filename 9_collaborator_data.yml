@@ -5,8 +5,6 @@ packages:
   - tidyverse
   - lwgeom
   - smoothr
-  - igraph
-  - purrr
   - geojsonio
   - geojsonsf
   - ggplot2
@@ -16,15 +14,18 @@ sources:
   - 1_network/src/geo_fabric_functions.R
   - 2_observations/src/data_munge_functions.R
   - 9_collaborator_data/src/makerspace_geojson.R
+  - 9_collaborator_data/src/write_functions.R
 
 targets:
   9_collaborator_data:
     depends:
-     #- 9_collaborator_data/out/delaware_sites_summary.geojson.ind
-     #- 9_collaborator_data/out/network_subset.rds.ind
-     #- 9_collaborator_data/out/distance_matrix.npz.ind
-     #- 9_collaborator_data/out/distance_matrix_subset.npz.ind
-     
+     - 9_collaborator_data/out/delaware_sites_summary.geojson.ind
+     - 9_collaborator_data/out/network_subset.rds.ind
+     - 9_collaborator_data/out/distance_matrix.npz.ind
+     - 9_collaborator_data/out/distance_matrix_subset.npz.ind
+     - 9_collaborator_data/out/obs_temp_full.csv.ind
+     - 9_collaborator_data/out/obs_temp_subset.csv.ind
+
   ##### Makerspace ##### 
   # generate file to load for map (http://delaware-basin-test-website.s3-website-us-west-2.amazonaws.com/)
   
@@ -50,6 +51,7 @@ targets:
     # 1_network/out/network.rds
     # 2_observations/out/basin_temp_data.rds
     
+  # networks and distance matrices
   # npy version of distance matrix
   9_collaborator_data/out/distance_matrix.npz.ind:
     command: save_dist_matrices(dist_mat_ind = '1_network/out/distance_matrix.rds.ind', out_ind = target_name)
@@ -75,9 +77,25 @@ targets:
   9_collaborator_data/out/distance_matrix_subset.rds:
     command: gd_get('9_collaborator_data/out/distance_matrix_subset.rds.ind')
     
-    # npy version of distance matrix_subset
+  # npy version of distance matrix_subset
   9_collaborator_data/out/distance_matrix_subset.npz.ind:
     command: save_dist_matrices(dist_mat_ind = '9_collaborator_data/out/distance_matrix_subset.rds.ind', out_ind = target_name)
    
   9_collaborator_data/out/distance_matrix_subset.npz:
     command: gd_get('9_collaborator_data/out/distance_matrix_subset.npz.ind')
+    
+  # data
+  9_collaborator_data/out/obs_temp_full.csv.ind:
+    command: write_to_csv(dat_ind = '2_observations/out/obs_temp_drb.rds.ind', out_ind = target_name)
+
+  9_collaborator_data/out/obs_temp_full.csv:
+    command: gd_get('9_collaborator_data/out/obs_temp_full.csv.ind')
+    
+  9_collaborator_data/out/obs_temp_subset.csv.ind:
+    command: filter_subset(
+      dat_ind = '2_observations/out/obs_temp_drb.rds.ind', 
+      subnet_ind = '9_collaborator_data/out/network_subset.rds.ind', 
+      out_ind = target_name)
+      
+  9_collaborator_data/out/obs_temp_subset.csv:
+    command: gd_get('9_collaborator_data/out/obs_temp_subset.csv.ind')
