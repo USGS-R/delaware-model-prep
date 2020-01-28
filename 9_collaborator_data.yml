@@ -25,6 +25,8 @@ targets:
      - 9_collaborator_data/out/distance_matrix_subset.npz.ind
      - 9_collaborator_data/out/obs_temp_full.csv.ind
      - 9_collaborator_data/out/obs_temp_subset.csv.ind
+     - 9_collaborator_data/out/obs_flow_full.csv.ind
+     - 9_collaborator_data/out/obs_flow_subset.csv.ind
 
   ##### Makerspace ##### 
   # generate file to load for map (http://delaware-basin-test-website.s3-website-us-west-2.amazonaws.com/)

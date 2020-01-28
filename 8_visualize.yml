@@ -14,8 +14,6 @@ sources:
 targets:
   8_visualize:
     depends:
-     
-      
 
   # map of network and subset
   8_visualize/out/map_network_subset.png:

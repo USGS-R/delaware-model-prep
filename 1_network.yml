@@ -20,6 +20,7 @@ targets:
     depends:
      - 1_network/out/boundary.rds.ind
      - 1_network/out/network.rds.ind
+     - 1_network/out/distance_matrix.rds.ind
   
   # placeholder for function to download and indicate the national geospatial fabric
   # also, should maybe store the DRB network from Steve in the google drive folder and fetch it

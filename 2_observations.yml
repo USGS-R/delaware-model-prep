@@ -17,6 +17,7 @@ targets:
   2_observations:
     depends:
      - 2_observations/out/obs_temp_drb.rds.ind
+     - 2_observations/out/obs_flow_drb.rds.ind
      
   # temperature sites
   2_observations/in/all_sites.rds:
