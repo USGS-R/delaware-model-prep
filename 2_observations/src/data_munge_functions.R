@@ -60,3 +60,26 @@ generate_site_summary <- function(dat_ind, crosswalk_ind, out_ind) {
   gd_put(out_ind, as_data_file(out_ind))
     
 }
+
+munge_flow <- function(dat_ind, sites_ind, out_ind) {
+  ddat_wide <- readr::read_csv(sc_retrieve(dat_ind), 
+                               col_types=cols(.default=col_double(), datetime=col_date(format='')))
+  
+  drb_sites <- readRDS(sc_retrieve(sites_ind))
+  
+  ddat_drb <- ddat_wide %>%
+    gather(site_no, discharge_cfs, -datetime) %>%
+    mutate(site_id = sprintf('USGS-%s', site_no),
+           discharge_cms = discharge_cfs / 35.314666) %>%
+    select(-site_no, -discharge_cfs) %>%
+    rename(date=datetime) %>%
+    filter(!is.na(discharge_cms)) %>%
+    filter(site_id %in% unique(drb_sites$site_id)) %>%
+    left_join(distinct(drb_sites, site_id, seg_id_nat, subseg_id), by='site_id') %>%
+    group_by(seg_id_nat, subseg_id, date) %>% 
+    summarize(discharge_cms = mean(discharge_cms)) %>%
+    ungroup()
+  
+  saveRDS(ddat_drb, as_data_file(out_ind))
+  gd_put(out_ind)
+}

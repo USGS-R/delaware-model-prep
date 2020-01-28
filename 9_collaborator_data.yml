@@ -84,7 +84,7 @@ targets:
   9_collaborator_data/out/distance_matrix_subset.npz:
     command: gd_get('9_collaborator_data/out/distance_matrix_subset.npz.ind')
     
-  # data
+  # temp data
   9_collaborator_data/out/obs_temp_full.csv.ind:
     command: write_to_csv(dat_ind = '2_observations/out/obs_temp_drb.rds.ind', out_ind = target_name)
 
@@ -99,3 +99,20 @@ targets:
       
   9_collaborator_data/out/obs_temp_subset.csv:
     command: gd_get('9_collaborator_data/out/obs_temp_subset.csv.ind')
+    
+  # flow_data
+  9_collaborator_data/out/obs_flow_full.csv.ind:
+    command: write_to_csv(dat_ind = '2_observations/out/obs_flow_drb.rds.ind', out_ind = target_name)
+  
+  9_collaborator_data/out/obs_flow_full.csv:
+    command: gd_get('9_collaborator_data/out/obs_flow_full.csv.ind')
+    
+  9_collaborator_data/out/obs_flow_subset.csv.ind:
+    command: filter_subset(
+      dat_ind = '2_observations/out/obs_flow_drb.rds.ind', 
+      subnet_ind = '9_collaborator_data/out/network_subset.rds.ind', 
+      out_ind = target_name)
+      
+  9_collaborator_data/out/obs_flow_subset.csv:
+    command: gd_get('9_collaborator_data/out/obs_flow_subset.csv.ind')
+    

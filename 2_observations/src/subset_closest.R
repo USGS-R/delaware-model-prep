@@ -19,7 +19,6 @@
 #' vertices <- readRDS('out/network_full.rds')$vertices
 #' sites <- drb_sites # build drb_sites in map_sites_to_reaches.R
 subset_closest <- function(sites, reaches, vertices) {
-  
   # see https://gis.stackexchange.com/questions/288570/find-nearest-point-along-polyline-using-sf-package-in-r
   # for the guidance I used for implementation
   system.time({ # 1.7 seconds

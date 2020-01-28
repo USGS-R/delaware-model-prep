@@ -11,11 +11,12 @@ packages:
 sources:
   - 2_observations/src/crosswalk_functions.R
   - 2_observations/src/data_munge_functions.R
+  - 2_observations/src/subset_closest.R
 
 targets:
   2_observations:
     depends:
-     - 2_observations/out/basin_temp_data.rds.ind
+     - 2_observations/out/obs_temp_drb.rds.ind
      
   # temperature sites
   2_observations/in/all_sites.rds:
@@ -31,8 +32,6 @@ targets:
       sites_ind = '2_observations/in/all_sites.rds.ind',
       boundary_ind = '1_network/out/boundary.rds.ind',
       network_ind = '1_network/out/network.rds.ind')
-    depends: 
-      - 2_observations/src/subset_closest.R
   
   2_observations/out/crosswalk_site_reach.rds:
     command: gd_get('2_observations/out/crosswalk_site_reach.rds.ind')
@@ -63,14 +62,18 @@ targets:
   2_observations/out/obs_temp_drb.rds:
     command: gd_get('2_observations/out/obs_temp_drb.rds.ind')
 
- 
-  # placeholder for discharge data
-  # either pull from Jeff's repo, or make DRB-specific pull from NWIS
-  # note - should include step above to go get flow sites, add to all sites, 
-  # then crosswalk flow and temp sites
-  # then get dv and uv flow data
+  # discharge data
+  # currently points to a file that was uploaded to gd (originally from Jeff)
+  # down the road should point to NWIS
   
-  # 2_observations/out/basin_flow_sites.rds.ind:
-    # command: whatNWISsites(...)
-  # 2_observations/out/basin_flow_data.rds.ind:
-    # command: readNWISdv(...)
+  2_observations/out/drb_discharge_daily_dv.csv:
+    command: gd_get('2_observations/out/drb_discharge_daily_dv.csv.ind')
+    
+  2_observations/out/obs_flow_drb.rds.ind:
+    command: munge_flow(
+      out_ind = target_name, 
+      dat_ind = '2_observations/out/drb_discharge_daily_dv.csv.ind',
+      sites_ind = '2_observations/out/drb_filtered_sites.rds.ind')
+      
+  2_observations/out/obs_flow_drb.rds:
+    command: gd_get('2_observations/out/obs_flow_drb.rds.ind')
