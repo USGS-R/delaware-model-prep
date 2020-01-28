@@ -36,15 +36,33 @@ targets:
   
   2_observations/out/crosswalk_site_reach.rds:
     command: gd_get('2_observations/out/crosswalk_site_reach.rds.ind')
+    
+  # a subset of "useable" sites in DRB, munged by:
+  # 1) filtering by bird and fish distance
 
-  2_observations/out/basin_temp_data.rds.ind:
-    command: subset_data(
+  2_observations/out/drb_filtered_sites.rds.ind:
+    command: subset_sites(
       out_ind = target_name, 
-      crosswalk_ind = '2_observations/out/crosswalk_site_reach.rds.ind', 
-      dat_ind = '2_observations/in/daily_temperatures.rds.ind')
+      crosswalk_ind = '2_observations/out/crosswalk_site_reach.rds.ind',
+      fish_dist = I(5000),
+      bird_dist = I(250))
       
-  2_observations/out/basin_temp_data.rds:
-    command: gd_get('2_observations/out/basin_temp_data.rds.ind')
+  2_observations/out/drb_filtered_sites.rds:
+    command: gd_get('2_observations/out/drb_filtered_sites.rds.ind')
+  
+  # temperature observations that have been filtered
+  # to 1) sites that were acceptable above, and 
+  # by 3) taking mean of multiple obs/reach-dat to reduce duplicate vals
+    
+  2_observations/out/obs_temp_drb.rds.ind:
+    command: filter_temp_data(
+      sites_ind = '2_observations/out/drb_filtered_sites.rds.ind',
+      dat_ind = '2_observations/in/daily_temperatures.rds.ind',
+      out_ind = target_name)
+    
+  2_observations/out/obs_temp_drb.rds:
+    command: gd_get('2_observations/out/obs_temp_drb.rds.ind')
+
  
   # placeholder for discharge data
   # either pull from Jeff's repo, or make DRB-specific pull from NWIS
