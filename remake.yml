@@ -1,0 +1,16 @@
+target_default: everything
+
+include:
+  - 1_network.yml
+  - 2_observations.yml
+  - 8_visualize.yml
+  - 9_collaborator_data.yml
+
+targets:
+  everything:
+    depends:
+      - 1_network
+      - 2_observations
+      - 8_visualize
+      - 9_collaborator_data
+
