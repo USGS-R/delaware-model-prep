@@ -10,6 +10,7 @@ packages:
 
 sources:
   - 8_visualize/src/visualization_functions.R
+  - 8_visualize/src/freq_dist_functions.R
 
 targets:
   8_visualize:
@@ -69,4 +70,21 @@ targets:
       labels = I('seg_id_nat'),
       title = I('Full Network - Upstream & Downstream'),
       direction = I('updown'))
+      
+  # plot how many sites have x number of observation days
+  8_visualize/out/site_obscount_freq_dist.rds:
+    command: get_freq_dist(
+      out_file = target_name,
+      dat_ind = '2_observations/out/obs_temp_drb.rds.ind')
+      
+  my_cutoffs:
+    command: c(1, 10, 100, 1000, 10000)
+    
+  8_visualize/out/site_obscount_freq_dist.png:
+    command: plot_freq_dist(
+      out_file = target_name, 
+      freq_dat = '8_visualize/out/site_obscount_freq_dist.rds',
+      cutoffs = my_cutoffs)
+
+  
       
