@@ -50,14 +50,24 @@ targets:
   2_observations/out/drb_filtered_sites.rds:
     command: gd_get('2_observations/out/drb_filtered_sites.rds.ind')
   
-  # temperature observations that have been filtered
-  # to 1) sites that were acceptable above, and 
-  # by 3) taking mean of multiple obs/reach-dat to reduce duplicate vals
+  # temperature observations that have been filtered to crosswalk
+  # this represent all DRB dat
     
-  2_observations/out/obs_temp_drb.rds.ind:
+  2_observations/out/all_drb_temp_obs.rds.ind:
     command: filter_temp_data(
-      sites_ind = '2_observations/out/drb_filtered_sites.rds.ind',
       dat_ind = '2_observations/in/daily_temperatures.rds.ind',
+      cross_ind = '2_observations/out/crosswalk_site_reach.rds.ind',
+      out_ind = target_name)
+
+  2_observations/out/all_drb_temp_obs.rds:
+    command: gd_get('2_observations/out/all_drb_temp_obs.rds.ind')
+    
+  # keep only data in the filtered sites above, 
+  # and take mean of multiple obs/reach-dat to reduce duplicate vals
+  2_observations/out/obs_temp_drb.rds.ind:
+    command: munge_temp_dat(
+      sites_ind = '2_observations/out/drb_filtered_sites.rds.ind',
+      dat_ind = '2_observations/out/all_drb_temp_obs.rds.ind',
       out_ind = target_name)
     
   2_observations/out/obs_temp_drb.rds:

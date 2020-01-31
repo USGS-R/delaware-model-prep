@@ -14,7 +14,22 @@ subset_sites <- function(out_ind, crosswalk_ind, dat_ind, fish_dist, bird_dist) 
     
 }
 
-filter_temp_data <- function(sites_ind, dat_ind, out_ind) {
+filter_temp_data <- function(cross_ind, dat_ind, out_ind) {
+  
+  sites <- readRDS(sc_retrieve(cross_ind)) %>%
+    select(site_id, subseg_id, seg_id_nat) %>%
+    distinct(site_id, subseg_id, seg_id_nat, .keep_all = TRUE)
+  dat <- readRDS(sc_retrieve(dat_ind))
+  
+  drb_dat <- filter(dat, site_id %in% unique(sites$site_id)) %>%
+    distinct()
+  
+  saveRDS(drb_dat, as_data_file(out_ind))
+  gd_put(out_ind)
+  
+}
+
+munge_temp_dat <- function(sites_ind, dat_ind, out_ind) {
   
   sites <- readRDS(sc_retrieve(sites_ind)) %>%
     select(site_id, subseg_id, seg_id_nat) %>%
