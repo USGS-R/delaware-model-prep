@@ -1,0 +1,12 @@
+version: 0.3.0
+name: 9_collaborator_data/psu/highly_observed_sites.csv.ind
+type: file
+hash: 042f1201dd9b792d2b563ef4a0265ccc
+time: 2020-01-31 19:39:32 UTC
+depends:
+  9_collaborator_data/psu/highly_observed_sites.rds: 269a532b75dfe07e6b5d81bf55a5a68c
+fixed: bad370cef802345d0eaeecd84963efe3
+code:
+  functions:
+    write_sites: a54302e53f2526e09f08072a85106f53
+

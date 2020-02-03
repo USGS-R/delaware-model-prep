@@ -1,0 +1,12 @@
+version: 0.3.0
+name: 2_observations/out/drb_filtered_sites.rds.ind
+type: file
+hash: f7205842d3673af2594db9b13beb7e70
+time: 2020-01-27 23:00:41 UTC
+depends:
+  2_observations/out/crosswalk_site_reach.rds.ind: 6b09d1b0076da8d6e5213cb44668c7d7
+fixed: 37c2941b9b3269e97d2987cd3e4026b0
+code:
+  functions:
+    subset_sites: fbad29090aad9b2d948b3af7540c3fa8
+

@@ -1,0 +1,108 @@
+target_default: 8_visualize
+
+packages:
+  - sf
+  - tidyverse
+  - lwgeom
+  - smoothr
+  - igraph
+  - purrr
+
+sources:
+  - 8_visualize/src/visualization_functions.R
+  - 8_visualize/src/freq_dist_functions.R
+  - 8_visualize/src/visualize_sntemp_predictions.R
+
+targets:
+  8_visualize:
+    depends:
+      - 8_visualize/out/site_obscount_freq_dist.png
+      - 8_visualize/out/nreaches_nobs_nyears.png
+      - 8_visualize/out/map_network_subset.png
+      
+
+  # map of network and subset
+  8_visualize/out/map_network_subset.png:
+    command: plot_subnet(
+      out_file = target_name,
+      subnet_ind = '9_collaborator_data/umn/network_subset.rds.ind', 
+      network_ind = '1_network/out/network.rds.ind', 
+      summary_ind = '9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind',
+      sites_ind = '2_observations/out/drb_filtered_sites.rds.ind')
+      
+  # plot distances from a particular reach
+  8_visualize/out/map_distance_down_from_579.png:
+    command: plot_dists(
+      out_file = target_name,
+      from_reach = I('579_1'), 
+      dist_mat_ind = '9_collaborator_data/umn/distance_matrix_subset.rds.ind',
+      direction = I('downstream'), 
+      labels = I('subseg_id'), 
+      network_ind = '9_collaborator_data/umn/network_subset.rds.ind', 
+      title = I('Subnetwork - Downstream'))
+      
+  8_visualize/out/map_distance_up_from_579.png:
+    command: plot_dists(
+      out_file = target_name,
+      from_reach = I('579_1'), 
+      dist_mat_ind = '9_collaborator_data/umn/distance_matrix_subset.rds.ind',
+      direction = I('upstream'), 
+      label = I('subseg_id'), 
+      network_ind = '9_collaborator_data/umn/network_subset.rds.ind', 
+      title = I('Subnetwork - Upstream'))
+      
+    # last plot is distance heatmaps that uses dist_heatmap
+      
+  8_visualize/out/distance_heatmap_full_up.png:
+    command: dist_heatmap(
+      out_file = target_name,
+      dist_ind = '1_network/out/distance_matrix.rds.ind',
+      labels = I('seg_id_nat'),
+      title = I('Full Network - upstream'),
+      direction = I('upstream'))
+      
+  8_visualize/out/distance_heatmap_full_down.png:
+    command: dist_heatmap(
+      out_file = target_name,
+      dist_ind = '1_network/out/distance_matrix.rds.ind',
+      labels = I('seg_id_nat'),
+      title = I('Full Network - downstream'),
+      direction = I('downstream'))
+      
+  8_visualize/out/distance_heatmap_full_updown.png:
+    command: dist_heatmap(
+      out_file = target_name,
+      dist_ind = '1_network/out/distance_matrix.rds.ind',
+      labels = I('seg_id_nat'),
+      title = I('Full Network - Upstream & Downstream'),
+      direction = I('updown'))
+      
+  # plot how many sites have x number of observation days
+  8_visualize/out/site_obscount_freq_dist.rds:
+    command: get_freq_dist(
+      out_file = target_name,
+      dat_ind = '2_observations/out/obs_temp_drb.rds.ind')
+    
+  8_visualize/out/site_obscount_freq_dist.png:
+    command: plot_freq_dist(
+      out_file = target_name, 
+      freq_dat = '8_visualize/out/site_obscount_freq_dist.rds',
+      cutoffs = I(c(1, 10, 100, 1000, 10000)))
+      
+  8_visualize/out/nreaches_nobs_nyears.png:
+    command: plot_year_obs_tradeoff(
+      dat_ind = '2_observations/out/obs_temp_drb.rds.ind',
+      out_file = target_name)
+      
+  # plot SNTemp predictions vs observations for a given reach
+  8_visualize/out/pred_obs_1578.png:
+    command: plot_pred_vs_obs(
+      out_file = target_name,
+      site = I('1578'),
+      start_date = I('2010-01-01'),
+      end_date = I('2015-12-31'),
+      dat_ind = '2_observations/out/obs_temp_drb.rds.ind',
+      pred_ind = '3_predictions/in/seg_tave_water.csv')
+
+  
+      

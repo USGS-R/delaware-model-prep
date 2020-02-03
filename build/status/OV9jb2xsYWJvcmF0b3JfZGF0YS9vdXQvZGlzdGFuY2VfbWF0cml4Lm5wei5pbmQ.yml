@@ -1,0 +1,12 @@
+version: 0.3.0
+name: 9_collaborator_data/out/distance_matrix.npz.ind
+type: file
+hash: d61fec1e818894c537713ae0ab594092
+time: 2020-01-27 19:38:57 UTC
+depends:
+  1_network/out/distance_matrix.rds.ind: 768b738f11ecac4f289c49b0f42a1aa4
+fixed: 550709ee7e624205b27fa70ae32faeb5
+code:
+  functions:
+    save_dist_matrices: f852ee348d80e8de777eaefa38838ce0
+

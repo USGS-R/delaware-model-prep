@@ -1,0 +1,90 @@
+target_default: 2_observations
+
+packages:
+  - sf
+  - tidyverse
+  - lwgeom
+  - smoothr
+  - igraph
+  - purrr
+
+sources:
+  - 2_observations/src/crosswalk_functions.R
+  - 2_observations/src/data_munge_functions.R
+  - 2_observations/src/subset_closest.R
+
+targets:
+  2_observations:
+    depends:
+     - 2_observations/out/obs_temp_drb.rds.ind
+     - 2_observations/out/obs_flow_drb.rds.ind
+     
+  # temperature sites
+  2_observations/in/all_sites.rds:
+    command: gd_get('2_observations/in/all_sites.rds.ind')
+    
+  # munged temperature data
+  2_observations/in/daily_temperatures.rds:
+    command: gd_get('2_observations/in/daily_temperatures.rds.ind')
+     
+  2_observations/out/crosswalk_site_reach.rds.ind:
+    command: crosswalk_sites_to_reaches(
+      out_ind = target_name,
+      sites_ind = '2_observations/in/all_sites.rds.ind',
+      boundary_ind = '1_network/out/boundary.rds.ind',
+      network_ind = '1_network/out/network.rds.ind')
+  
+  2_observations/out/crosswalk_site_reach.rds:
+    command: gd_get('2_observations/out/crosswalk_site_reach.rds.ind')
+    
+  # a subset of "useable" sites in DRB, munged by:
+  # 1) filtering by bird and fish distance
+
+  2_observations/out/drb_filtered_sites.rds.ind:
+    command: subset_sites(
+      out_ind = target_name, 
+      crosswalk_ind = '2_observations/out/crosswalk_site_reach.rds.ind',
+      fish_dist = I(5000),
+      bird_dist = I(250))
+      
+  2_observations/out/drb_filtered_sites.rds:
+    command: gd_get('2_observations/out/drb_filtered_sites.rds.ind')
+  
+  # temperature observations that have been filtered to crosswalk
+  # this represent all DRB dat
+    
+  2_observations/out/all_drb_temp_obs.rds.ind:
+    command: filter_temp_data(
+      dat_ind = '2_observations/in/daily_temperatures.rds.ind',
+      cross_ind = '2_observations/out/crosswalk_site_reach.rds.ind',
+      out_ind = target_name)
+
+  2_observations/out/all_drb_temp_obs.rds:
+    command: gd_get('2_observations/out/all_drb_temp_obs.rds.ind')
+    
+  # keep only data in the filtered sites above, 
+  # and take mean of multiple obs/reach-dat to reduce duplicate vals
+  2_observations/out/obs_temp_drb.rds.ind:
+    command: munge_temp_dat(
+      sites_ind = '2_observations/out/drb_filtered_sites.rds.ind',
+      dat_ind = '2_observations/out/all_drb_temp_obs.rds.ind',
+      out_ind = target_name)
+    
+  2_observations/out/obs_temp_drb.rds:
+    command: gd_get('2_observations/out/obs_temp_drb.rds.ind')
+
+  # discharge data
+  # currently points to a file that was uploaded to gd (originally from Jeff)
+  # down the road should point to NWIS
+  
+  2_observations/out/drb_discharge_daily_dv.csv:
+    command: gd_get('2_observations/out/drb_discharge_daily_dv.csv.ind')
+    
+  2_observations/out/obs_flow_drb.rds.ind:
+    command: munge_flow(
+      out_ind = target_name, 
+      dat_ind = '2_observations/out/drb_discharge_daily_dv.csv.ind',
+      sites_ind = '2_observations/out/drb_filtered_sites.rds.ind')
+      
+  2_observations/out/obs_flow_drb.rds:
+    command: gd_get('2_observations/out/obs_flow_drb.rds.ind')

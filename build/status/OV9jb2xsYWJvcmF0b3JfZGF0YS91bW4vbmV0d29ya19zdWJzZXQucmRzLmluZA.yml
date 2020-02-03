@@ -1,0 +1,15 @@
+version: 0.3.0
+name: 9_collaborator_data/umn/network_subset.rds.ind
+type: file
+hash: 62ae932ad3ac4891eab909c7f0c9bc1a
+time: 2020-01-31 19:12:53 UTC
+depends:
+  1_network/out/network.rds.ind: a2cb3b67100dcba93764d7a8025ade27
+  1_network/out/distance_matrix.rds.ind: 768b738f11ecac4f289c49b0f42a1aa4
+  9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind: 4d91425ee52b498d8666d3b2b58825d8
+fixed: ac1d8d10469d92512f36810395e38ac1
+code:
+  functions:
+    explore_subnetwork: 46621eadba029d1d09944947d5f5bbf7
+    make_subnetwork: cb686ca69bef76f684863ca060752118
+

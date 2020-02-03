@@ -1,0 +1,23 @@
+target_default: 3_predictions
+
+packages:
+  - sf
+  - tidyverse
+  - lwgeom
+  - smoothr
+  - igraph
+  - purrr
+
+sources:
+  - 
+
+targets:
+  3_predictions:
+    depends:
+     - 3_predictions/in/uncal_sntemp_preds.csv.ind
+     
+  # predictions using defaults provided by Markstrom on 10-01
+  3_predictions/in/uncal_sntemp_preds.csv.ind:
+    command: gd_get('3_predictions/in/uncal_sntemp_preds.csv.ind')
+    
+  
