@@ -5,6 +5,7 @@ include:
   - 2_observations.yml
   - 8_visualize.yml
   - 9_collaborator_data.yml
+  - 3_predictions.yml
 
 targets:
   everything:
@@ -13,4 +14,5 @@ targets:
       - 2_observations
       - 8_visualize
       - 9_collaborator_data
+      - 3_predictions
 
