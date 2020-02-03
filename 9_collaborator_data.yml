@@ -175,6 +175,12 @@ targets:
       dist_ind = '9_collaborator_data/psu/highly_obs_distance_matrix.rds.ind',
       labels = I('subseg_id'),
       title = I('Full Network - Upstream & Downstream'))
+      
+  9_collaborator_data/psu/high_obs_upstream_sites.csv:
+    command: get_upstream_sites(
+      dist_ind = '9_collaborator_data/psu/highly_obs_distance_matrix.rds.ind', 
+      network_ind = '1_network/out/network.rds.ind',
+      out_file = target_name)
 
    
   # 9_collaborator_data/psu/selected_site_relationships.csv:

@@ -378,3 +378,19 @@ dist_heatmap2 <- function(dist_ind, labels=c('subseg_id','seg_id_nat'), title, o
   return(g)
 }
 
+get_upstream_sites <- function(dist_ind, network_ind, out_file) {
+  dist <- readRDS(sc_retrieve(dist_ind))
+  network <- readRDS(sc_retrieve(network_ind))
+  network <- network$edges %>% dplyr::select(subseg_id, seg_id_nat) %>% sf::st_drop_geometry()
+  new_names <- network$seg_id_nat[network$subseg_id %in% row.names(dist)]
+  dist_dat <- data.frame(from_reach = new_names, stringsAsFactors = FALSE)
+  dist_dat[, 2:(1+nrow(dist))] <- dist
+  names(dist_dat)[2:ncol(dist_dat)] <- new_names
+  
+  dist_dat <- tidyr::gather(dist_dat, key = 'to_reach', value = 'distance', -from_reach) %>%
+    filter(!is.infinite(distance) & distance > 0) %>% select(-distance) %>% arrange(from_reach)
+  
+  write.csv(dist_dat, file = out_file, row.names = FALSE)
+  
+}
+
