@@ -1,18 +1,20 @@
-plot_subnet <- function(subnet_ind, network_ind, summary_ind, out_file) {
+plot_subnet <- function(subnet_ind, network_ind, sites_ind, summary_ind, out_file) {
   
   network <- readRDS(sc_retrieve(network_ind))
   subnet <- readRDS(sc_retrieve(subnet_ind))
+  sites <- readRDS(sc_retrieve(sites_ind))
   summary <- readRDS(sc_retrieve(summary_ind)) %>%
+    filter(site_id %in% unique(sites$site_id)) %>%
     st_as_sf(coords = c('longitude', 'latitude'), crs = 4326)
-  browser()
+
   just_beyonds <- network$edges %>% 
     filter(start_pt %in% subnet$vertices$point_ids | end_pt %in% subnet$vertices) %>%
     filter(!subseg_id %in% subnet$edges$subseg_id)
   g <- ggplot(subnet$edges) + geom_sf(color='gold') +
     geom_sf(data=just_beyonds, color='gray') +
     geom_sf(data=subnet$vertices, color='gold', shape=4, size=2) +
-    geom_sf(data=filter(summary, matched_subseg_id %in% subnet$edges$subseg_id), aes(fill=nobsBin), size=2, shape = 21) +
-    scale_fill_brewer('Number of Observations', palette=3) +
+    geom_sf(data=filter(summary, matched_subseg_id %in% subnet$edges$subseg_id), aes(color=nobsBin), size=2) +
+    scale_color_brewer('Number of Observations', palette=3) +
     theme_bw() +
     ggtitle('Filtered by bird and fish distance; showing observation counts')
   

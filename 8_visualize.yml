@@ -27,7 +27,8 @@ targets:
       out_file = target_name,
       subnet_ind = '9_collaborator_data/umn/network_subset.rds.ind', 
       network_ind = '1_network/out/network.rds.ind', 
-      summary_ind = '9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind')
+      summary_ind = '9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind',
+      sites_ind = '2_observations/out/drb_filtered_sites.rds.ind')
       
   # plot distances from a particular reach
   8_visualize/out/map_distance_down_from_579.png:
@@ -65,7 +66,7 @@ targets:
       out_file = target_name,
       dist_ind = '1_network/out/distance_matrix.rds.ind',
       labels = I('seg_id_nat'),
-      title = I('Full Network - upstream'),
+      title = I('Full Network - downstream'),
       direction = I('downstream'))
       
   8_visualize/out/distance_heatmap_full_updown.png:
