@@ -102,7 +102,7 @@ targets:
       start_date = I('2010-01-01'),
       end_date = I('2015-12-31'),
       dat_ind = '2_observations/out/obs_temp_drb.rds.ind',
-      pred_ind = '3_predictions/in/seg_tave_water.csv')
+      pred_ind = '3_predictions/in/uncal_sntemp_preds.csv.ind')
 
   
       

@@ -127,7 +127,7 @@ targets:
     command: filter_sites(
       out_file = target_name,
       dat_ind = '2_observations/out/obs_temp_drb.rds.ind',
-      geo_dat = '1_network/in/GeospatialFabric_National.gdb',
+      geo_dat = I('1_network/in/GeospatialFabric_National.gdb'),
       years = I(2),
       obs_per_year = I(150),
       min_drainage = I(100),
