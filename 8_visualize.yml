@@ -18,35 +18,36 @@ targets:
     depends:
       - 8_visualize/out/site_obscount_freq_dist.png
       - 8_visualize/out/nreaches_nobs_nyears.png
+      - 8_visualize/out/map_network_subset.png
       
 
   # map of network and subset
   8_visualize/out/map_network_subset.png:
     command: plot_subnet(
       out_file = target_name,
-      subnet_ind = '9_collaborator_data/out/network_subset.rds.ind', 
+      subnet_ind = '9_collaborator_data/umn/network_subset.rds.ind', 
       network_ind = '1_network/out/network.rds.ind', 
-      summary_ind = '9_collaborator_data/out/delaware_sites_summary.rds.ind')
+      summary_ind = '9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind')
       
   # plot distances from a particular reach
   8_visualize/out/map_distance_down_from_579.png:
     command: plot_dists(
       out_file = target_name,
       from_reach = I('579_1'), 
-      dist_mat_ind = '9_collaborator_data/out/distance_matrix_subset.rds.ind',
+      dist_mat_ind = '9_collaborator_data/umn/distance_matrix_subset.rds.ind',
       direction = I('downstream'), 
       labels = I('subseg_id'), 
-      network_ind = '9_collaborator_data/out/network_subset.rds.ind', 
+      network_ind = '9_collaborator_data/umn/network_subset.rds.ind', 
       title = I('Subnetwork - Downstream'))
       
   8_visualize/out/map_distance_up_from_579.png:
     command: plot_dists(
       out_file = target_name,
       from_reach = I('579_1'), 
-      dist_mat_ind = '9_collaborator_data/out/distance_matrix_subset.rds.ind',
+      dist_mat_ind = '9_collaborator_data/umn/distance_matrix_subset.rds.ind',
       direction = I('upstream'), 
       label = I('subseg_id'), 
-      network_ind = '9_collaborator_data/out/network_subset.rds.ind', 
+      network_ind = '9_collaborator_data/umn/network_subset.rds.ind', 
       title = I('Subnetwork - Upstream'))
       
     # last plot is distance heatmaps that uses dist_heatmap
