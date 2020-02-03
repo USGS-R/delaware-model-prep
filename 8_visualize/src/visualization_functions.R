@@ -108,3 +108,51 @@ dist_heatmap <- function(dist_ind, labels=c('subseg_id','seg_id_nat'), title, di
   }
   return(g)
 }
+
+
+
+plot_year_obs_tradeoff <- function(dat_ind, out_file){
+  
+  dat_years <- readRDS(sc_retrieve(dat_ind)) %>%
+    mutate(year = lubridate::year(date)) %>%
+    filter(year >=1980) %>%
+    group_by(subseg_id, year) %>%
+    summarize(n_per_year = n())
+  
+  # set years and obs per year to calculate over
+  years <- 1:70
+  obs_per_year <- c(30, 90, 150, 210, 270, 330)
+  
+  # function to calculate how many sites mean 
+  # nobs/year and year criteria
+  how_many_sites <- function(years, obs_per_year, data) {
+    return(filter(data, n_per_year >= obs_per_year) %>%
+             group_by(subseg_id) %>%
+             summarize(n_years = n()) %>%
+             filter(n_years > years) %>%
+             nrow())
+  }
+  
+  # loop through obs/year to apply function
+  n_reaches <- c()
+  for (i in 1:length(obs_per_year)) {
+    temp <- unlist(lapply(years, FUN = how_many_sites, obs_per_year = obs_per_year[i], data = dat_years))
+    n_reaches <- c(n_reaches, temp)
+  }
+  
+  # put output into dataframe
+  year_nobs_dat <- data.frame(years = rep(years, times = length(obs_per_year)),
+                              obs_per_year = rep(obs_per_year, each = length(years)),
+                              n_reaches = n_reaches) %>%
+    arrange(obs_per_year, years)
+  
+  # plot, with different lines representing obs/year criteria
+  p <- ggplot(year_nobs_dat, aes(x = years, y = n_reaches)) +
+    geom_line(aes(group = factor(obs_per_year), 
+                  color = factor(obs_per_year))) +
+    labs(x = "Number of years meeting obs/year criteria", 
+         y = "Number of reaches", color = "Obs. per \nyear criteria") +
+    theme_bw()
+  
+  ggsave(out_file, p, height = 4, width = 6)
+}

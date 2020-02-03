@@ -11,6 +11,7 @@ packages:
 sources:
   - 8_visualize/src/visualization_functions.R
   - 8_visualize/src/freq_dist_functions.R
+  - 8_visualize/src/visualize_sntemp_predictions.R
 
 targets:
   8_visualize:
@@ -85,6 +86,21 @@ targets:
       out_file = target_name, 
       freq_dat = '8_visualize/out/site_obscount_freq_dist.rds',
       cutoffs = my_cutoffs)
+      
+  8_visualize/out/nreaches_nobs_nyears.png:
+    command: plot_year_obs_tradeoff(
+      dat_ind = '2_observations/out/obs_temp_drb.rds.ind',
+      out_file = target_name)
+      
+  # plot SNTemp predictions vs observations for a given reach
+  8_visualize/out/pred_obs_1578.png:
+    command: plot_pred_vs_obs(
+      out_file = target_name,
+      site = I('1578'),
+      start_date = I('2010-01-01'),
+      end_date = I('2015-12-31'),
+      dat_ind = '2_observations/out/obs_temp_drb.rds.ind',
+      pred_ind = '3_predictions/in/seg_tave_water.csv')
 
   
       
