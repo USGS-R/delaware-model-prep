@@ -3,7 +3,6 @@
 .RData
 .Ruserdata
 *.Rproj
-
 *.rds
 *.Rds
 *.feather
@@ -13,9 +12,8 @@
 *.geojson
 *.png
 *.csv
-
 # remake
 .remake/
-
 # in folder for 1_network
 1_network/in/*
+.httr-oauth
