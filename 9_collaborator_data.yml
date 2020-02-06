@@ -179,8 +179,9 @@ targets:
 
   9_collaborator_data/psu/high_obs_upstream_sites.csv:
     command: get_upstream_sites(
-      dist_ind = '9_collaborator_data/psu/highly_obs_distance_matrix.rds.ind',
+      dist_ind = '1_network/out/distance_matrix.rds.ind',
       network_ind = '1_network/out/network.rds.ind',
+      sites = '9_collaborator_data/psu/highly_observed_sites.rds',
       out_file = target_name)
 
   9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather.ind:

@@ -378,19 +378,37 @@ dist_heatmap2 <- function(dist_ind, labels=c('subseg_id','seg_id_nat'), title, o
   return(g)
 }
 
-get_upstream_sites <- function(dist_ind, network_ind, out_file) {
+get_upstream_sites <- function(dist_ind, network_ind, sites, out_file) {
   dist <- readRDS(sc_retrieve(dist_ind))
+  dist <- dist$upstream
+  sites <- readRDS(sites)
+  
   network <- readRDS(sc_retrieve(network_ind))
   network <- network$edges %>% dplyr::select(subseg_id, seg_id_nat) %>% sf::st_drop_geometry()
-  new_names <- network$seg_id_nat[network$subseg_id %in% row.names(dist)]
-  dist_dat <- data.frame(from_reach = new_names, stringsAsFactors = FALSE)
-  dist_dat[, 2:(1+nrow(dist))] <- dist
-  names(dist_dat)[2:ncol(dist_dat)] <- new_names
+  #new_names <- network$seg_id_nat[network$subseg_id %in% row.names(dist)]
+  
+  dist_red <- dist[row.names(dist) %in% sites$subseg_id, ]
+  
+  dist_dat <- data.frame(from_reach = row.names(dist_red), stringsAsFactors = FALSE)
+  dist_dat[, 2:(1+ncol(dist_red))] <- dist_red
+  names(dist_dat)[2:ncol(dist_dat)] <- colnames(dist_red)
   
   dist_dat <- tidyr::gather(dist_dat, key = 'to_reach', value = 'distance', -from_reach) %>%
     filter(!is.infinite(distance) & distance > 0) %>% select(-distance) %>% arrange(from_reach)
   
-  write.csv(dist_dat, file = out_file, row.names = FALSE)
+  # now translate to national IDs
+
+  dist_dat_nat <- dist_dat %>%
+    left_join(network, by = c('from_reach' = 'subseg_id')) %>%
+    select(-from_reach) %>% rename(from_reach = seg_id_nat) %>%
+    left_join(network, by = c('to_reach' = 'subseg_id')) %>%
+    select(-to_reach) %>% rename(to_reach = seg_id_nat) %>%
+    filter(!is.na(to_reach)) %>%
+    select(from_reach, to_reach)
+  
+  # add sites with no upstream reaches back in
+  dist_dat_nat <- add_row(dist_dat_nat, from_reach = sites$seg_id_nat[!sites$seg_id_nat %in% unique(dist_dat_nat$from_reach)])
+  
+  write.csv(dist_dat_nat, file = out_file, row.names = FALSE)
   
 }
-
