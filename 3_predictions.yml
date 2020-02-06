@@ -12,7 +12,13 @@ targets:
   3_predictions:
     depends:
      - 3_predictions/in/uncal_sntemp_preds.csv.ind
+     - 3_predictions/in/uncal_sntemp_input_output.feather.ind
 
   # predictions using defaults provided by Markstrom on 10-01
   3_predictions/in/uncal_sntemp_preds.csv:
     command: gd_get('3_predictions/in/uncal_sntemp_preds.csv.ind')
+
+  # segment-level drivers, intermediate model variables, and stream temperature predictions using uncalibrated PRMS-SNTemp
+  #  from https://github.com/jzwart/delaware-water-temp/blob/626d6d159daccfcf52c5e7fddf88d24031f35e6d/4_model_for_PGDL.yml#L42-L46
+  3_predictions/in/uncal_sntemp_input_output.feather:
+    command: gd_get('3_predictions/in/uncal_sntemp_input_output.feather.ind')
