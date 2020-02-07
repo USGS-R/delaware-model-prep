@@ -7,10 +7,10 @@ def add_all_src_dir():
     for contents in os.walk('.'):
         directory = contents[0]
         if directory.endswith('src'):
-            scripts_path =  os.path.abspath("20_catchment_attributes/src")
-            sys.path.insert(0, scripts_path)
+            sys.path.insert(0, directory)
 
 # import local scripts
+add_all_src_dir()
 import catch_attr
 
 configfile: 'catchment_attr_links.yaml'
@@ -74,12 +74,22 @@ rule subset_attr_to_drb:
 rule subset_attr_drb_subset:
     input:
         # this is a list of link ids that are in the subset of the DRB (the small subset Xiaowei started with)
-        "10_spatial_data/out/drb_subset_links.csv",
+        "10_spatial_data/out/sntemp_subset_ids.csv",
         f"{cat_att_dir}/combined_seg_attr_02.feather"
     output:
         rules.all.input.subset_drb_attr
     run:
         catch_attr.subset_for_drb_subset(input[0], input[1], output[0])
+
+rule aggregate_upstream:
+    input:
+        f"{cat_att_dir}/combined_seg_attr_02.feather",
+        "10_spatial_data/out/high_obs_upstream_sites.csv"
+    output:
+        f"{cat_att_dir}/aggregated_upstream.feather"
+    run:
+        catch_attr.aggregate_upstream_attr(input[0], input[1], output[0])
+
 
 metadata_file_fmt = "{fldr}/{category}_metadata.xml"
 rule get_metadata_xml_files:
@@ -96,5 +106,4 @@ rule combine_metadata_files:
         rules.all.input.metadata
     run:
         catch_attr.consolidate_metdata(input, output[0])
-
 
