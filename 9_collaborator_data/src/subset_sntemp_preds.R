@@ -22,4 +22,35 @@ subset_sntemp_preds = function(ind_file,
 }
 
 
+aggregate_sntemp_preds = function(ind_file,
+                                  sub_net_file,
+                                  subset_data_file,
+                                  gd_config = 'lib/cfg/gd_config.yml'){
+
+  sub_net = read.csv(sub_net_file)
+
+  subbasin_outlets = unique(sub_net$from_reach)
+
+  subset_data = feather::read_feather(subset_data_file)
+
+  vars = colnames(subset_data)[4:ncol(subset_data)]
+
+
+  out = lapply(subbasin_outlets, function(cur_basin){
+    segs = c(cur_basin, sub_net$to_reach[sub_net$from_reach == cur_basin])
+
+    cur_agg_data = dplyr::filter(subset_data, seg_id_nat %in% segs)  %>%
+      group_by(date) %>%
+      summarise_at(vars(seg_ccov:seg_elev), mean) %>%
+      ungroup() %>%
+      mutate(seg_tave_water = subset_data$seg_tave_water[subset_data$seg_id_nat == cur_basin],
+             seg_outflow = subset_data$seg_outflow[subset_data$seg_id_nat == cur_basin],
+             subbasin_outlet_seg_id_nat = cur_basin)
+  }) %>% bind_rows()
+
+  out_file = as_data_file(ind_file)
+  feather::write_feather(x = out, path = out_file)
+  gd_put(remote_ind = ind_file, local_source = out_file, config_file = gd_config)
+}
+
 
