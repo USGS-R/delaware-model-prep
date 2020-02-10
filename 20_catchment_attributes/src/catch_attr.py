@@ -222,13 +222,24 @@ def add_ids_and_seg_attr(nat_reg_seg_file, nat_reg_hru_file, attr_file, region,
     return attr_df
 
 
+def weigted_avg(df, weight_col='hru_area'):
+    """
+    take a weighted average of a dataframe
+    :param df: [dataframe] a dataframe for which to take the weighted average
+    :param weight_col: [str] column name that contains the weights
+    """
+    numerator = (df.multiply(df[weight_col], axis=0)).sum()
+    denom = df[weight_col].sum()
+    return numerator/denom
+
+
 def aggregate_attr_by_col(attr_df, agg_col):
     """
     aggregate segment or hru attributes by a given column
     :param attr_df: [dataframe] dataframe with segment attributes
     :param agg_col: [str] column name that you want to be grouping your
     """
-    by_seg_mean = attr_df.groupby(agg_col).mean()
+    by_seg_mean = attr_df.groupby(agg_col).apply(weigted_avg)
     by_seg_sum = attr_df.groupby(agg_col).sum()
     # replace the mean cols with sum cols for the appropriate attributes
     sum_cols = ['hru_area']
