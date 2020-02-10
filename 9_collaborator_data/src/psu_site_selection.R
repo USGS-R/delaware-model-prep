@@ -412,3 +412,13 @@ get_upstream_sites <- function(dist_ind, network_ind, sites, out_file) {
   write.csv(dist_dat_nat, file = out_file, row.names = FALSE)
   
 }
+
+filter_obs <- function(dat_ind, subset, out_ind) {
+  dat <- readRDS(sc_retrieve(dat_ind))
+  subset_sites <- readRDS(subset)
+  
+  filt_dat <- filter(dat, seg_id_nat %in% unique(subset_sites$seg_id_nat))
+  
+  write.csv(filt_dat, as_data_file(out_ind), row.names = FALSE)
+  gd_put(out_ind)
+}
