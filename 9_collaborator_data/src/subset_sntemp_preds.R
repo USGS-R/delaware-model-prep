@@ -18,7 +18,7 @@ subset_sntemp_preds = function(ind_file,
 
   out_file = as_data_file(ind_file)
   feather::write_feather(x = stream_temp_intermediates_wide_sub, path = out_file)
-  gd_put(remote_ind = ind_file, local_source = out_file, config_file = gd_config)
+  gd_put(ind_file)
 }
 
 
@@ -50,7 +50,7 @@ aggregate_sntemp_preds = function(ind_file,
 
   out_file = as_data_file(ind_file)
   feather::write_feather(x = out, path = out_file)
-  gd_put(remote_ind = ind_file, local_source = out_file, config_file = gd_config)
+  gd_put(ind_file)
 }
 
 

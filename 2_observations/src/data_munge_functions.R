@@ -72,7 +72,7 @@ generate_site_summary <- function(dat_ind, crosswalk_ind, out_ind) {
       nobsBin)
   
   saveRDS(delaware_pts, as_data_file(out_ind))
-  gd_put(out_ind, as_data_file(out_ind))
+  gd_put(out_ind)
     
 }
 
