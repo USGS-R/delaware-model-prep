@@ -242,7 +242,7 @@ def aggregate_attr_by_col(attr_df, agg_col):
     by_seg_mean = attr_df.groupby(agg_col).apply(weigted_avg)
     by_seg_sum = attr_df.groupby(agg_col).sum()
     # replace the mean cols with sum cols for the appropriate attributes
-    sum_cols = ['hru_area']
+    sum_cols = ['hru_area', 'dprst_area']
     by_seg_mean[sum_cols] = by_seg_sum[sum_cols]
     return by_seg_mean
 
