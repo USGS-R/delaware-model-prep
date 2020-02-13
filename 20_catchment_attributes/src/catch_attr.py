@@ -217,7 +217,6 @@ def add_ids_and_seg_attr(nat_reg_seg_file, nat_reg_hru_file, attr_file, region,
     attr_df['seg_id_nat'].fillna(0, inplace=True)
     attr_df['seg_id_nat'] = attr_df['seg_id_nat'].astype(int)
 
-    print(attr_df.columns)
     attr_df.to_feather(out_file)
     return attr_df
 
@@ -227,10 +226,31 @@ def weigted_avg(df, weight_col='hru_area'):
     take a weighted average of a dataframe
     :param df: [dataframe] a dataframe for which to take the weighted average
     :param weight_col: [str] column name that contains the weights
+    :return: [pandas Series] pandas Series of the average weighted by the
+    weight_col
     """
     numerator = (df.multiply(df[weight_col], axis=0)).sum()
     denom = df[weight_col].sum()
     return numerator/denom
+
+
+def most_rep_cats_by_col(df, col='hru_area',
+                         categories=['soil_type', 'cov_type', 'hru_deplcrv']):
+    """
+    get the most represented categories by column. for example, for the
+    defaults i would be getting the soil_type in the dataframe most represented
+    by area. i'd be doing the same for cov_type, and hru_deplcrv. this function
+    then just averages the rest of the columns (which won't be used anyway)
+    :param df: [dataframe] data frame for which you are getting the most
+    :return: [pandas Series] the data with the most represented categories by
+    the specified column
+    """
+    summary_series = df.mean()
+    for cat in categories:
+        gp = df.groupby(cat).sum()
+        most_rep = gp[col].idxmax()
+        summary_series.loc[cat] = most_rep
+    return summary_series
 
 
 def aggregate_attr_by_col(attr_df, agg_col):
@@ -241,9 +261,13 @@ def aggregate_attr_by_col(attr_df, agg_col):
     """
     by_seg_mean = attr_df.groupby(agg_col).apply(weigted_avg)
     by_seg_sum = attr_df.groupby(agg_col).sum()
-    # replace the mean cols with sum cols for the appropriate attributes
+    categories = ['soil_type', 'cov_type', 'hru_deplcrv']
+    most_rep_cats = attr_df.groupby(agg_col).apply(most_rep_cats_by_col,
+                                                   col='hru_area',
+                                                   categories=categories)
     sum_cols = ['hru_area', 'dprst_area']
     by_seg_mean[sum_cols] = by_seg_sum[sum_cols]
+    by_seg_sum[categories] = most_rep_cats[categories]
     return by_seg_mean
 
 
