@@ -249,7 +249,7 @@ def most_rep_cats_by_col(df, col='hru_area',
     for cat in categories:
         gp = df.groupby(cat).sum()
         most_rep = gp[col].idxmax()
-        summary_series.loc[cat] = most_rep
+        summary_series.loc[cat] = int(most_rep)
     return summary_series
 
 
