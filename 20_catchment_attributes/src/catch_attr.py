@@ -268,6 +268,7 @@ def aggregate_attr_by_col(attr_df, agg_col):
     sum_cols = ['hru_area', 'dprst_area']
     by_seg_mean[sum_cols] = by_seg_sum[sum_cols]
     by_seg_sum[categories] = most_rep_cats[categories]
+    del by_seg_mean[agg_col]
     return by_seg_mean
 
 

@@ -92,4 +92,5 @@ def aggregate_upstream_attr(seg_attr_file, upstream_link_file, out_file):
     combined_df = pd.concat(df_list, ignore_index=True)
     combined_df = combined_df.rename(columns={"from_reach": "seg_id_nat"})
     combined_df.to_feather(out_file)
+    return combined_df
 
