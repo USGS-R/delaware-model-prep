@@ -241,6 +241,8 @@ def most_rep_cats_by_col(df, col='hru_area',
     defaults i would be getting the soil_type in the dataframe most represented
     by area. i'd be doing the same for cov_type, and hru_deplcrv. this function
     then just averages the rest of the columns (which won't be used anyway)
+    :param col: [str] the column to use to judge which one is most represented
+    :param categories: [str] the categories to aggregate
     :param df: [dataframe] data frame for which you are getting the most
     :return: [pandas Series] the data with the most represented categories by
     the specified column
@@ -265,9 +267,16 @@ def aggregate_attr_by_col(attr_df, agg_col):
     most_rep_cats = attr_df.groupby(agg_col).apply(most_rep_cats_by_col,
                                                    col='hru_area',
                                                    categories=categories)
+    assert len(most_rep_cats['soil_type'].unique()) <= 3
+    assert sum(~most_rep_cats['soil_type'].isin([1, 2, 3])) == 0
+    assert len(most_rep_cats['cov_type'].unique()) <= 4
+    assert sum(~most_rep_cats['cov_type'].isin([0, 1, 2, 3])) == 0
+    assert len(most_rep_cats['hru_deplcrv'].unique()) <= 2
+    assert sum(~most_rep_cats['hru_deplcrv'].isin([1, 2])) == 0
+
     sum_cols = ['hru_area', 'dprst_area']
     by_seg_mean[sum_cols] = by_seg_sum[sum_cols]
-    by_seg_sum[categories] = most_rep_cats[categories]
+    by_seg_mean[categories] = most_rep_cats[categories]
     del by_seg_mean[agg_col]
     return by_seg_mean
 
@@ -338,5 +347,4 @@ def subset_for_drb_subset(subset_links_file, seg_attr_file, out_file):
     """
     seg_ids = pd.read_csv(subset_links_file, header=None)[0]
     subset_by_links(seg_ids, seg_attr_file, out_file)
-
 

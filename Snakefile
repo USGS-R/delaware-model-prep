@@ -12,6 +12,7 @@ def add_all_src_dir():
 # import local scripts
 add_all_src_dir()
 import catch_attr
+import aggregate_upstream
 
 configfile: 'catchment_attr_links.yaml'
 regions = ['02']
@@ -88,7 +89,7 @@ rule aggregate_upstream:
     output:
         f"{cat_att_dir}/aggregated_upstream.feather"
     run:
-        catch_attr.aggregate_upstream_attr(input[0], input[1], output[0])
+        aggregate_upstream.aggregate_upstream_attr(input[0], input[1], output[0])
 
 
 metadata_file_fmt = "{fldr}/{category}_metadata.xml"
