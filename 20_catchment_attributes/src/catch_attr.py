@@ -58,7 +58,7 @@ def combine_categories(cat_data_files, output_file):
         gdf = gpd.read_file(data_file)
         df = pd.DataFrame(gdf.drop(columns='geometry'))
         df.set_index('hru_id', inplace=True)
-        df.index.rename('hru_reg_id', inplace=True)
+        df.index.rename('hru_id_reg', inplace=True)
         df_list.append(df)
     df_combined = pd.concat(df_list, axis=1)
 
@@ -136,7 +136,7 @@ def parse_metadata_file(file_path):
     return data
     
 
-def consolidate_metdata(metadata_files, output_file):
+def consolidate_metadata(metadata_files, output_file):
     """
     combine all of the attribute fields contained in the different category
     files into one file
@@ -153,12 +153,12 @@ def consolidate_metdata(metadata_files, output_file):
     return df
 
 
-def add_nat_id_to_table(nat_reg_table, attr_df, region, join_idx_nat,
-                       join_idx_attr, nat_col_names, attr_col_names=None):
+def add_nat_col_to_table(nat_reg_table, attr_df, region, join_idx_nat,
+                         join_idx_attr, nat_col_names, attr_col_names=None):
     """
     add a column from a nat_reg_table to the attribute table. 
     :param nat_reg_table: [str] the path to the national-regional id look up
-    :param attr_file: [str] the path to the catchment attributes_file
+    :param attr_df: [dataframe] dataframe with segment attributes
     :param region: [str] the region for relating them (e.g., '02') 
     :param join_idx_nat: [str] the col name by which the nat_reg_table should
     be indexed so the indices of that table match the indices of the attr table
@@ -187,7 +187,6 @@ def add_nat_id_to_table(nat_reg_table, attr_df, region, join_idx_nat,
     return attr_df
 
 
-
 def add_ids_and_seg_attr(nat_reg_seg_file, nat_reg_hru_file, attr_file, region,
                          out_file):
     """
@@ -206,27 +205,80 @@ def add_ids_and_seg_attr(nat_reg_seg_file, nat_reg_hru_file, attr_file, region,
     """
     attr_df = pd.read_feather(attr_file)
     # add hru_nat_id and seg_reg_id
-    attr_df = add_nat_id_to_table(nat_reg_hru_file, attr_df, region,
-                                  'hru_id_reg', 'hru_reg_id',
-                                  ['hru_id_nat', 'hru_segment'],
-                                  ['hru_nat_id', 'seg_reg_id'])
-
-    # add segment attributes
-    seg_attr_to_add = ['SUM_LENGTHKM','SUM_TRAV_TIME', 'MAX_CUMDRAINAG']
-    attr_df = add_nat_id_to_table(nat_reg_seg_file, attr_df, region,
-                                  'seg_id_reg', 'seg_reg_id', seg_attr_to_add)
+    attr_df = add_nat_col_to_table(nat_reg_hru_file, attr_df, region,
+                                   'hru_id_reg', 'hru_id_reg',
+                                   ['hru_id_nat', 'hru_segment'])
 
     # add nat seg_id
-    attr_df = add_nat_id_to_table(nat_reg_seg_file, attr_df, region,
-                                  'seg_id_reg', 'seg_reg_id', ['seg_id_nat'],
-                                  ['seg_nat_id'])
+    attr_df = add_nat_col_to_table(nat_reg_seg_file, attr_df, region,
+                                   'seg_id_reg', 'hru_segment', ['seg_id_nat'])
 
     # convert seg_nat_id Nan to 0
-    attr_df['seg_nat_id'].fillna(0, inplace=True)
-    attr_df['seg_nat_id'] = attr_df['seg_nat_id'].astype(int)
+    attr_df['seg_id_nat'].fillna(0, inplace=True)
+    attr_df['seg_id_nat'] = attr_df['seg_id_nat'].astype(int)
 
     attr_df.to_feather(out_file)
     return attr_df
+
+
+def weigted_avg(df, weight_col='hru_area'):
+    """
+    take a weighted average of a dataframe
+    :param df: [dataframe] a dataframe for which to take the weighted average
+    :param weight_col: [str] column name that contains the weights
+    :return: [pandas Series] pandas Series of the average weighted by the
+    weight_col
+    """
+    numerator = (df.multiply(df[weight_col], axis=0)).sum()
+    denom = df[weight_col].sum()
+    return numerator/denom
+
+
+def most_rep_cats_by_col(df, col='hru_area',
+                         categories=['soil_type', 'cov_type', 'hru_deplcrv']):
+    """
+    get the most represented categories by column. for example, for the
+    defaults i would be getting the soil_type in the dataframe most represented
+    by area. i'd be doing the same for cov_type, and hru_deplcrv. this function
+    then just averages the rest of the columns (which won't be used anyway)
+    :param col: [str] the column to use to judge which one is most represented
+    :param categories: [str] the categories to aggregate
+    :param df: [dataframe] data frame for which you are getting the most
+    :return: [pandas Series] the data with the most represented categories by
+    the specified column
+    """
+    summary_series = df.mean()
+    for cat in categories:
+        gp = df.groupby(cat).sum()
+        most_rep = gp[col].idxmax()
+        summary_series.loc[cat] = int(most_rep)
+    return summary_series
+
+
+def aggregate_attr_by_col(attr_df, agg_col):
+    """
+    aggregate segment or hru attributes by a given column
+    :param attr_df: [dataframe] dataframe with segment attributes
+    :param agg_col: [str] column name that you want to be grouping your
+    """
+    by_seg_mean = attr_df.groupby(agg_col).apply(weigted_avg)
+    by_seg_sum = attr_df.groupby(agg_col).sum()
+    categories = ['soil_type', 'cov_type', 'hru_deplcrv']
+    most_rep_cats = attr_df.groupby(agg_col).apply(most_rep_cats_by_col,
+                                                   col='hru_area',
+                                                   categories=categories)
+    assert len(most_rep_cats['soil_type'].unique()) <= 3
+    assert sum(~most_rep_cats['soil_type'].isin([1, 2, 3])) == 0
+    assert len(most_rep_cats['cov_type'].unique()) <= 4
+    assert sum(~most_rep_cats['cov_type'].isin([0, 1, 2, 3])) == 0
+    assert len(most_rep_cats['hru_deplcrv'].unique()) <= 2
+    assert sum(~most_rep_cats['hru_deplcrv'].isin([1, 2])) == 0
+
+    sum_cols = ['hru_area', 'dprst_area']
+    by_seg_mean[sum_cols] = by_seg_sum[sum_cols]
+    by_seg_mean[categories] = most_rep_cats[categories]
+    del by_seg_mean[agg_col]
+    return by_seg_mean
 
 
 def relate_attr_to_segments(attr_w_id_file, out_file, rm_other_ids=True):
@@ -236,37 +288,35 @@ def relate_attr_to_segments(attr_w_id_file, out_file, rm_other_ids=True):
     taken except for catchment area
     :param attr_w_id_file: [str] path to feather file with attributes and the 
     nation-wide segment id (along with the regional and the HRU's)
+    data by
     :param out_file: [str] path to where the output file should be written
     :param rm_other_ids: [bool] whether or not you want to drop the other id
     columns
     :return: [pandas df] df of attributes related to national segment id
     """
     attr_df = pd.read_feather(attr_w_id_file)
-    by_seg_mean = attr_df.groupby('seg_nat_id').mean()
-    by_seg_sum = attr_df.groupby('seg_nat_id').sum()
-    # replace the mean cols with sum cols for the appropriate attributes
-    sum_cols = ['hru_area']
-    by_seg_mean[sum_cols] = by_seg_sum[sum_cols]
+    agg_df = aggregate_attr_by_col(attr_df, 'seg_id_nat')
 
     if rm_other_ids:
-        non_id_cols = [c for c in by_seg_mean.columns if not c.endswith('_id')]
-        assert len(by_seg_mean.columns) - len(non_id_cols) == 3
-        by_seg_mean = by_seg_mean[non_id_cols]
+        cols_not_needed = ['hru_segment', 'hru_id_nat', 'hru_id_reg']
+        good_cols = [c for c in agg_df.columns if c not in cols_not_needed]
+        agg_df = agg_df[good_cols]
 
-    by_seg_mean.reset_index(inplace=True)
-    by_seg_mean.to_feather(out_file)
-    return by_seg_mean
+    agg_df.reset_index(inplace=True)
+    agg_df.to_feather(out_file)
+    return agg_df
 
 
 def subset_by_links(subset_links, seg_attr_file, out_file):
     """
     subset the segment attributes just for the drb 
     :param subset_links: [list] list of links that you want attribute data for
-    :parm seg_attr_file: [str] path to file with the segment attributes by
+    :param seg_attr_file: [str] path to file with the segment attributes by
     national segment id
-    :out_file: [str] path to where the data should be written
+    :param out_file: [str] path to where the data should be written
     """
     seg_att_df = pd.read_feather(seg_attr_file)
+    seg_att_df.set_index('seg_id_nat', inplace=True)
     seg_subset = seg_att_df.loc[subset_links]
     seg_subset.reset_index(inplace=True)
     seg_subset.to_feather(out_file)
@@ -274,11 +324,12 @@ def subset_by_links(subset_links, seg_attr_file, out_file):
 
 def subset_for_drb(drb_file, seg_attr_file, out_file):
     """
+    subset the regional attribute file for just the reaches in the drb
     :param drb_file: [str] path to shapefile with the drb segment subset with
     'seg_id_nat' as the links to subset by
-    :parm seg_attr_file: [str] path to file with the segment attributes by
+    :param seg_attr_file: [str] path to file with the segment attributes by
     national segment id
-    :out_file: [str] path to where the data should be written
+    :param out_file: [str] path to where the data should be written
     """
     subset_gdf = gpd.read_file(drb_file)
     link_ids = subset_gdf['seg_id_nat']
@@ -287,10 +338,12 @@ def subset_for_drb(drb_file, seg_attr_file, out_file):
 
 def subset_for_drb_subset(subset_links_file, seg_attr_file, out_file):
     """
+    subset the attributes for the subset of the drb. this is a 42 link subset
+    of the drb 
     :param subset_links_file: [list] path to file with the drb subset link ids 
-    :parm seg_attr_file: [str] path to file with the segment attributes by
+    :param seg_attr_file: [str] path to file with the segment attributes by
     national segment id
-    :out_file: [str] path to where the data should be written
+    :param out_file: [str] path to where the data should be written
     """
     seg_ids = pd.read_csv(subset_links_file, header=None)[0]
     subset_by_links(seg_ids, seg_attr_file, out_file)

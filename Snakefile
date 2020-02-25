@@ -1,8 +1,18 @@
+# import global scripts
 import sys
-scripts_path =  os.path.abspath("20_catchment_attributes/src")
-sys.path.insert(0, scripts_path)
+import os
 
+# add all the src directories to the path so that we have access to the scripts
+def add_all_src_dir():
+    for contents in os.walk('.'):
+        directory = contents[0]
+        if directory.endswith('src'):
+            sys.path.insert(0, directory)
+
+# import local scripts
+add_all_src_dir()
 import catch_attr
+import aggregate_upstream
 
 configfile: 'catchment_attr_links.yaml'
 regions = ['02']
@@ -14,7 +24,6 @@ rule all:
         seg_attr = expand("{fldr}/combined_seg_attr_{region}.feather", fldr=cat_att_dir, region=regions),
         drb_attr = f"{cat_att_dir}/seg_attr_drb.feather",
         subset_drb_attr = f"{cat_att_dir}/seg_attr_drb_subset.feather"
-
 
 params_out_fmt = "{fldr}/GeospatialFabricAttributes-PRMS_{category}_{region}.gdb"
 rule get_all_catchment_params:
@@ -66,12 +75,22 @@ rule subset_attr_to_drb:
 rule subset_attr_drb_subset:
     input:
         # this is a list of link ids that are in the subset of the DRB (the small subset Xiaowei started with)
-        "10_spatial_data/out/drb_subset_links.csv",
+        "10_spatial_data/out/sntemp_subset_ids.csv",
         f"{cat_att_dir}/combined_seg_attr_02.feather"
     output:
         rules.all.input.subset_drb_attr
     run:
         catch_attr.subset_for_drb_subset(input[0], input[1], output[0])
+
+rule aggregate_upstream:
+    input:
+        f"{cat_att_dir}/combined_seg_attr_02.feather",
+        "10_spatial_data/out/high_obs_upstream_sites.csv"
+    output:
+        f"{cat_att_dir}/aggregated_upstream.feather"
+    run:
+        aggregate_upstream.aggregate_upstream_attr(input[0], input[1], output[0])
+
 
 metadata_file_fmt = "{fldr}/{category}_metadata.xml"
 rule get_metadata_xml_files:
