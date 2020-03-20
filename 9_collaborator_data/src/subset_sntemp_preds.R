@@ -2,10 +2,10 @@
 
 subset_sntemp_preds = function(ind_file,
                                sub_net_file,
-                               full_data_file,
+                               full_data_ind,
                                gd_config = 'lib/cfg/gd_config.yml'){
 
-  stream_temp_intermediates_wide = feather::read_feather(full_data_file)
+  stream_temp_intermediates_wide = feather::read_feather(sc_retrieve(full_data_ind))
 
   # subset set of seg_id_nats
   sub_net = read.csv(sub_net_file)

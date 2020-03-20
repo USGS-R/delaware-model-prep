@@ -35,7 +35,7 @@ targets:
      - 9_collaborator_data/psu/sntemp_preds_aggregated.feather.ind
      - 9_collaborator_data/psu/temp_obs_high_obs_sites.csv.ind
      - 9_collaborator_data/psu/flow_obs_high_obs_sites.csv.ind
-     
+
 
   ##### Makerspace #####
   # generate file to load for map (http://delaware-basin-test-website.s3-website-us-west-2.amazonaws.com/)
@@ -192,7 +192,7 @@ targets:
     command: subset_sntemp_preds(
       ind_file = target_name,
       sub_net_file = '9_collaborator_data/psu/high_obs_upstream_sites.csv',
-      full_data_file = '3_predictions/in/uncal_sntemp_input_output.feather')
+      full_data_ind = '3_predictions/in/uncal_sntemp_input_output.feather.ind')
   9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather:
     command: gd_get('9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather.ind')
 
@@ -209,7 +209,7 @@ targets:
       dat_ind = '2_observations/out/obs_temp_drb.rds.ind',
       subset = '9_collaborator_data/psu/highly_observed_sites.rds',
       out_ind = target_name)
-  
+
   9_collaborator_data/psu/temp_obs_high_obs_sites.csv:
     command: gd_get('9_collaborator_data/psu/temp_obs_high_obs_sites.csv.ind')
 
@@ -218,7 +218,7 @@ targets:
       dat_ind = '2_observations/out/obs_flow_drb.rds.ind',
       subset = '9_collaborator_data/psu/highly_observed_sites.rds',
       out_ind = target_name)
-  
+
   9_collaborator_data/psu/flow_obs_high_obs_sites.csv:
     command: gd_get('9_collaborator_data/psu/flow_obs_high_obs_sites.csv.ind')
 
