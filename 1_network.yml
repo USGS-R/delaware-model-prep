@@ -22,11 +22,19 @@ targets:
      - 1_network/out/network.rds.ind
      - 1_network/out/distance_matrix.rds.ind
 
-  # placeholder for function to download and indicate the national geospatial fabric
-  # also, should maybe store the DRB network from Steve in the google drive folder and fetch it
-  # for now, downloaded to "in" from here: https://www.sciencebase.gov/catalog/item/5362b683e4b0c409c6289bf6
-  #1_network/in/GeospatialFabric_National.gdb.ind:
-  #  command: get_national_gf(sb_id = I('5362b683e4b0c409c6289bf6'), sb_name = I('GeospatialFabric_National.gdb.zip'))
+  # THESE DATA TARGETS ARE FOR REPRODUCIBILITY BUT NOT LINKED TO THE PIPELINE:
+  # store the DRB network from Steve in the google drive folder and fetch it.
+  # This first target only needed to be run one time:
+  #1_network/in/delaware_stream_temp_by_segment.zip.ind:
+  #  command: gd_confirm_posted(target_name)
+  1_network/in/delaware_stream_temp_by_segment.zip:
+    command: gd_get('1_network/in/delaware_stream_temp_by_segment.zip.ind')
+  1_network/in/delaware_stream_temp_by_segment/delaware_segments/delaware_segments.shp:
+    command: unzip('1_network/in/delaware_stream_temp_by_segment.zip', exdir=I('1_network/in'))
+  # download and indicate the national geospatial fabric.
+  # comes from ScienceBase: https://www.sciencebase.gov/catalog/item/5362b683e4b0c409c6289bf6
+  1_network/in/GeospatialFabric_National.gdb.ind:
+    command: get_national_gf(out_ind=target_name, sb_id = I('5362b683e4b0c409c6289bf6'), sb_name = I('GeospatialFabric_National.gdb.zip'))
 
   1_network/out/network.rds.ind:
     command: revise_raw_network(
