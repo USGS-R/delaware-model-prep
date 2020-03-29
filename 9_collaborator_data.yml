@@ -158,7 +158,7 @@ targets:
   9_collaborator_data/umn/obs_flow_subset.csv:
     command: gd_get('9_collaborator_data/umn/obs_flow_subset.csv.ind')
 
-  # Penn State data
+  #### Penn State ####
   9_collaborator_data/psu/highly_observed_sites.rds:
     command: filter_sites(
       out_file = target_name,
@@ -188,8 +188,8 @@ targets:
    # command: c("578_1", "580_1", "154_1", "269_1", "249_1", "250_1", "132_1", "16_1", "23_1")
 
   9_collaborator_data/psu/highly_obs_distance_matrix.rds.ind:
-    command: subset_dist(
-      dat = '9_collaborator_data/psu/highly_observed_sites.rds',
+    command: subset_dist_to_subsegs(
+      subsegs_rds = '9_collaborator_data/psu/highly_observed_sites.rds',
       dist_ind = '1_network/out/distance_matrix.rds.ind',
       network_ind = '1_network/out/network.rds.ind',
       out_ind = target_name)
@@ -197,10 +197,12 @@ targets:
   9_collaborator_data/psu/highly_obs_distance_matrix.rds:
     command: gd_get('9_collaborator_data/psu/highly_obs_distance_matrix.rds.ind')
 
+  # this target builds a few times for some reason
   9_collaborator_data/psu/highly_obs_distance_matrix.csv.ind:
     command: write_distance(
+      out_ind = target_name,
       dat = '9_collaborator_data/psu/highly_obs_distance_matrix.rds',
-      out_ind = target_name)
+      dist_type = I('updown'))
 
   9_collaborator_data/psu/highly_obs_distance_matrix.csv:
     command: gd_get('9_collaborator_data/psu/highly_obs_distance_matrix.csv')
@@ -209,6 +211,7 @@ targets:
     command: dist_heatmap2(
       out_file = target_name,
       dist_ind = '9_collaborator_data/psu/highly_obs_distance_matrix.rds.ind',
+      dist_type = I('updown'),
       labels = I('subseg_id'),
       title = I('Full Network - Upstream & Downstream'))
 

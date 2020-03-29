@@ -346,16 +346,16 @@ subset_dist_to_subsegs <- function(subsegs_rds, dist_ind, network_ind, out_ind){
   gd_put(out_ind)
 }
 
-write_distance <- function(dat, out_ind) {
-  subset_dist <- readRDS(dat)
-  write.csv(subset_dist, as_data_file(out_ind), row.names = TRUE)
+write_distance <- function(dat, dist_type='updown', out_ind) {
+  dist <- readRDS(dat)
+  write.csv(dist[[dist_type]], as_data_file(out_ind), row.names = TRUE)
   gd_put(out_ind)
 }
 
-dist_heatmap2 <- function(dist_ind, labels=c('subseg_id','seg_id_nat'), title, out_file) {
+dist_heatmap2 <- function(dist_ind, dist_type='updown', labels=c('subseg_id','seg_id_nat'), title, out_file) {
 
   labels <- match.arg(labels)
-  dat <- readRDS(sc_retrieve(dist_ind))
+  dat <- readRDS(sc_retrieve(dist_ind))[[dist_type]]
 
   dat_df <- as_tibble(dat) %>%
     mutate(from_reach=rownames(dat)) %>%
