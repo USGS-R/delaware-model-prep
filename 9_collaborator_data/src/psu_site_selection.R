@@ -315,21 +315,35 @@ plot_upstream <- function(POIs, dist_mat_ind, labels=c('subseg_id','seg_id_nat')
 
 }
 
+# identify those subsegs whose outlets are in the geospatial fabric (omitting
+# reaches we added for the purpose of constructing and accurate distance matrix)
+select_sntemp_subsegs <- function(
+  network_ind = '1_network/out/network.rds.ind',
+  out_rds) {
 
-subset_dist <- function(dat, dist_ind, network_ind, out_ind){
-
-  sites <- readRDS(dat)
-  dist_mat <- readRDS(sc_retrieve(dist_ind))
-  dist_mat <- dist_mat$updown
   network <- readRDS(sc_retrieve(network_ind))
+  sntemp_edges <- network$edges %>%
+    mutate(end_subseg=sprintf('%dd', subseg_seg)) %>%
+    filter(
+      mapply(function(ep, ss) {
+        grepl(sprintf('%dd', ss), ep)
+      }, ep=end_pt, ss=subseg_seg)) %>%
+    select(subseg_id, seg_id_nat)
 
-  subset_dist <- dist_mat[sites$subseg_id, ]
-  subset_dist <- subset_dist[, sites$subseg_id]
+  saveRDS(sntemp_edges, out_rds)
+}
 
-  saveRDS(subset_dist, as_data_file(out_ind))
+subset_dist_to_subsegs <- function(subsegs_rds, dist_ind, network_ind, out_ind){
+
+  subsegs <- readRDS(subsegs_rds)
+  network <- readRDS(sc_retrieve(network_ind))
+  dist_mats <- readRDS(sc_retrieve(dist_ind))
+  subset_dists <- lapply(dist_mats, function(dist_mat) {
+    subset_dist <- dist_mat[subsegs$subseg_id, ][, subsegs$subseg_id]
+  })
+  saveRDS(subset_dists, as_data_file(out_ind))
 
   gd_put(out_ind)
-
 }
 
 write_distance <- function(dat, out_ind) {
