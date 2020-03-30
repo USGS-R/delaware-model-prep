@@ -13,7 +13,10 @@ subset_sntemp_preds = function(out_file,
 
   stream_temp_intermediates_wide_sub <- stream_temp_intermediates_wide %>%
     dplyr::filter(seg_id_nat %in% sub_net_sites) %>%
-    mutate(seg_tave_upstream = ifelse(seg_tave_upstream == -98.9, NA, seg_tave_upstream)) # convert numeric flag to NA
+    # convert numeric flag to NA. from
+    # https://github.com/nhm-usgs/prms/blob/2ca4e2d298fa853bcc87f28343cedceaad30ef27/prms/stream_temp.f90#L905-L907:
+    # "-98.9 is the code for no flow on this timestep"
+    mutate(seg_tave_upstream = ifelse(seg_tave_upstream == -98.9, NA, seg_tave_upstream))
 
   feather::write_feather(x = stream_temp_intermediates_wide_sub, path = out_file)
 }
