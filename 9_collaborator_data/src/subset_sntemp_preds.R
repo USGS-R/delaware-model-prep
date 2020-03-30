@@ -29,51 +29,50 @@ aggregate_sntemp_preds = function(ind_file,
 
   subset_data <- feather::read_feather(subset_data_file)
 
-  # area-weighted mean. hrus_area is the total area of HRUs contributing directly to the segment for each row
-  awmean <- function(values, hrus_area) {}
-  # stream-reach-length-weighted mean
-  lwmean <- function(values, seg_length) {}
-
   out = lapply(subbasin_outlets, function(cur_basin){
-    segs = c(cur_basin, sub_net$to_reach[sub_net$from_reach == cur_basin])
+    segs <- sub_net$seg_id_nat[sub_net$outlet == cur_basin]
 
-    cur_agg_data = dplyr::filter(subset_data, seg_id_nat %in% segs)  %>%
+    cur_agg_data = dplyr::filter(subset_data, seg_id_nat %in% segs) %>%
+      left_join(filter(sub_net, outlet == cur_basin), by='seg_id_nat') %>%
       group_by(date) %>%
       mutate(is_outlet = seg_id_nat == cur_basin) %>%
-      summarise_at(
-        # from https://www.usgs.gov/media/videos/precipitation-runoff-modeling-system-prms-streamflow-modules:
-        # "Variables with names having the prefix “seg” are flows for each segment plus all associated upstream segments." (but...really??)
-        # "Variables with names having the prefix “seginc” are flows for each segment. These are the incremental flows in the stream network."
-        basin_ccov = awmean(seg_ccov, hrus_area), # unitless; area-weighted average cloud cover fraction for each segment from HRUs contributing flow to the segment
-        basin_humid = awmean(seg_outflow), # area-weighted average relative humidity for each segment from HRUs contributing flow to the segment
-        basin_rain = awmean(seg_rain), # area-weighted average rainfall for each segment from HRUs contributing flow to the segment
-        basin_shade = awmean(seg_shade), # seems to be always 0. area-weighted average shade fraction for each segment
-        basin_tave_air = awmean(seg_tave_air), # area-weighted air temperature for each segment from HRUs contributing flow to the segment
-        basin_tave_gw = awmean(seg_tave_gw), # C, groundwater temperature
-        basin_tave_sroff = awmean(seg_tave_sroff), # surface runoff temperature
-        seg_tave_ss = awmean(seg_tave_ss), # subsurface temperature
-        #seg_tave_upstream = mean(seg_tave_upstream), # Temperature of streamflow entering each segment
-        #seg_upstream_inflow = mean(seg_upstream_inflow), # cfs; sum of inflow from upstream segments
-        network_width = lwmean(seg_width, seg_length), # m, width of each segment
+      summarize(
+        # Definitions from https://www.usgs.gov/media/videos/precipitation-runoff-modeling-system-prms-streamflow-modules:
+        #   "Variables with names having the prefix “seg” are flows for each segment plus all associated upstream segments." (but...really??)
+        #   "Variables with names having the prefix “seginc” are flows for each segment. These are the incremental flows in the stream network."
+        # Below, comments describe the value being summarized (not the resulting summary):
+        # drivers
+        basin_ccov = weighted.mean(seg_ccov, hrus_area_km2), # unitless; area-weighted average cloud cover fraction for each segment from HRUs contributing flow to the segment
+        basin_humid = weighted.mean(seg_outflow, hrus_area_km2), # area-weighted average relative humidity for each segment from HRUs contributing flow to the segment
+        basin_rain = weighted.mean(seg_rain, hrus_area_km2), # area-weighted average rainfall for each segment from HRUs contributing flow to the segment
+        basin_shade = weighted.mean(seg_shade, hrus_area_km2), # seems to be always 0. area-weighted average shade fraction for each segment
+        basin_tave_air = weighted.mean(seg_tave_air, hrus_area_km2), # area-weighted air temperature for each segment from HRUs contributing flow to the segment
+        basin_gwflow = weighted.mean(seginc_gwflow, hrus_area_km2), # cfs, area-weighted average groundwater discharge for each segment from HRUs contributing flow to the segment
+        basin_potet = weighted.mean(seginc_potet, hrus_area_km2), # area-weighted average potential ET for each segment from HRUs contributing flow to the segment
+        basin_sroff = weighted.mean(seginc_sroff, hrus_area_km2), # area-weighted average surface runoff for each segment from HRUs contributing flow to the segment
+        basin_ssflow = weighted.mean(seginc_ssflow, hrus_area_km2), # area-weighted average interflow for each segment from HRUs contributing flow to the segment
+        basin_swrad = weighted.mean(seginc_swrad, hrus_area_km2), # W m^-2; area-weighted average solar radiation for each segment from HRUs contributing flow to the segment
+        # values we probably won't use as predictors (too internal to the temperature module):
+        basin_tave_gw = weighted.mean(seg_tave_gw, hrus_area_km2), # C, groundwater temperature
+        basin_tave_sroff = weighted.mean(seg_tave_sroff, hrus_area_km2), # surface runoff temperature
+        basin_tave_ss = weighted.mean(seg_tave_ss, hrus_area_km2), # subsurface temperature
+        # basin properties
+        basin_area = sum(hrus_area_km2),
+        network_slope = weighted.mean(seg_slope, seg_length_km), # Slope of segments
+        network_length = sum(seg_length_km), # km; Length of each segment
+        network_width = weighted.mean(seg_width, seg_length_km), # m, width of each segment
+        network_elev = weighted.mean(seg_elev, seg_length_km), # m?; Elevation of each segment, used to estimate atmospheric pressure
+        # outlet properties (these are actually properties of the most downstream segment in the network - close enough to consider "outlet", I hope)
+        outlet_slope = seg_slope[is_outlet], # m, width of each segment
         outlet_width = seg_width[is_outlet], # m, width of each segment
-        seginc_gwflow = awmean(seginc_gwflow), # cfs, area-weighted average groundwater discharge for each segment from HRUs contributing flow to the segment
-        seginc_potet = awmean(seginc_potet), # area-weighted average potential ET for each segment from HRUs contributing flow to the segment
-        seginc_sroff = awmean(seginc_sroff), # area-weighted average surface runoff for each segment from HRUs contributing flow to the segment
-        seginc_ssflow = awmean(seginc_ssflow), # area-weighted average interflow for each segment from HRUs contributing flow to the segment
-        seginc_swrad = awmean(seginc_swrad), # W m^-2; area-weighted average solar radiation for each segment from HRUs contributing flow to the segment
-        network_length = sum(seg_length), # m?; Length of each segment
-        network_slope = lwmean(seg_slope, seg_length), # Slope of segments
-        basin_elev = awmean(seg_elev, hrus_area), # m?; Elevation of each segment, used to estimate atmospheric pressure
-        # outputs
+        outlet_elev = seg_elev[is_outlet], # m?; Elevation of each segment, used to estimate atmospheric pressure
+        # targets for prediction
         outlet_tave_water = seg_tave_water[is_outlet], # Computed daily mean stream temperature for each segment
-        outlet_outflow = seg_outflow[is_outlet] # cfs?; streamflow leaving a segment (total discharge at the segment outlet)
-        # hru_elev?
-        # hru_slope?
+        outlet_outflow = seg_outflow[is_outlet], # cfs?; streamflow leaving a segment (total discharge at the segment outlet)
+        # metadata
+        outlet_seg_id_nat = cur_basin
       ) %>%
-      ungroup() %>%
-      mutate(seg_tave_water = subset_data$seg_tave_water[subset_data$seg_id_nat == cur_basin],
-             seg_outflow = subset_data$seg_outflow[subset_data$seg_id_nat == cur_basin],
-             subbasin_outlet_seg_id_nat = cur_basin)
+      ungroup()
   }) %>% bind_rows()
 
   out_file = as_data_file(ind_file)
