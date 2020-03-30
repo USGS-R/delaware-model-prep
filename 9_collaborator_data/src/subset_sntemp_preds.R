@@ -82,38 +82,38 @@ aggregate_sntemp_preds = function(ind_file,
 }
 
 # Inspect the outputs to make sure the ranges are reasonable
-raw_preds <- feather::read_feather('9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather')
-agg_preds <- feather::read_feather('9_collaborator_data/psu/sntemp_preds_aggregated.feather')
-# basin_ccov seems fine, ranges from 0.25 to 0.8
-raw_preds$seg_ccov %>% summary
-agg_preds$basin_ccov %>% summary
-ggplot(agg_preds, aes(x=date, y=basin_ccov, color=outlet_seg_id_nat)) + geom_line()
-# CHECK AFTER REBUILD basin_humid is boring, always 0.7
-raw_preds$seg_humid %>% summary
-agg_preds$basin_humid %>% summary
-ggplot(agg_preds, aes(x=date, y=basin_humid, color=outlet_seg_id_nat)) + geom_line()
-# basin_rain
-raw_preds$seg_rain %>% summary
-agg_preds$basin_rain %>% summary
-ggplot(agg_preds, aes(x=date, y=basin_humid, color=outlet_seg_id_nat)) + geom_line() + facet_wrap(~ outlet_seg_id_nat)
-# basin_shade
-# basin_tave_air
-# basin_gwflow
-# basin_potet
-# basin_sroff
-# basin_ssflow
-# basin_swrad
-# basin_tave_gw
-# basin_tave_sroff
-# basin_tave_ss
-# basin_area
-# network_slope
-# network_length
-# network_width
-# network_elev
-# outlet_slope
-# outlet_width
-# outlet_elev
-# outlet_tave_water
-# outlet_outflow
-# outlet_seg_id_nat
+# raw_preds <- feather::read_feather('9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather')
+# agg_preds <- feather::read_feather('9_collaborator_data/psu/sntemp_preds_aggregated.feather')
+# # basin_ccov seems fine, ranges from 0.25 to 0.8
+# raw_preds$seg_ccov %>% summary
+# agg_preds$basin_ccov %>% summary
+# ggplot(agg_preds, aes(x=date, y=basin_ccov, color=outlet_seg_id_nat)) + geom_line()
+# # CHECK AFTER REBUILD basin_humid is boring, always 0.7
+# raw_preds$seg_humid %>% summary
+# agg_preds$basin_humid %>% summary
+# ggplot(agg_preds, aes(x=date, y=basin_humid, color=outlet_seg_id_nat)) + geom_line()
+# # basin_rain
+# raw_preds$seg_rain %>% summary
+# agg_preds$basin_rain %>% summary
+# ggplot(agg_preds, aes(x=date, y=basin_humid, color=outlet_seg_id_nat)) + geom_line() + facet_wrap(~ outlet_seg_id_nat)
+# # basin_shade
+# # basin_tave_air
+# # basin_gwflow
+# # basin_potet
+# # basin_sroff
+# # basin_ssflow
+# # basin_swrad
+# # basin_tave_gw
+# # basin_tave_sroff
+# # basin_tave_ss
+# # basin_area
+# # network_slope
+# # network_length
+# # network_width
+# # network_elev
+# # outlet_slope
+# # outlet_width
+# # outlet_elev
+# # outlet_tave_water
+# # outlet_outflow
+# # outlet_seg_id_nat
