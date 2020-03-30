@@ -219,13 +219,11 @@ targets:
       sites = '9_collaborator_data/psu/highly_observed_sites.rds',
       geo_dat = I('1_network/in/GeospatialFabric_National.gdb'))
 
-  9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather.ind:
+  9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather:
     command: subset_sntemp_preds(
-      ind_file = target_name,
+      out_file = target_name,
       sub_net_file = '9_collaborator_data/psu/high_obs_upstream_sites.csv',
       full_data_ind = '3_predictions/in/uncal_sntemp_input_output.feather.ind')
-  9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather:
-    command: gd_get('9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather.ind')
 
   9_collaborator_data/psu/sntemp_preds_aggregated.feather.ind:
     command: aggregate_sntemp_preds(

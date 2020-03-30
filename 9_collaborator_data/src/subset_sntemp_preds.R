@@ -1,24 +1,21 @@
 
 
-subset_sntemp_preds = function(ind_file,
+subset_sntemp_preds = function(out_file,
                                sub_net_file,
                                full_data_ind,
                                gd_config = 'lib/cfg/gd_config.yml'){
 
-  stream_temp_intermediates_wide = feather::read_feather(sc_retrieve(full_data_ind))
+  stream_temp_intermediates_wide <- feather::read_feather(sc_retrieve(full_data_ind))
 
   # subset set of seg_id_nats
-  sub_net = read.csv(sub_net_file)
-  sub_net_sites = as.character(unique(c(sub_net$from_reach, sub_net$to_reach)))
+  sub_net <- read_csv(sub_net_file, col_types='ccdd')
+  sub_net_sites <- unique(sub_net$seg_id_nat)
 
-  stream_temp_intermediates_wide_sub = stream_temp_intermediates_wide %>%
-    dplyr::filter(seg_id_nat %in% sub_net_sites)
+  stream_temp_intermediates_wide_sub <- stream_temp_intermediates_wide %>%
+    dplyr::filter(seg_id_nat %in% sub_net_sites) %>%
+    mutate(seg_tave_upstream = ifelse(seg_tave_upstream == -98.9, NA, seg_tave_upstream)) # convert numeric flag to NA
 
-  length(unique(stream_temp_intermediates_wide_sub$seg_id_nat))
-
-  out_file = as_data_file(ind_file)
   feather::write_feather(x = stream_temp_intermediates_wide_sub, path = out_file)
-  gd_put(ind_file)
 }
 
 
