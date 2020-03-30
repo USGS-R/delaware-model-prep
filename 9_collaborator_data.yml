@@ -183,10 +183,6 @@ targets:
       dat = '9_collaborator_data/psu/highly_observed_sites.rds',
       title = I('Sites with >=2 years with >150 obs'))
 
-  # script to calculate keep sites is in psu_site_selection.R but is not formalized
-  #keep_sites:
-   # command: c("578_1", "580_1", "154_1", "269_1", "249_1", "250_1", "132_1", "16_1", "23_1")
-
   9_collaborator_data/psu/highly_obs_distance_matrix.rds.ind:
     command: subset_dist_to_subsegs(
       subsegs_rds = '9_collaborator_data/psu/highly_observed_sites.rds',
@@ -217,10 +213,11 @@ targets:
 
   9_collaborator_data/psu/high_obs_upstream_sites.csv:
     command: get_upstream_sites(
+      out_file = target_name,
       dist_ind = '1_network/out/distance_matrix.rds.ind',
       network_ind = '1_network/out/network.rds.ind',
       sites = '9_collaborator_data/psu/highly_observed_sites.rds',
-      out_file = target_name)
+      geo_dat = I('1_network/in/GeospatialFabric_National.gdb'))
 
   9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather.ind:
     command: subset_sntemp_preds(
