@@ -228,7 +228,7 @@ targets:
   9_collaborator_data/psu/sntemp_preds_aggregated.feather.ind:
     command: aggregate_sntemp_preds(
       ind_file = target_name,
-      sub_net_file ='9_collaborator_data/psu/high_obs_upstream_sites.csv' ,
+      sub_net_file ='9_collaborator_data/psu/high_obs_upstream_sites.csv',
       subset_data_file = '9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather')
   9_collaborator_data/psu/sntemp_preds_aggregated.feather:
     command: gd_get('9_collaborator_data/psu/sntemp_preds_aggregated.feather.ind')
