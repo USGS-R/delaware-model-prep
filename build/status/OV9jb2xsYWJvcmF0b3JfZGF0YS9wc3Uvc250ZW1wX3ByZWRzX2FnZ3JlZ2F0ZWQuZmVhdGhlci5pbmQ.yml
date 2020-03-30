@@ -1,13 +1,13 @@
 version: 0.3.0
 name: 9_collaborator_data/psu/sntemp_preds_aggregated.feather.ind
 type: file
-hash: 5883d94a6c0e73bb7781a49bafc7cc2d
-time: 2020-03-28 17:10:24 UTC
+hash: 261ceeea01fa4072f3f6ffe51e012f29
+time: 2020-03-30 15:57:27 UTC
 depends:
-  9_collaborator_data/psu/high_obs_upstream_sites.csv: 0285f8a02e3904f733d616648629a0e9
-  9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather: 4fc9fe389c14c9ff1c9757ce22a1b96a
+  9_collaborator_data/psu/high_obs_upstream_sites.csv: 9bf4ac63452dc3f2cf8874e188bbdd78
+  9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather: adb6b7f33bf0a14361594c5c31998249
 fixed: aff783eefd95be4efbce9b6cb6e721e2
 code:
   functions:
-    aggregate_sntemp_preds: 95fef4f1b41cd7dfae59183e7703b733
+    aggregate_sntemp_preds: 770a1b9afd93ff92269554db3cd5e045
 
