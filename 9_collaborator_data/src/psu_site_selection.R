@@ -75,9 +75,9 @@ map_highly_obs <- function(dat, cross_ind, network_ind, out_file, title) {
 # plot upstream reaches from POI
 plot_upstream <- function(POIs, dist_mat_ind, labels=c('subseg_id','seg_id_nat'), network_ind) {
 
-  dist_mat <- readRDS('1_network/out/distance_matrix.rds')
+  dist_mat <- readRDS(sc_retrieve(dist_mat_ind))
   dist_mat <- dist_mat$upstream
-  network <- readRDS('1_network/out/network.rds')
+  network <- readRDS(sc_retrieve(network_ind))
 
   labels <- match.arg(labels)
 
