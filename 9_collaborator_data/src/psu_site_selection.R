@@ -333,10 +333,9 @@ select_sntemp_subsegs <- function(
   saveRDS(sntemp_edges, out_rds)
 }
 
-subset_dist_to_subsegs <- function(subsegs_rds, dist_ind, network_ind, out_ind){
+subset_dist_to_subsegs <- function(subsegs_rds, dist_ind, out_ind){
 
   subsegs <- readRDS(subsegs_rds)
-  network <- readRDS(sc_retrieve(network_ind))
   dist_mats <- readRDS(sc_retrieve(dist_ind))
   subset_dists <- lapply(dist_mats, function(dist_mat) {
     subset_dist <- dist_mat[subsegs$subseg_id, ][, subsegs$subseg_id]
