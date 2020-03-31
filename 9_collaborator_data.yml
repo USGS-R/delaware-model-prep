@@ -16,7 +16,7 @@ sources:
   - 9_collaborator_data/src/makerspace_geojson.R
   - 9_collaborator_data/src/write_functions.R
   - 9_collaborator_data/src/psu_site_selection.R
-  - 9_collaborator_data/src/subset_sntemp_preds.R
+  - 9_collaborator_data/src/subset_sntemp.R
 
 targets:
   9_collaborator_data:
