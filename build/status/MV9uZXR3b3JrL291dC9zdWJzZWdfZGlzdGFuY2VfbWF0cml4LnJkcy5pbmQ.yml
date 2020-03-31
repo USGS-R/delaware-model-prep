@@ -1,11 +1,11 @@
 version: 0.3.0
-name: 1_network/out/distance_matrix.rds.ind
+name: 1_network/out/subseg_distance_matrix.rds.ind
 type: file
 hash: 1f6a91bc85dc25c92674f8c19ed5827c
-time: 2020-03-27 19:25:55 UTC
+time: 2020-03-31 14:27:36 UTC
 depends:
   1_network/out/network.rds.ind: 9eca4876956e080830ee145b824faf89
-fixed: 90fcbf35ceebedd7875c269713f51d4c
+fixed: ce7618ccc0f81a38aafdd3172094d69e
 code:
   functions:
     calc_dist_matrices: a9fc4a4c446739347c28fbac07966dd9

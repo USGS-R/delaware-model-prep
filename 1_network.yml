@@ -20,7 +20,7 @@ targets:
     depends:
      - 1_network/out/boundary.rds.ind
      - 1_network/out/network.rds.ind
-     - 1_network/out/distance_matrix.rds.ind
+     - 1_network/out/subseg_distance_matrix.rds.ind
 
   # THESE DATA TARGETS ARE FOR REPRODUCIBILITY BUT NOT LINKED TO THE PIPELINE:
   # store the DRB network from Steve in the google drive folder and fetch it.
@@ -56,8 +56,8 @@ targets:
 
   # generate network distance matrix
 
-  1_network/out/distance_matrix.rds.ind:
+  1_network/out/subseg_distance_matrix.rds.ind:
     command: calc_dist_matrices(network_ind = '1_network/out/network.rds.ind', out_ind = target_name)
 
-  1_network/out/distance_matrix.rds:
-    command: gd_get('1_network/out/distance_matrix.rds.ind')
+  1_network/out/subseg_distance_matrix.rds:
+    command: gd_get('1_network/out/subseg_distance_matrix.rds.ind')

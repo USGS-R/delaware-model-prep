@@ -77,7 +77,7 @@ targets:
   9_collaborator_data/umn/sntemp_distance_matrix.rds.ind:
     command: subset_dist_to_subsegs(
       subsegs_rds = '9_collaborator_data/umn/sntemp_segs.rds',
-      dist_ind = '1_network/out/distance_matrix.rds.ind',
+      dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       network_ind = '1_network/out/network.rds.ind',
       out_ind = target_name)
   9_collaborator_data/umn/sntemp_distance_matrix.rds:
@@ -98,7 +98,7 @@ targets:
       out_ind = target_name,
       lower_reach = I('2748_1'),
       network_ind = '1_network/out/network.rds.ind',
-      distance_ind = '1_network/out/distance_matrix.rds.ind',
+      distance_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       summary_ind = '9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind')
 
   9_collaborator_data/umn/network_subset.rds:
@@ -112,7 +112,7 @@ targets:
   9_collaborator_data/umn/distance_matrix_subset.rds.ind:
     command: subset_dist_to_subsegs(
       subsegs_rds = '9_collaborator_data/umn/network_subset_sntemp_segs.rds',
-      dist_ind = '1_network/out/distance_matrix.rds.ind',
+      dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       network_ind = '9_collaborator_data/umn/network_subset.rds.ind',
       out_ind = target_name)
 
