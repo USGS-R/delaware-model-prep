@@ -340,6 +340,9 @@ subset_dist_to_subsegs <- function(subsegs_rds, dist_ind, network_ind, out_ind){
   dist_mats <- readRDS(sc_retrieve(dist_ind))
   subset_dists <- lapply(dist_mats, function(dist_mat) {
     subset_dist <- dist_mat[subsegs$subseg_id, ][, subsegs$subseg_id]
+    colnames(subset_dist) <- subsegs$seg_id_nat
+    rownames(subset_dist) <- subsegs$seg_id_nat
+    subset_dist
   })
   saveRDS(subset_dists, as_data_file(out_ind))
 
