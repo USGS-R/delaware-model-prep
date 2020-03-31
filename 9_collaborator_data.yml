@@ -23,7 +23,7 @@ targets:
     depends:
      - 9_collaborator_data/mkrsp/delaware_sites_summary.geojson.ind
      - 9_collaborator_data/umn/network_subset.rds.ind
-     - 9_collaborator_data/umn/sntemp_distance_matrix.rds.ind
+     - 9_collaborator_data/umn/distance_matrix.rds.ind
      - 9_collaborator_data/umn/distance_matrix.npz.ind
      - 9_collaborator_data/umn/distance_matrix_subset.npz.ind
      - 9_collaborator_data/umn/obs_temp_full.csv.ind
@@ -74,20 +74,20 @@ targets:
     command: select_sntemp_subsegs(
       network_ind = '1_network/out/network.rds.ind',
       out_rds = target_name)
-  9_collaborator_data/umn/sntemp_distance_matrix.rds.ind:
+  9_collaborator_data/umn/distance_matrix.rds.ind:
     command: subset_dist_to_subsegs(
       subsegs_rds = '9_collaborator_data/umn/sntemp_segs.rds',
       dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       network_ind = '1_network/out/network.rds.ind',
       out_ind = target_name)
-  9_collaborator_data/umn/sntemp_distance_matrix.rds:
-    command: gd_get('9_collaborator_data/umn/sntemp_distance_matrix.rds.ind')
+  9_collaborator_data/umn/distance_matrix.rds:
+    command: gd_get('9_collaborator_data/umn/distance_matrix.rds.ind')
 
   # networks and distance matrices
   # npy version of distance matrix - this target seems to rebuild a few times if given the chance. huh.
   9_collaborator_data/umn/distance_matrix.npz.ind:
     command: save_dist_matrices(
-      dist_mat_ind = '9_collaborator_data/umn/sntemp_distance_matrix.rds.ind',
+      dist_mat_ind = '9_collaborator_data/umn/distance_matrix.rds.ind',
       out_ind = target_name)
 
   9_collaborator_data/umn/distance_matrix.npz:
@@ -186,7 +186,7 @@ targets:
   9_collaborator_data/psu/highly_obs_distance_matrix.rds.ind:
     command: subset_dist_to_subsegs(
       subsegs_rds = '9_collaborator_data/psu/highly_observed_sites.rds',
-      dist_ind = '1_network/out/distance_matrix.rds.ind',
+      dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       network_ind = '1_network/out/network.rds.ind',
       out_ind = target_name)
 
@@ -214,7 +214,7 @@ targets:
   9_collaborator_data/psu/high_obs_upstream_sites.csv:
     command: get_upstream_sites(
       out_file = target_name,
-      dist_ind = '1_network/out/distance_matrix.rds.ind',
+      dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       network_ind = '1_network/out/network.rds.ind',
       sites = '9_collaborator_data/psu/highly_observed_sites.rds',
       geo_dat = I('1_network/in/GeospatialFabric_National.gdb'))
