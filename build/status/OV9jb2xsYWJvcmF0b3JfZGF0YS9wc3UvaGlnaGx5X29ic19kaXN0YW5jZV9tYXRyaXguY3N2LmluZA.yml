@@ -1,13 +1,12 @@
 version: 0.3.0
 name: 9_collaborator_data/psu/highly_obs_distance_matrix.csv.ind
 type: file
-hash: 69ca2a22ba509dacbe0a701734796c7f
-time: 2020-01-31 19:39:55 UTC
+hash: ba6d143a1f55623f38afb61823979634
+time: 2020-03-29 00:58:00 UTC
 depends:
-  9_collaborator_data/psu/highly_obs_distance_matrix.rds: 35c54eabd22f52c929d1b9330c2fd6db
-fixed: e99880b828b57798bf5c87738d27e2b3
+  9_collaborator_data/psu/highly_obs_distance_matrix.rds: 53d76a8dbff98a98f8605dfaf11b6abc
+fixed: d7ac987d84621d4460b664fe6e0144f2
 code:
   functions:
-    subset_dist: bb0ef7ff867bb97a8d832676f320a8b2
-    write_distance: 80ec56f568c085493d64efbbac721a77
+    write_distance: ad9482a633636111e22bbdade8dfa22f
 

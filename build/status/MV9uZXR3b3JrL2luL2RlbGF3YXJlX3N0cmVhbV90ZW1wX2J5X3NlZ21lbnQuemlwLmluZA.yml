@@ -1,0 +1,10 @@
+version: 0.3.0
+name: 1_network/in/delaware_stream_temp_by_segment.zip.ind
+type: file
+hash: 9e95b25b802b82cf38c53ad9538aa245
+time: 2020-03-27 17:00:05 UTC
+depends: {}
+fixed: 9806ea9e3863c542fd90b388ace1b250
+code:
+  functions: {}
+

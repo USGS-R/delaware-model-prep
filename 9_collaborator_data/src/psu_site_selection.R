@@ -75,9 +75,9 @@ map_highly_obs <- function(dat, cross_ind, network_ind, out_file, title) {
 # plot upstream reaches from POI
 plot_upstream <- function(POIs, dist_mat_ind, labels=c('subseg_id','seg_id_nat'), network_ind) {
 
-  dist_mat <- readRDS('1_network/out/distance_matrix.rds')
+  dist_mat <- readRDS(sc_retrieve(dist_mat_ind))
   dist_mat <- dist_mat$upstream
-  network <- readRDS('1_network/out/network.rds')
+  network <- readRDS(sc_retrieve(network_ind))
 
   labels <- match.arg(labels)
 
@@ -315,33 +315,16 @@ plot_upstream <- function(POIs, dist_mat_ind, labels=c('subseg_id','seg_id_nat')
 
 }
 
-
-subset_dist <- function(dat, dist_ind, network_ind, out_ind){
-
-  sites <- readRDS(dat)
-  dist_mat <- readRDS(sc_retrieve(dist_ind))
-  dist_mat <- dist_mat$updown
-  network <- readRDS(sc_retrieve(network_ind))
-
-  subset_dist <- dist_mat[sites$subseg_id, ]
-  subset_dist <- subset_dist[, sites$subseg_id]
-
-  saveRDS(subset_dist, as_data_file(out_ind))
-
-  gd_put(out_ind)
-
-}
-
-write_distance <- function(dat, out_ind) {
-  subset_dist <- readRDS(dat)
-  write.csv(subset_dist, as_data_file(out_ind), row.names = TRUE)
+write_distance <- function(dat, dist_type='updown', out_ind) {
+  dist <- readRDS(dat)
+  write.csv(dist[[dist_type]], as_data_file(out_ind), row.names = TRUE)
   gd_put(out_ind)
 }
 
-dist_heatmap2 <- function(dist_ind, labels=c('subseg_id','seg_id_nat'), title, out_file) {
+dist_heatmap2 <- function(dist_ind, dist_type='updown', labels=c('subseg_id','seg_id_nat'), title, out_file) {
 
   labels <- match.arg(labels)
-  dat <- readRDS(sc_retrieve(dist_ind))
+  dat <- readRDS(sc_retrieve(dist_ind))[[dist_type]]
 
   dat_df <- as_tibble(dat) %>%
     mutate(from_reach=rownames(dat)) %>%

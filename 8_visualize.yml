@@ -56,7 +56,7 @@ targets:
   8_visualize/out/distance_heatmap_full_up.png:
     command: dist_heatmap(
       out_file = target_name,
-      dist_ind = '1_network/out/distance_matrix.rds.ind',
+      dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       labels = I('seg_id_nat'),
       title = I('Full Network - upstream'),
       direction = I('upstream'))
@@ -64,7 +64,7 @@ targets:
   8_visualize/out/distance_heatmap_full_down.png:
     command: dist_heatmap(
       out_file = target_name,
-      dist_ind = '1_network/out/distance_matrix.rds.ind',
+      dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       labels = I('seg_id_nat'),
       title = I('Full Network - downstream'),
       direction = I('downstream'))
@@ -72,7 +72,7 @@ targets:
   8_visualize/out/distance_heatmap_full_updown.png:
     command: dist_heatmap(
       out_file = target_name,
-      dist_ind = '1_network/out/distance_matrix.rds.ind',
+      dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       labels = I('seg_id_nat'),
       title = I('Full Network - Upstream & Downstream'),
       direction = I('updown'))

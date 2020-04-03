@@ -16,13 +16,14 @@ sources:
   - 9_collaborator_data/src/makerspace_geojson.R
   - 9_collaborator_data/src/write_functions.R
   - 9_collaborator_data/src/psu_site_selection.R
-  - 9_collaborator_data/src/subset_sntemp_preds.R
+  - 9_collaborator_data/src/subset_sntemp.R
 
 targets:
   9_collaborator_data:
     depends:
      - 9_collaborator_data/mkrsp/delaware_sites_summary.geojson.ind
      - 9_collaborator_data/umn/network_subset.rds.ind
+     - 9_collaborator_data/umn/distance_matrix.rds.ind
      - 9_collaborator_data/umn/distance_matrix.npz.ind
      - 9_collaborator_data/umn/distance_matrix_subset.npz.ind
      - 9_collaborator_data/umn/obs_temp_full.csv.ind
@@ -62,10 +63,31 @@ targets:
     # 1_network/out/network.rds
     # 2_observations/out/basin_temp_data.rds
 
+  # subset network segments and then distance matrix to only those reaches whose outlets match up with
+  # SNTemp prediction points, because these are the reaches we'll have SNTemp driver data for, and
+  # for the purpose of the neural networks, the distance matrix is the only representation of network
+  # connectivity, so once we have it correct (by doing the network corrections in 1_network)
+  # we can safely subset to only the sntemp segments and still have a connected network. This effectively
+  # treats the reaches that were split into 2 reaches as now being 1 reach again (appropriate because
+  # that's what the inputs from SNTemp into the NN will describe).
+  9_collaborator_data/umn/sntemp_segs.rds:
+    command: select_sntemp_subsegs(
+      network_ind = '1_network/out/network.rds.ind',
+      out_rds = target_name)
+  9_collaborator_data/umn/distance_matrix.rds.ind:
+    command: subset_dist_to_subsegs(
+      subsegs_rds = '9_collaborator_data/umn/sntemp_segs.rds',
+      dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
+      out_ind = target_name)
+  9_collaborator_data/umn/distance_matrix.rds:
+    command: gd_get('9_collaborator_data/umn/distance_matrix.rds.ind')
+
   # networks and distance matrices
-  # npy version of distance matrix
+  # npy version of distance matrix - this target seems to rebuild a few times if given the chance. huh.
   9_collaborator_data/umn/distance_matrix.npz.ind:
-    command: save_dist_matrices(dist_mat_ind = '1_network/out/distance_matrix.rds.ind', out_ind = target_name)
+    command: save_dist_matrices(
+      dist_mat_ind = '9_collaborator_data/umn/distance_matrix.rds.ind',
+      out_ind = target_name)
 
   9_collaborator_data/umn/distance_matrix.npz:
     command: gd_get('9_collaborator_data/umn/distance_matrix.npz.ind')
@@ -75,15 +97,22 @@ targets:
       out_ind = target_name,
       lower_reach = I('2748_1'),
       network_ind = '1_network/out/network.rds.ind',
-      distance_ind = '1_network/out/distance_matrix.rds.ind',
+      distance_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       summary_ind = '9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind')
 
   9_collaborator_data/umn/network_subset.rds:
     command: gd_get('9_collaborator_data/umn/network_subset.rds.ind')
 
   # create distance matrix of subset
+  9_collaborator_data/umn/network_subset_sntemp_segs.rds:
+    command: select_sntemp_subsegs(
+      network_ind = '9_collaborator_data/umn/network_subset.rds.ind',
+      out_rds = target_name)
   9_collaborator_data/umn/distance_matrix_subset.rds.ind:
-    command: calc_dist_matrices(network_ind = '9_collaborator_data/umn/network_subset.rds.ind', out_ind = target_name)
+    command: subset_dist_to_subsegs(
+      subsegs_rds = '9_collaborator_data/umn/network_subset_sntemp_segs.rds',
+      dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
+      out_ind = target_name)
 
   9_collaborator_data/umn/distance_matrix_subset.rds:
     command: gd_get('9_collaborator_data/umn/distance_matrix_subset.rds.ind')
@@ -127,7 +156,7 @@ targets:
   9_collaborator_data/umn/obs_flow_subset.csv:
     command: gd_get('9_collaborator_data/umn/obs_flow_subset.csv.ind')
 
-  # Penn State data
+  #### Penn State ####
   9_collaborator_data/psu/highly_observed_sites.rds:
     command: filter_sites(
       out_file = target_name,
@@ -157,19 +186,20 @@ targets:
    # command: c("578_1", "580_1", "154_1", "269_1", "249_1", "250_1", "132_1", "16_1", "23_1")
 
   9_collaborator_data/psu/highly_obs_distance_matrix.rds.ind:
-    command: subset_dist(
-      dat = '9_collaborator_data/psu/highly_observed_sites.rds',
-      dist_ind = '1_network/out/distance_matrix.rds.ind',
-      network_ind = '1_network/out/network.rds.ind',
+    command: subset_dist_to_subsegs(
+      subsegs_rds = '9_collaborator_data/psu/highly_observed_sites.rds',
+      dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       out_ind = target_name)
 
   9_collaborator_data/psu/highly_obs_distance_matrix.rds:
     command: gd_get('9_collaborator_data/psu/highly_obs_distance_matrix.rds.ind')
 
+  # this target builds a few times for some reason
   9_collaborator_data/psu/highly_obs_distance_matrix.csv.ind:
     command: write_distance(
+      out_ind = target_name,
       dat = '9_collaborator_data/psu/highly_obs_distance_matrix.rds',
-      out_ind = target_name)
+      dist_type = I('updown'))
 
   9_collaborator_data/psu/highly_obs_distance_matrix.csv:
     command: gd_get('9_collaborator_data/psu/highly_obs_distance_matrix.csv')
@@ -178,12 +208,14 @@ targets:
     command: dist_heatmap2(
       out_file = target_name,
       dist_ind = '9_collaborator_data/psu/highly_obs_distance_matrix.rds.ind',
+      dist_type = I('updown'),
       labels = I('subseg_id'),
       title = I('Full Network - Upstream & Downstream'))
 
   9_collaborator_data/psu/high_obs_upstream_sites.csv:
     command: get_upstream_sites(
-      dist_ind = '1_network/out/distance_matrix.rds.ind',
+      out_file = target_name,
+      dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       network_ind = '1_network/out/network.rds.ind',
       sites = '9_collaborator_data/psu/highly_observed_sites.rds',
       out_file = target_name)
