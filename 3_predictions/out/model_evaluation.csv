@@ -1,0 +1,4 @@
+"model","bias","rmse","rmse_abv_20","rmse_blw_10","rmse_april","rmse_july","n"
+"rgcn_temp_c",0.01,1.24,1.3,1.08,1.2,1.59,10236
+"rgcn2_temp_c",-0.06,1.23,1.51,0.97,1.12,1.74,10236
+"sntemp_temp_C",0.98,3.7,2.62,3.48,5.66,2.48,10236

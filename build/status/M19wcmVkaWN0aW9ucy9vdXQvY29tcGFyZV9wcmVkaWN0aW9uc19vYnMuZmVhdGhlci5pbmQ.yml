@@ -1,0 +1,15 @@
+version: 0.3.0
+name: 3_predictions/out/compare_predictions_obs.feather.ind
+type: file
+hash: 8ac1d1ce6760e1996f3e39ded815a125
+time: 2020-04-03 13:05:17 UTC
+depends:
+  2_observations/out/obs_temp_drb.rds.ind: e57f3a114c7e5a3b413044b9b6035a8c
+  3_predictions/in/uncal_sntemp_preds.csv.ind: 9cff5d0b1ebc416cc8e84a0e7df9f598
+  3_predictions/out/rgcn_v1_preds.feather.ind: 6c3ea0b6d323f0b38c12755a00954a97
+  3_predictions/in/rgcn_v2_preds.feather.ind: 19bc25f3a73e8f84ae9799c47e57221e
+fixed: 5ad87b1a75416844c9eb618cdc7ba35f
+code:
+  functions:
+    combine_preds_obs: a9ce37f26b32721382a8bae091bc04bd
+

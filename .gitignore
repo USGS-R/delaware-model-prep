@@ -12,6 +12,9 @@
 *.geojson
 *.png
 *.csv
+*.npy
+!3_predictions/out/model_evaluation.csv
+
 # remake
 .remake/
 # in folder for 1_network
