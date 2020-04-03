@@ -16,7 +16,7 @@ sources:
   - 9_collaborator_data/src/makerspace_geojson.R
   - 9_collaborator_data/src/write_functions.R
   - 9_collaborator_data/src/psu_site_selection.R
-  - 9_collaborator_data/src/subset_sntemp_preds.R
+  - 9_collaborator_data/src/subset_sntemp.R
 
 targets:
   9_collaborator_data:
@@ -63,12 +63,12 @@ targets:
     # 1_network/out/network.rds
     # 2_observations/out/basin_temp_data.rds
 
-  # subset to only those reaches whose outlets match up with SNTemp prediction points,
-  # because these are the reaches we'll have SNTemp driver data for, and for the purpose
-  # of the neural networks, the distance matrix is the only representation of network
+  # subset network segments and then distance matrix to only those reaches whose outlets match up with
+  # SNTemp prediction points, because these are the reaches we'll have SNTemp driver data for, and
+  # for the purpose of the neural networks, the distance matrix is the only representation of network
   # connectivity, so once we have it correct (by doing the network corrections in 1_network)
-  # we can safely subset and still have a connected network. This effectively treats the
-  # reaches that were split into 2 reaches as now being 1 reach again (appropriate because
+  # we can safely subset to only the sntemp segments and still have a connected network. This effectively
+  # treats the reaches that were split into 2 reaches as now being 1 reach again (appropriate because
   # that's what the inputs from SNTemp into the NN will describe).
   9_collaborator_data/umn/sntemp_segs.rds:
     command: select_sntemp_subsegs(
@@ -78,7 +78,6 @@ targets:
     command: subset_dist_to_subsegs(
       subsegs_rds = '9_collaborator_data/umn/sntemp_segs.rds',
       dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
-      network_ind = '1_network/out/network.rds.ind',
       out_ind = target_name)
   9_collaborator_data/umn/distance_matrix.rds:
     command: gd_get('9_collaborator_data/umn/distance_matrix.rds.ind')
@@ -113,7 +112,6 @@ targets:
     command: subset_dist_to_subsegs(
       subsegs_rds = '9_collaborator_data/umn/network_subset_sntemp_segs.rds',
       dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
-      network_ind = '9_collaborator_data/umn/network_subset.rds.ind',
       out_ind = target_name)
 
   9_collaborator_data/umn/distance_matrix_subset.rds:
@@ -191,7 +189,6 @@ targets:
     command: subset_dist_to_subsegs(
       subsegs_rds = '9_collaborator_data/psu/highly_observed_sites.rds',
       dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
-      network_ind = '1_network/out/network.rds.ind',
       out_ind = target_name)
 
   9_collaborator_data/psu/highly_obs_distance_matrix.rds:
