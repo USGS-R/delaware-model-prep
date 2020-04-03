@@ -103,5 +103,9 @@ targets:
       end_date = I('2015-12-31'),
       dat_ind = '2_observations/out/obs_temp_drb.rds.ind',
       pred_ind = '3_predictions/in/uncal_sntemp_preds.csv.ind')
+      
+  # compare Jeff and Xiaowei's model output
+  8_visualize/out/rgcn_mods_comparison.png:
+    command: plot_rgcns(compare_ind = '3_predictions/out/compare_predictions_obs.feather.ind', out_file = target_name)
 
 
