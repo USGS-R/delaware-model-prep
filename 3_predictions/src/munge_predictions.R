@@ -37,7 +37,7 @@ combine_preds_obs <- function(obs_ind, sntemp_ind, rgcn_v1_ind, rgcn_v2_ind, out
   rgcn1 <- read_feather(sc_retrieve(rgcn_v1_ind))
   rgcn2 <- read_feather(sc_retrieve(rgcn_v2_ind)) %>%
     mutate(seg_id_nat = as.character(seg_id_nat), date = as.Date(date)) %>%
-    rename(rgcn2_temp_c = temperature) %>% select(-flow)
+    rename(rgcn2_temp_c = temp_degC) %>% select(-discharge_cms)
   
   preds <- left_join(sntemp, rgcn1) %>%
     left_join(rgcn2)
