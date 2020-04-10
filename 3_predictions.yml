@@ -40,6 +40,10 @@ targets:
   3_predictions/in/rgcn_v2_preds.feather:
     command: gd_get('3_predictions/in/rgcn_v2_preds.feather.ind')
     
+  # Jeff's full DRB model
+  3_predictions/in/rgcn_v2_preds_full.feather:
+    command: gd_get('3_predictions/in/rgcn_v2_preds_full.feather.ind')
+    
   # define train/dev/test periods for comparison
   # these are currently not being used anywhere
   train_period:
@@ -58,6 +62,7 @@ targets:
       sntemp_ind = '3_predictions/in/uncal_sntemp_preds.csv.ind',
       rgcn_v1_ind = '3_predictions/out/rgcn_v1_preds.feather.ind',
       rgcn_v2_ind = '3_predictions/in/rgcn_v2_preds.feather.ind',
+      rgcn_v2_full_ind = '3_predictions/in/rgcn_v2_preds_full.feather.ind',
       out_ind = target_name
       )
       

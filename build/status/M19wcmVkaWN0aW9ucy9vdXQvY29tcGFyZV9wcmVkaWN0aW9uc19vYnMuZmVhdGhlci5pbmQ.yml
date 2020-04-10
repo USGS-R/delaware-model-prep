@@ -1,15 +1,16 @@
 version: 0.3.0
 name: 3_predictions/out/compare_predictions_obs.feather.ind
 type: file
-hash: e2d0e17c6d8cd0f16f0512783a5b75d4
-time: 2020-04-03 17:33:08 UTC
+hash: 2a55016298a7d5a8dd19c4e22f1a2101
+time: 2020-04-10 13:25:44 UTC
 depends:
   2_observations/out/obs_temp_drb.rds.ind: e57f3a114c7e5a3b413044b9b6035a8c
   3_predictions/in/uncal_sntemp_preds.csv.ind: 9cff5d0b1ebc416cc8e84a0e7df9f598
   3_predictions/out/rgcn_v1_preds.feather.ind: 6c3ea0b6d323f0b38c12755a00954a97
-  3_predictions/in/rgcn_v2_preds.feather.ind: a17cdd426044771651078e4e34b9635d
+  3_predictions/in/rgcn_v2_preds.feather.ind: 0b3905ac32a5dd1db606ecd1d58d3321
+  3_predictions/in/rgcn_v2_preds_full.feather.ind: 1211527992c5272e8e029300f884f846
 fixed: 5ad87b1a75416844c9eb618cdc7ba35f
 code:
   functions:
-    combine_preds_obs: 8cbfc920d5d98cd9ac09d9646faa0165
+    combine_preds_obs: aafb9673e8c040133b3995438ec96c2c
 
