@@ -14,15 +14,19 @@ subset_sites <- function(out_ind, crosswalk_ind, dat_ind, fish_dist, bird_dist) 
     
 }
 
-filter_temp_data <- function(cross_ind, dat_ind, out_ind) {
+filter_temp_data <- function(cross_ind, dat_ind, ngwos_ind, out_ind) {
   
   sites <- readRDS(sc_retrieve(cross_ind)) %>%
     select(site_id, subseg_id, seg_id_nat) %>%
     distinct(site_id, subseg_id, seg_id_nat, .keep_all = TRUE)
   dat <- readRDS(sc_retrieve(dat_ind))
+  ngwos_dat <- readRDS(sc_retrieve(ngwos_ind))
   
-  drb_dat <- filter(dat, site_id %in% unique(sites$site_id)) %>%
-    distinct()
+  dat_all <- bind_rows(ungroup(dat), ungroup(ngwos_dat)) %>%
+    mutate(source = gsub('nwiw', 'nwis', source))
+  
+  drb_dat <- filter(dat_all, site_id %in% unique(sites$site_id)) %>%
+    distinct(site_id, date, temp_degC, .keep_all = TRUE)
   
   saveRDS(drb_dat, as_data_file(out_ind))
   gd_put(out_ind)
@@ -41,7 +45,7 @@ munge_temp_dat <- function(sites_ind, dat_ind, out_ind) {
     group_by(site_id, date) %>%
     summarize(temp_C = mean(temp_degC)) %>%
     ungroup()
-  
+
   drb_dat <- drb_dat %>%
     left_join(sites) %>%
     group_by(subseg_id, seg_id_nat, date) %>%
