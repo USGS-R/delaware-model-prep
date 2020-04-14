@@ -24,12 +24,11 @@ munge_rgcn_output <- function(in_ind, out_ind) {
   
 }
 
-combine_preds_obs <- function(obs_ind, sntemp_ind, rgcn_v1_ind, rgcn_v2_ind, out_ind){
+combine_preds_obs <- function(obs_ind, sntemp_ind, rgcn_v1_ind, rgcn_v2_ind, rgcn_v2_full_ind, out_ind){
   # join with SNTemp predictions
   sntemp <- read.csv(sc_retrieve(sntemp_ind), stringsAsFactors = FALSE) %>%
-    tidyr::gather(key = 'seg_id_nat', value = 'sntemp_temp_C', -Date) %>%
-    mutate(seg_id_nat = gsub('X', '', seg_id_nat),
-           date = as.Date(Date)) %>% select(-Date)
+    mutate(seg_id_nat = as.character(seg_id_nat),
+           date = as.Date(date)) %>% select(seg_id_nat, date, sntemp_temp_c)
   
   # bring in both rgcn mods
   # drop flow
@@ -38,9 +37,14 @@ combine_preds_obs <- function(obs_ind, sntemp_ind, rgcn_v1_ind, rgcn_v2_ind, out
   rgcn2 <- read_feather(sc_retrieve(rgcn_v2_ind)) %>%
     mutate(seg_id_nat = as.character(seg_id_nat), date = as.Date(date)) %>%
     rename(rgcn2_temp_c = temp_degC) %>% select(-discharge_cms)
+  rgcn2_full <- read_feather(sc_retrieve(rgcn_v2_full_ind)) %>%
+    mutate(seg_id_nat = as.character(seg_id_nat), date = as.Date(date)) %>%
+    rename(rgcn2_full_temp_c = temp_degC) %>% select(-discharge_cms)
+
   
   preds <- left_join(sntemp, rgcn1) %>%
-    left_join(rgcn2)
+    left_join(rgcn2) %>%
+    left_join(rgcn2_full)
   
   # bring in observations
   obs <- readRDS(sc_retrieve(obs_ind)) %>%
@@ -87,12 +91,35 @@ calc_metrics <- function(compare_ind, out_file) {
               rmse_blw_10 = round(sqrt(mean(sq_error[temp_c < 10])),2), 
               rmse_april = round(sqrt(mean(sq_error[lubridate::month(date) == 4])),2),
               rmse_july = round(sqrt(mean(sq_error[lubridate::month(date) == 7])),2),
-              n = n())
+              n = n()) %>%
+    mutate(model = paste0(gsub('temp_c', '', model, ignore.case = TRUE), 'subset'))
   
+  stats_all_full <- filter(r_compare, date >= start & date <= end) %>%
+    group_by(model) %>%
+    summarize(bias = round(mean(error), 2),
+              rmse = round(sqrt(mean(sq_error)),2), 
+              rmse_abv_20 = round(sqrt(mean(sq_error[temp_c > 20])),2), 
+              rmse_blw_10 = round(sqrt(mean(sq_error[temp_c < 10])),2), 
+              rmse_april = round(sqrt(mean(sq_error[lubridate::month(date) == 4])),2),
+              rmse_july = round(sqrt(mean(sq_error[lubridate::month(date) == 7])),2),
+              n = n()) %>%
+    filter(model %in% c('sntemp_temp_c', 'rgcn2_full_temp_c')) %>%
+    mutate(model = paste0(gsub('temp_c', '', model, ignore.case = TRUE), 'full'))
+  
+  out <- bind_rows(stats_all, stats_all_full)
   # write, but don't push to GD
   # going to git commit this one
-  write.csv(stats_all, out_file, row.names = FALSE)
+  write.csv(out, out_file, row.names = FALSE)
   
-  }
+}
+
+pull_sntemp_preds <- function(sntemp_ind, out_ind) {
+  # pull out predictions from sntemp in/out file from Jake
+  dat <- feather::read_feather(sc_retrieve(sntemp_ind))
+  preds <- select(dat, seg_id_nat, date, sntemp_temp_c = seg_tave_water)
+  
+  write.csv(preds, as_data_file(out_ind))
+  gd_put(out_ind)
+}
 
   

@@ -14,14 +14,21 @@ targets:
      - 3_predictions/in/uncal_sntemp_input_output.feather.ind
      - 3_predictions/out/model_evaluation.csv
 
-  # predictions using defaults provided by Markstrom on 10-01
-  3_predictions/in/uncal_sntemp_preds.csv:
-    command: gd_get('3_predictions/in/uncal_sntemp_preds.csv.ind')
-
   # segment-level drivers, intermediate model variables, and stream temperature predictions using uncalibrated PRMS-SNTemp
   #  from https://github.com/jzwart/delaware-water-temp/blob/626d6d159daccfcf52c5e7fddf88d24031f35e6d/4_model_for_PGDL.yml#L42-L46
   3_predictions/in/uncal_sntemp_input_output.feather:
     command: gd_get('3_predictions/in/uncal_sntemp_input_output.feather.ind')
+    
+  # pull out predictions from SNTEMP in/out - updated in April 2020
+  # to use drivers that run through 2019
+  3_predictions/out/uncal_sntemp_preds.csv.ind:
+    command: pull_sntemp_preds(
+      sntemp_ind = '3_predictions/in/uncal_sntemp_input_output.feather.ind',
+      out_ind = target_name)
+      
+  3_predictions/out/uncal_sntemp_preds.csv:
+    command: gd_get('3_predictions/out/uncal_sntemp_preds.csv.ind')
+
 
   # Xiaowei's original output using 100% of process model output in training period
   # original file he sent was titled prd_RGCN_full_obstemp_cv2_full.npy
@@ -59,7 +66,7 @@ targets:
   3_predictions/out/compare_predictions_obs.feather.ind:
     command: combine_preds_obs(
       obs_ind = '2_observations/out/obs_temp_drb.rds.ind',
-      sntemp_ind = '3_predictions/in/uncal_sntemp_preds.csv.ind',
+      sntemp_ind = '3_predictions/out/uncal_sntemp_preds.csv.ind',
       rgcn_v1_ind = '3_predictions/out/rgcn_v1_preds.feather.ind',
       rgcn_v2_ind = '3_predictions/in/rgcn_v2_preds.feather.ind',
       rgcn_v2_full_ind = '3_predictions/in/rgcn_v2_preds_full.feather.ind',
