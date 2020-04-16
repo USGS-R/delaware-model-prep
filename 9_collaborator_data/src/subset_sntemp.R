@@ -41,7 +41,7 @@ subset_sntemp_preds = function(out_file,
   stream_temp_intermediates_wide <- feather::read_feather(sc_retrieve(full_data_ind))
 
   # subset set of seg_id_nats
-  sub_net <- read_csv(sub_net_file, col_types='ccdd')
+  sub_net <- read_csv(sub_net_file, col_types='ccddd')
   sub_net_sites <- unique(sub_net$seg_id_nat)
 
   stream_temp_intermediates_wide_sub <- stream_temp_intermediates_wide %>%
@@ -60,15 +60,23 @@ aggregate_sntemp_preds = function(ind_file,
                                   subset_data_file,
                                   gd_config = 'lib/cfg/gd_config.yml'){
 
-  sub_net <- readr::read_csv(sub_net_file, col_types='ccdd')
+  sub_net <- readr::read_csv(sub_net_file, col_types='ccddd')
   subbasin_outlets <- unique(sub_net$outlet)
 
   subset_data <- feather::read_feather(subset_data_file)
 
-  out = lapply(subbasin_outlets, function(cur_basin){
+  circular.mean <- function(seg_id_nat, azrh_rad) {
+    azrh <- tibble(seg_id_nat, azrh_rad) %>% # pick out the angle for each unique segment
+      distinct() %>%
+      pull(azrh_rad)
+    # https://en.wikipedia.org/wiki/Mean_of_circular_quantities
+    atan2(mean(sin(azrh)), mean(cos(azrh)))
+  }
+
+  out <- lapply(subbasin_outlets, function(cur_basin){
     segs <- sub_net$seg_id_nat[sub_net$outlet == cur_basin]
 
-    cur_agg_data = dplyr::filter(subset_data, seg_id_nat %in% segs) %>%
+    cur_agg_data <- dplyr::filter(subset_data, seg_id_nat %in% segs) %>%
       left_join(filter(sub_net, outlet == cur_basin), by='seg_id_nat') %>%
       group_by(date) %>%
       mutate(is_outlet = seg_id_nat == cur_basin) %>%
@@ -100,6 +108,7 @@ aggregate_sntemp_preds = function(ind_file,
         # basin properties
         basin_area_sum = sum(hrus_area_km2),
         network_slope_lwm = weighted.mean(seg_slope, seg_length_km), # (not in table. hru_slope is decimal fraction, 0 to 10); Slope of segments
+        network_azrh_crm = circular.mean(seg_id_nat, seg_azrh_rad), # radians
         network_length_sum = sum(seg_length_km), # km; Length of each segment
         network_width_lwm = weighted.mean(seg_width, seg_length_km), # m, width of each segment
         network_elev_lwm = weighted.mean(seg_elev, seg_length_km), # m?; Elevation of each segment, used to estimate atmospheric pressure
@@ -120,4 +129,3 @@ aggregate_sntemp_preds = function(ind_file,
   feather::write_feather(x = out, path = out_file)
   gd_put(ind_file)
 }
-# # outlet_seg_id_nat

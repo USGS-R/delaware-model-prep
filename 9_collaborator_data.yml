@@ -208,12 +208,18 @@ targets:
       labels = I('subseg_id'),
       title = I('Full Network - Upstream & Downstream'))
 
+  9_collaborator_data/psu/prms_azhr.csv:
+    command: download.file(
+      destfile = target_name,
+      url = I('https://raw.githubusercontent.com/nhm-usgs/nhmparamdb_CONUS/master/azrh.csv'))
+
   9_collaborator_data/psu/high_obs_upstream_sites.csv:
     command: get_upstream_sites(
       out_file = target_name,
       dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       network_ind = '1_network/out/network.rds.ind',
       sites = '9_collaborator_data/psu/highly_observed_sites.rds',
+      azrh_file = '9_collaborator_data/psu/prms_azhr.csv',
       geo_dat = I('1_network/in/GeospatialFabric_National.gdb'))
 
   9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather:

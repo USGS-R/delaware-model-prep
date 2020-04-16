@@ -361,7 +361,7 @@ dist_heatmap2 <- function(dist_ind, dist_type='updown', labels=c('subseg_id','se
   return(g)
 }
 
-get_upstream_sites <- function(dist_ind, network_ind, sites, geo_dat, out_file) {
+get_upstream_sites <- function(dist_ind, network_ind, sites, azrh_file, geo_dat, out_file) {
   dist <- readRDS(sc_retrieve(dist_ind))
   dist <- dist$upstream
   sites <- readRDS(sites)
@@ -407,14 +407,18 @@ get_upstream_sites <- function(dist_ind, network_ind, sites, geo_dat, out_file) 
       length_m = Shape_Length, # length of the segment in m
       MAX_CUMDRAINAG) %>%
     sf::st_drop_geometry()
+  geo_azrh <- readr::read_csv(azrh_file, col_types='id') %>%
+    rename(seg_id_nat = `$id`)
   geo_united <- geo_segs %>%
     filter(seg_id_nat %in% dist_dat_nat$seg_id_nat) %>%
     left_join(geo_hrus, by=c('seg_id'='hru_segment', 'region')) %>%
+    left_join(geo_azrh, by='seg_id_nat') %>%
     mutate(area_m2 = ifelse(is.na(area_m2), 0, area_m2)) %>% # there are 15 segments with no associated HRUs
     group_by(seg_id_nat) %>%
     summarize(
       hrus_area_km2 = sum(area_m2)/1000000,
-      seg_length_km = unique(length_m)/1000)
+      seg_length_km = unique(length_m)/1000,
+      seg_azrh_rad = unique(azrh))
 
   dist_dat_nat_geo <- dist_dat_nat %>%
     left_join(geo_united, by='seg_id_nat')
