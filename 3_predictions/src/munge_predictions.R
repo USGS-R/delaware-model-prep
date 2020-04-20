@@ -65,8 +65,7 @@ calc_metrics <- function(compare_ind, out_file) {
   r_compare <- compare %>%
     pivot_longer(c(-seg_id_nat, -date, -temp_c), names_to = 'model', values_to = 'predicted') %>%
     filter(!is.na(predicted)) %>%
-    filter(!is.na(temp_c)) %>%
-    mutate(error = temp_c - predicted, sq_error = error^2) 
+    filter(!is.na(temp_c))
   
   # for now, find min and max dates to use as bounds on comparison
   # Jeff's model is setting the bounds as he's using a dev period
@@ -82,27 +81,14 @@ calc_metrics <- function(compare_ind, out_file) {
   segs <- filter(r_compare, model %in% 'rgcn_temp_c') %>%
     select(seg_id_nat) %>% distinct() %>% pull(seg_id_nat)
 
+
   # calculate bias and RMSE
   stats_all <- filter(r_compare, date >= start & date <= end & seg_id_nat %in% segs) %>%
-    group_by(model) %>%
-    summarize(bias = round(mean(error), 2),
-              rmse = round(sqrt(mean(sq_error)),2), 
-              rmse_abv_20 = round(sqrt(mean(sq_error[temp_c > 20])),2), 
-              rmse_blw_10 = round(sqrt(mean(sq_error[temp_c < 10])),2), 
-              rmse_april = round(sqrt(mean(sq_error[lubridate::month(date) == 4])),2),
-              rmse_july = round(sqrt(mean(sq_error[lubridate::month(date) == 7])),2),
-              n = n()) %>%
+    calc_stats() %>%
     mutate(model = paste0(gsub('temp_c', '', model, ignore.case = TRUE), 'subset'))
   
   stats_all_full <- filter(r_compare, date >= start & date <= end) %>%
-    group_by(model) %>%
-    summarize(bias = round(mean(error), 2),
-              rmse = round(sqrt(mean(sq_error)),2), 
-              rmse_abv_20 = round(sqrt(mean(sq_error[temp_c > 20])),2), 
-              rmse_blw_10 = round(sqrt(mean(sq_error[temp_c < 10])),2), 
-              rmse_april = round(sqrt(mean(sq_error[lubridate::month(date) == 4])),2),
-              rmse_july = round(sqrt(mean(sq_error[lubridate::month(date) == 7])),2),
-              n = n()) %>%
+    calc_stats() %>%
     filter(model %in% c('sntemp_temp_c', 'rgcn2_full_temp_c')) %>%
     mutate(model = paste0(gsub('temp_c', '', model, ignore.case = TRUE), 'full'))
   
@@ -111,6 +97,23 @@ calc_metrics <- function(compare_ind, out_file) {
   # going to git commit this one
   write.csv(out, out_file, row.names = FALSE)
   
+}
+
+# calculate model statistics from a file with required columns
+# date, predicted, temp_c (for observed), and model 
+calc_stats <- function(dat_compare){
+  stats_out <- dat_compare %>%
+    mutate(error = temp_c - predicted, sq_error = error^2) %>% 
+    group_by(model) %>%
+    summarize(bias = round(mean(error), 2),
+              rmse = round(sqrt(mean(sq_error)),2), 
+              rmse_abv_20 = round(sqrt(mean(sq_error[temp_c > 20])),2), 
+              rmse_blw_10 = round(sqrt(mean(sq_error[temp_c < 10])),2), 
+              rmse_april = round(sqrt(mean(sq_error[lubridate::month(date) == 4])),2),
+              rmse_july = round(sqrt(mean(sq_error[lubridate::month(date) == 7])),2),
+              n = n())
+    
+    return(stats_out)
 }
 
 pull_sntemp_preds <- function(sntemp_ind, out_ind) {

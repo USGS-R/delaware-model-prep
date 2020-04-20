@@ -4,6 +4,7 @@ packages:
   - RcppCNPy
   - dplyr
   - feather
+  - lubridate
   
 sources:
   - 3_predictions/src/munge_predictions.R
@@ -50,17 +51,6 @@ targets:
   # Jeff's full DRB model
   3_predictions/in/rgcn_v2_preds_full.feather:
     command: gd_get('3_predictions/in/rgcn_v2_preds_full.feather.ind')
-    
-  # define train/dev/test periods for comparison
-  # these are currently not being used anywhere
-  train_period:
-    command: 1981:2004
-    
-  dev_period:
-    command: 2004:2010
-    
-  test_period:
-    command: 2010:2016
     
   # put it all together!
   3_predictions/out/compare_predictions_obs.feather.ind:
