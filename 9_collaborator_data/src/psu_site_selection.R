@@ -75,9 +75,9 @@ map_highly_obs <- function(dat, cross_ind, network_ind, out_file, title) {
 # plot upstream reaches from POI
 plot_upstream <- function(POIs, dist_mat_ind, labels=c('subseg_id','seg_id_nat'), network_ind) {
 
-  dist_mat <- readRDS('1_network/out/distance_matrix.rds')
+  dist_mat <- readRDS(sc_retrieve(dist_mat_ind))
   dist_mat <- dist_mat$upstream
-  network <- readRDS('1_network/out/network.rds')
+  network <- readRDS(sc_retrieve(network_ind))
 
   labels <- match.arg(labels)
 
@@ -315,33 +315,16 @@ plot_upstream <- function(POIs, dist_mat_ind, labels=c('subseg_id','seg_id_nat')
 
 }
 
-
-subset_dist <- function(dat, dist_ind, network_ind, out_ind){
-
-  sites <- readRDS(dat)
-  dist_mat <- readRDS(sc_retrieve(dist_ind))
-  dist_mat <- dist_mat$updown
-  network <- readRDS(sc_retrieve(network_ind))
-
-  subset_dist <- dist_mat[sites$subseg_id, ]
-  subset_dist <- subset_dist[, sites$subseg_id]
-
-  saveRDS(subset_dist, as_data_file(out_ind))
-
-  gd_put(out_ind)
-
-}
-
-write_distance <- function(dat, out_ind) {
-  subset_dist <- readRDS(dat)
-  write.csv(subset_dist, as_data_file(out_ind), row.names = TRUE)
+write_distance <- function(dat, dist_type='updown', out_ind) {
+  dist <- readRDS(dat)
+  write.csv(dist[[dist_type]], as_data_file(out_ind), row.names = TRUE)
   gd_put(out_ind)
 }
 
-dist_heatmap2 <- function(dist_ind, labels=c('subseg_id','seg_id_nat'), title, out_file) {
+dist_heatmap2 <- function(dist_ind, dist_type='updown', labels=c('subseg_id','seg_id_nat'), title, out_file) {
 
   labels <- match.arg(labels)
-  dat <- readRDS(sc_retrieve(dist_ind))
+  dat <- readRDS(sc_retrieve(dist_ind))[[dist_type]]
 
   dat_df <- as_tibble(dat) %>%
     mutate(from_reach=rownames(dat)) %>%
@@ -378,39 +361,65 @@ dist_heatmap2 <- function(dist_ind, labels=c('subseg_id','seg_id_nat'), title, o
   return(g)
 }
 
-get_upstream_sites <- function(dist_ind, network_ind, sites, out_file) {
+get_upstream_sites <- function(dist_ind, network_ind, sites, geo_dat, out_file) {
   dist <- readRDS(sc_retrieve(dist_ind))
   dist <- dist$upstream
   sites <- readRDS(sites)
 
+  # create tibble of reaches within a basin (trib_subseg) and the outlet subseg
+  # to which each drains. trib_subsegs are duplicated when they drain to
+  # multiple outlets so that group_by(outlet) will get you a complete set of
+  # subsegs draining to that outlet.
+  dist_dat <- dist %>%
+    as.data.frame() %>%
+    rownames_to_column('outlet_subseg') %>%
+    as_tibble() %>%
+    filter(outlet_subseg %in% sites$subseg_id) %>%
+    tidyr::gather(key = 'trib_subseg', value = 'm_to_outlet', -outlet_subseg) %>%
+    filter(is.finite(m_to_outlet)) %>%
+    select(-m_to_outlet) %>%
+    arrange(outlet_subseg)
+
+  # translate to national IDs
   network <- readRDS(sc_retrieve(network_ind))
   network <- network$edges %>% dplyr::select(subseg_id, seg_id_nat) %>% sf::st_drop_geometry()
-  #new_names <- network$seg_id_nat[network$subseg_id %in% row.names(dist)]
-
-  dist_red <- dist[row.names(dist) %in% sites$subseg_id, ]
-
-  dist_dat <- data.frame(from_reach = row.names(dist_red), stringsAsFactors = FALSE)
-  dist_dat[, 2:(1+ncol(dist_red))] <- dist_red
-  names(dist_dat)[2:ncol(dist_dat)] <- colnames(dist_red)
-
-  dist_dat <- tidyr::gather(dist_dat, key = 'to_reach', value = 'distance', -from_reach) %>%
-    filter(!is.infinite(distance) & distance > 0) %>% select(-distance) %>% arrange(from_reach)
-
-  # now translate to national IDs
-
   dist_dat_nat <- dist_dat %>%
-    left_join(network, by = c('from_reach' = 'subseg_id')) %>%
-    select(-from_reach) %>% rename(from_reach = seg_id_nat) %>%
-    left_join(network, by = c('to_reach' = 'subseg_id')) %>%
-    select(-to_reach) %>% rename(to_reach = seg_id_nat) %>%
-    filter(!is.na(to_reach)) %>%
-    select(from_reach, to_reach)
+    left_join(rename(network, outlet = seg_id_nat), by = c('outlet_subseg' = 'subseg_id')) %>%
+    left_join(rename(network, seg_id_nat = seg_id_nat), by = c('trib_subseg' = 'subseg_id')) %>%
+    filter(!is.na(seg_id_nat), !is.na(outlet)) %>%
+    select(outlet, seg_id_nat)
 
-  # add sites with no upstream reaches back in
-  dist_dat_nat <- add_row(dist_dat_nat, from_reach = sites$seg_id_nat[!sites$seg_id_nat %in% unique(dist_dat_nat$from_reach)])
+  # append spatial information
+  geo_hrus <- sf::read_sf(geo_dat, layer='nhruNationalIdentifier') %>%
+    filter(region == '02') %>%
+    select(
+      hru_id_nat,
+      hru_segment,
+      region,
+      area_m2 = Shape_Area) %>% # same as st_area(Shape)
+    sf::st_drop_geometry()
+  geo_segs <- sf::read_sf(geo_dat, layer='nsegmentNationalIdentifier') %>%
+    filter(region == '02') %>%
+    select(
+      seg_id,
+      region,
+      seg_id_nat,
+      length_m = Shape_Length, # length of the segment in m
+      MAX_CUMDRAINAG) %>%
+    sf::st_drop_geometry()
+  geo_united <- geo_segs %>%
+    filter(seg_id_nat %in% dist_dat_nat$seg_id_nat) %>%
+    left_join(geo_hrus, by=c('seg_id'='hru_segment', 'region')) %>%
+    mutate(area_m2 = ifelse(is.na(area_m2), 0, area_m2)) %>% # there are 15 segments with no associated HRUs
+    group_by(seg_id_nat) %>%
+    summarize(
+      hrus_area_km2 = sum(area_m2)/1000000,
+      seg_length_km = unique(length_m)/1000)
 
-  write.csv(dist_dat_nat, file = out_file, row.names = FALSE)
+  dist_dat_nat_geo <- dist_dat_nat %>%
+    left_join(geo_united, by='seg_id_nat')
 
+  readr::write_csv(dist_dat_nat_geo, path = out_file)
 }
 
 filter_obs <- function(dat_ind, subset, out_ind) {

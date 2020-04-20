@@ -19,4 +19,7 @@
 .remake/
 # in folder for 1_network
 1_network/in/*
+!1_network/in/*.ind
 .httr-oauth
+*.DS_Store
+__MACOS*
