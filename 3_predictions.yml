@@ -11,7 +11,7 @@ sources:
 targets:
   3_predictions:
     depends:
-     - 3_predictions/in/uncal_sntemp_input_output.feather.ind
+     - 3_predictions/out/compare_predictions_obs.feather.ind
      - 3_predictions/out/model_evaluation.csv
 
   # segment-level drivers, intermediate model variables, and stream temperature predictions using uncalibrated PRMS-SNTemp
