@@ -7,11 +7,13 @@ packages:
   - smoothr
   - igraph
   - purrr
+  - dataRetrieval
 
 sources:
   - 2_observations/src/crosswalk_functions.R
   - 2_observations/src/data_munge_functions.R
   - 2_observations/src/subset_closest.R
+  - 2_observations/src/pull_ngwos_dat.R
 
 targets:
   2_observations:
@@ -26,7 +28,19 @@ targets:
   # munged temperature data
   2_observations/in/daily_temperatures.rds:
     command: gd_get('2_observations/in/daily_temperatures.rds.ind')
-     
+    
+  # latest NGWOS data
+  # should clean up later
+  2_observations/out/NGWOS_sites_data.rds.ind:
+    command: retrieve_ngwos(out_ind = target_name)
+    
+  2_observations/out/NGWOS_sites_data.rds:
+    command: gd_get('2_observations/out/NGWOS_sites_data.rds.ind')
+    
+  # sites that we feel confident calling "NGWOS" sites for experiment purposes
+  ngwos_sites:
+    command: filter_ngwos(ngwos_ind = '2_observations/out/NGWOS_sites_data.rds.ind')
+      
   2_observations/out/crosswalk_site_reach.rds.ind:
     command: crosswalk_sites_to_reaches(
       out_ind = target_name,
@@ -56,6 +70,7 @@ targets:
   2_observations/out/all_drb_temp_obs.rds.ind:
     command: filter_temp_data(
       dat_ind = '2_observations/in/daily_temperatures.rds.ind',
+      ngwos_ind = '2_observations/out/NGWOS_sites_data.rds.ind',
       cross_ind = '2_observations/out/crosswalk_site_reach.rds.ind',
       out_ind = target_name)
 
@@ -72,6 +87,10 @@ targets:
     
   2_observations/out/obs_temp_drb.rds:
     command: gd_get('2_observations/out/obs_temp_drb.rds.ind')
+    
+  # ngwos reaches that should be withheld after 2017-10-01 for NGWOS experiment
+  ngwos_reaches:
+    command: get_ngwos_reaches(sites_ind = '2_observations/out/drb_filtered_sites.rds.ind', ngwos_sites)
 
   # discharge data
   # currently points to a file that was uploaded to gd (originally from Jeff)
