@@ -158,3 +158,29 @@ plot_year_obs_tradeoff <- function(dat_ind, out_file){
   
   ggsave(out_file, p, height = 4, width = 6)
 }
+
+
+# Compare Jeff and Xiaowei's model output
+plot_rgcns <- function(compare_ind, out_file) {
+  preds_obs <- read_feather(sc_retrieve(compare_ind))
+  
+  plot_dat <- filter(preds_obs, !is.na(rgcn_temp_c) & !is.na(rgcn2_temp_c))
+  
+  mod <- lm(plot_dat$rgcn2_temp_c ~ plot_dat$rgcn_temp_c)
+  r2 <- round(summary(mod)$r.squared, 3)
+  slope = round(summary(mod)$coefficients[2,1], 3)
+  
+  plot_lab <- paste0('r2 = ', r2, ' | slope = ', slope)
+  
+  print(mod)
+  p <-  ggplot(plot_dat, aes(x = rgcn_temp_c, y = rgcn2_temp_c)) +
+     geom_point(size = 0.2, alpha = 0.05) +
+     geom_abline(slope = 1, intercept = 0, color = 'red') +
+     geom_smooth(method = 'lm', color = 'blue') +
+     theme_bw() +
+     labs(x = "XJ's predictions", y = "Jeff's predictions") +
+     geom_text(aes(x = 8, y = 35, label = plot_lab), size = 4, color = 'blue')
+  
+  ggsave(out_file, p, height = 4, width = 4)
+  
+}

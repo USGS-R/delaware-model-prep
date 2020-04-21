@@ -12,6 +12,7 @@ sources:
   - 8_visualize/src/visualization_functions.R
   - 8_visualize/src/freq_dist_functions.R
   - 8_visualize/src/visualize_sntemp_predictions.R
+  - 8_visualize/src/plot_rmse_map.R
 
 targets:
   8_visualize:
@@ -102,6 +103,26 @@ targets:
       start_date = I('2010-01-01'),
       end_date = I('2015-12-31'),
       dat_ind = '2_observations/out/obs_temp_drb.rds.ind',
-      pred_ind = '3_predictions/in/uncal_sntemp_preds.csv.ind')
+      pred_ind = '3_predictions/out/uncal_sntemp_preds.csv.ind')
+      
+  # compare Jeff and Xiaowei's model output
+  8_visualize/out/rgcn_mods_comparison.png:
+    command: plot_rgcns(compare_ind = '3_predictions/out/compare_predictions_obs.feather.ind', out_file = target_name)
 
+  # plot Jeff's model RMSE on the network
+  # can plot any model that's in 3_predictions/out/compare_predictions_obs.feather
+  8_visualize/out/rgcn2_full_rmse_on_network.png:
+    command: plot_rmse_map(
+      out_file = target_name,
+      network_ind = '1_network/out/network.rds.ind', 
+      compare_ind = '3_predictions/out/compare_predictions_obs.feather.ind', 
+      plot_model = I('rgcn2_full_temp_c'))
+      
+  8_visualize/out/sntemp_rmse_on_network.png:
+    command: plot_rmse_map(
+      out_file = target_name,
+      network_ind = '1_network/out/network.rds.ind', 
+      compare_ind = '3_predictions/out/compare_predictions_obs.feather.ind', 
+      plot_model = I('sntemp_temp_c'))
+      
 

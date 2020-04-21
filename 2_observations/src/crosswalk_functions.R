@@ -7,7 +7,7 @@ crosswalk_sites_to_reaches <- function(network_ind, boundary_ind, sites_ind, out
   
   # read in sites from WQP, nwisdv, nwisuv
   sites <- readRDS(sc_retrieve(sites_ind)) %>%
-    filter(site_type %in% c('ST', 'Stream'))
+    filter(site_type %in% c('ST', 'Stream', 'ST-TS'))
   
   # Convert to sfc
   obs_site_points <- purrr::map2(sites$longitude, sites$latitude, function(lat, lon) {
