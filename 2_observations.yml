@@ -31,8 +31,15 @@ targets:
     
   # latest NGWOS data
   # should clean up later
+  
+  # Retrieve list of NGWOS sites from Brian Pellerin, receieved 2020-04-18
+  2_observations/in/NGWOS_site_metadata.xlsx:
+    command: gd_get('2_observations/in/NGWOS_site_metadata.xlsx.ind')
+    
   2_observations/out/NGWOS_sites_data.rds.ind:
-    command: retrieve_ngwos(out_ind = target_name)
+    command: retrieve_ngwos(
+      out_ind = target_name,
+      sites_ind = '2_observations/in/NGWOS_site_metadata.xlsx.ind')
     
   2_observations/out/NGWOS_sites_data.rds:
     command: gd_get('2_observations/out/NGWOS_sites_data.rds.ind')
