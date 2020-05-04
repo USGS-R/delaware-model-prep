@@ -52,6 +52,7 @@ targets:
     command: crosswalk_sites_to_reaches(
       out_ind = target_name,
       sites_ind = '2_observations/in/all_sites.rds.ind',
+      ngwos_sites = ngwos_sites,
       boundary_ind = '1_network/out/boundary.rds.ind',
       network_ind = '1_network/out/network.rds.ind')
   
