@@ -95,7 +95,7 @@ retrieve_ngwos <- function(out_ind, sites_ind) {
   ngwos_dat <- bind_rows(dv_dat, uv_dat)
   
   ## return NGWOS data
-  saveRDS(all_dat, as_data_file(out_ind))
+  saveRDS(ngwos_dat, as_data_file(out_ind))
   gd_put(out_ind)
 
 }
@@ -103,24 +103,35 @@ retrieve_ngwos <- function(out_ind, sites_ind) {
 # figure out which NGWOS sites to withhold
 filter_ngwos <- function(ngwos_ind){
 
-  summary <- readRDS(sc_retrieve(ngwos_ind)) %>%
+  dat <- readRDS(sc_retrieve(ngwos_ind))
+  
+  summary <-  dat %>%
     group_by(site_id) %>%
-    summarize(n_pre = sum(date < as.Date('2017-10-01')),
-              n_post = sum(date >= as.Date('2017-10-01')))
+    summarize(n_pre_NGWOS = length(date[date < as.Date('2017-10-01') & date > as.Date('2013-10-01')]),
+              n_pre_all = length(date[date < as.Date('2017-10-01')]),
+              n_post_NGWOS = length(date[date >= as.Date('2017-10-01')]))
+  
+  sites_potential_drop <- summary %>%
+    filter(n_pre_NGWOS > 0)
+  
+  # some sites have data pre-NGWOS, but not that much. Maybe was just early install? 
+  # maybe should drop when continuous records start more recently instead of the 2017-10-01 cutoff?
   
   sites_keep <- summary %>%
-    filter(n_pre == 0|n_post > n_pre)
+    filter(n_pre_NGWOS < 450)
   
-  # site 0147500 had lots of pre data, but seemed to be out of commission from 2001-2019
-  # and came back online in NGWOS days
+  message('Sites ', paste(summary$site_id[summary$n_pre_NGWOS >=450], collapse = ', '), ' were dropped due to being heavily monitored prior to NGWOS in the period of 2013-10-01 to 2017-10-01')
   
-  keepers <- c(sites_keep$site_id, 'USGS-01474500')
+  # did any of these fail to return any post-NGWOS data?
   
-  # filter out sites that are not stream sites
-  site_meta <- dataRetrieval::readNWISsite(gsub('USGS-', '', keepers)) %>%
-    filter(site_tp_cd %in% c('ST', 'ST-TS')) # keep stream and tidal stream, drops 1 estuary site
+  sites_keep <- sites_keep %>%
+    filter(n_post_NGWOS > 0)
   
-  keepers <- keepers[gsub('USGS-', '', keepers) %in% site_meta$site_no]
+  if (sum(sites_keep$n_post_NGWOS == 0) > 0) {
+    message('Sites ', paste(sites_keep$site_id[sites_keep$n_post_NGWOS ==0], collapse = ', '), ' were dropped due to having no data in the NGWOS period.')
+  }
+  
+  keepers <- sites_keep$site_id
   
   return(keepers)
   
