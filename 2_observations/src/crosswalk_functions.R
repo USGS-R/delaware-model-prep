@@ -30,7 +30,7 @@ crosswalk_sites_to_reaches <- function(network_ind, boundary_ind, sites_ind, ngw
     st_transform(crs=st_crs(drb_net$vertices))
   
   # Subset to sites in the Delaware River Basin
-  drb_sites <- obs_sites[st_intersects(drb_boundary, obs_sites)[[1]], ] # 5009 rows
+  drb_sites <- obs_sites[st_intersects(drb_boundary, obs_sites)[[1]], ] # 5028 rows
   
   #### Match sites to reaches ####
   
