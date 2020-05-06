@@ -1,32 +1,41 @@
 library(sf)
 library(dplyr)
+#' @param zip char path to input zip file containing shapefile
+#' @param extract_dir char directory to unzip to, and read shapefile from
+#' @param out_ind char indicator file to represent output
+zipped_shp_to_rds <- function(zip, extract_dir, out_ind) {
+  unzip('1_network/in/dams-rev01-global-shp.zip', exdir = extract_dir)
+  read_sf(extract_dir) %>% saveRDS(file = as_data_file(out_ind))
+  gd_put(out_ind)
+}
+
 
 #' @param dams_file directory of dams shapefile
 #' @param reservoirs_file directory of reservoir shapefile
 #' @param boundary polygon of basin boundaries to subset dams/reservoirs by
 #' @param outind output indicator file
-filter_dams_reservoirs_by_boundary <- function(dams_shp_ind, reservoirs_shp_ind, 
-                                               boundary, out_ind) {
+filter_dams_reservoirs_by_boundary <- function(dams_shp_rds, reservoirs_shp_rds, 
+                                               boundary_rds, out_ind) {
   #dams are points, reservoirs are polygons
-  dams_shp <- read_sf(as_data_file(dams_shp_ind)) %>% 
+  dams_shp <- readRDS(dams_shp_rds) %>% 
     st_transform(crs = 102039) %>% 
     filter(COUNTRY == "United States")
   
   #Assumes GRAND IDs match up for corresponding reservoirs and dams
   #There are some empty/invalid geometries outside the US, this 
   #avoids them
-  res_shp <- read_sf(as_data_file(reservoirs_shp_ind)) %>% 
+  res_shp <- readRDS(reservoirs_shp_rds) %>% 
     st_transform(crs = 102039) %>% 
     filter(GRAND_ID %in% dams_shp$GRAND_ID)
   
-  boundary <- readRDS('1_network/out/boundary.rds')
+  boundary <- readRDS(boundary_rds)
   
   subset_dams <- st_intersection(dams_shp, boundary)
   subset_res <- st_intersection(res_shp, boundary)
   
   output <- list(dams = subset_dams, reservoirs = subset_res)
   saveRDS(output, file = as_data_file(out_ind))
-  sc_indicate(ind_file = out_ind)
+  gd_put(out_ind)
 }
 
 intersect_network_with_reservoirs <- function(stream_network_file, dams_reservoirs_file, out_ind) {
@@ -72,7 +81,7 @@ intersect_network_with_reservoirs <- function(stream_network_file, dams_reservoi
            inlet_intersects = as.numeric(st_intersects(inlet_point_geom, reservoir_geometry)))
   
   saveRDS(network_res_intersection, file = as_data_file(out_ind))
-  sc_indicate(out_ind)
+  gd_put(out_ind)
 }
 
 ##### plot function ######

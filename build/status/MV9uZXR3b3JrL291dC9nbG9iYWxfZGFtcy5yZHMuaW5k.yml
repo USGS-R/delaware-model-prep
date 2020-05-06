@@ -1,0 +1,12 @@
+version: 0.3.0
+name: 1_network/out/global_dams.rds.ind
+type: file
+hash: bca13572cb115ee91d98934cbf1e5800
+time: 2020-05-06 22:35:58 UTC
+depends:
+  1_network/in/dams-rev01-global-shp.zip: 61f310b5306bf39c034a1a0fe1745c03
+fixed: 793854a6ca9fb24c8cb50d6c2980b027
+code:
+  functions:
+    zipped_shp_to_rds: 99e4a7f440e3ba0b418ab4eb3af99f53
+
