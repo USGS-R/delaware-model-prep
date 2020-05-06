@@ -66,7 +66,7 @@ targets:
     command: subset_sites(
       out_ind = target_name, 
       crosswalk_ind = '2_observations/out/crosswalk_site_reach.rds.ind',
-      fish_dist = I(5000),
+      fish_dist = I(20000),
       bird_dist = I(250))
       
   2_observations/out/drb_filtered_sites.rds:

@@ -9,6 +9,13 @@ subset_sites <- function(out_ind, crosswalk_ind, dat_ind, fish_dist, bird_dist) 
     st_drop_geometry %>%
     distinct() # should check into why we need this
   
+  # manual fix for a site that gets filtered out
+  # need to adjust filter for upstream/downstream stream size
+  add_back <- filter(crosswalk, site_id %in% 'USGS-01467059') %>%
+    st_drop_geometry()
+  
+  basin_sites <- bind_rows(basin_sites, add_back)
+  
   saveRDS(basin_sites, as_data_file(out_ind))
   gd_put(out_ind)
     
