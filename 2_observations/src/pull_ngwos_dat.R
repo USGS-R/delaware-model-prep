@@ -139,9 +139,9 @@ filter_ngwos <- function(ngwos_ind){
 
 get_ngwos_reaches <- function(sites_ind, ngwos_sites) {
   sites <- readRDS(sc_retrieve(sites_ind))
-  
-  sites_ngwos <- filter(sites, site_id %in% ngwos_sites) %>%
-    filter(!source %in% 'wqp')
+
+  sites_ngwos <- filter(sites, site_id %in% paste0('USGS-', ngwos_sites)) %>%
+    select(site_id, seg_id_nat) %>% distinct()
   
   return(sites_ngwos$seg_id_nat)
 }

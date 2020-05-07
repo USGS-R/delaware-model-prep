@@ -115,3 +115,6 @@ targets:
       
   2_observations/out/obs_flow_drb.rds:
     command: gd_get('2_observations/out/obs_flow_drb.rds.ind')
+    
+  2_observations/out/drb_temp_summary.csv:
+    command: summarize_temp(in_ind = '2_observations/out/obs_temp_drb.rds.ind', out_file = target_name)
