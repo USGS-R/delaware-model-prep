@@ -1,14 +1,11 @@
-library(sf)
-library(dplyr)
 #' @param zip char path to input zip file containing shapefile
 #' @param extract_dir char directory to unzip to, and read shapefile from
 #' @param out_ind char indicator file to represent output
 zipped_shp_to_rds <- function(zip, extract_dir, out_ind) {
-  unzip('1_network/in/dams-rev01-global-shp.zip', exdir = extract_dir)
+  unzip(zip, exdir = extract_dir)
   read_sf(extract_dir) %>% saveRDS(file = as_data_file(out_ind))
   gd_put(out_ind)
 }
-
 
 #' @param dams_file directory of dams shapefile
 #' @param reservoirs_file directory of reservoir shapefile
@@ -32,24 +29,28 @@ filter_dams_reservoirs_by_boundary <- function(dams_shp_rds, reservoirs_shp_rds,
   
   subset_dams <- st_intersection(dams_shp, boundary)
   subset_res <- st_intersection(res_shp, boundary)
-  
   output <- list(dams = subset_dams, reservoirs = subset_res)
   saveRDS(output, file = as_data_file(out_ind))
   gd_put(out_ind)
 }
 
+
+#' Create a data frame for each subsegment with assorted into about reservoirs they intersect
+#' @param stream_network_file RDS file containing stream network edge and vertex geometries
+#' @param dams_reservoirs_file RDS file containing sf objects for dams and reservoirs in the basin (in a list
+#' @param out_ind char output indicator file
 intersect_network_with_reservoirs <- function(stream_network_file, dams_reservoirs_file, out_ind) {
   stream_network <- readRDS(stream_network_file)
   dams_reservoirs <- readRDS(dams_reservoirs_file)
   
+  #create some non-sf tibbles to allow joining by ID rather than geometry
   network_edges_tibble <- as_tibble(stream_network$edges)
   network_vertices_tibble <- as_tibble(stream_network$vertices)
   network_vertices_tibble_separated <- network_vertices_tibble %>% 
     tidyr::separate_rows(ends_subseg, sep = ";")
   dams_tibble <- as_tibble(dams_reservoirs$dams)
   reservoirs_tibble <- as_tibble(dams_reservoirs$reservoirs)
-  
-  network_res_intersection <- st_intersection(stream_network$edges, subset_res) %>% 
+  network_res_intersection <- st_intersection(stream_network$edges, dams_reservoirs$reservoirs) %>% 
     mutate(intersected_subseg_length = st_length(geometry),
            frac_res_overlap = intersected_subseg_length/subseg_length) %>% 
     rename(intersected_geometry = geometry) %>% 
@@ -85,27 +86,23 @@ intersect_network_with_reservoirs <- function(stream_network_file, dams_reservoi
 }
 
 ##### plot function ######
-plot_reservoir_reach_overlaps <- function() {
-  #generate plots to check
-  subset_res <- rename(subset_res, reservoir_geometry = geometry)
-  subset_dams <- rename(subset_dams, dam_geometry = geometry)
-  network_res_intersection_all_geoms <- left_join(network_res_intersection,
-                                                  subset_res, 
-                                                  by = "GRAND_ID") %>% 
-    left_join(subset_dams, by = "GRAND_ID")
-  library(ggplot2)
+#not built into pipeline
+plot_reservoir_reach_overlaps <- function(subseg_reservoir_rds = '1_network/out/subseg_reservoir_mapping.rds',
+                                          output_dir = '1_network/tmp') {
+  browser()
+  network_res_intersection_all_geoms <- readRDS(subseg_reservoir_rds)
   for(reservoir in na.omit(unique(network_res_intersection_all_geoms$GRAND_ID))) {
     reservoir_df <- network_res_intersection_all_geoms %>% 
       filter(GRAND_ID == reservoir) %>% 
       mutate()
     ggplot(reservoir_df, aes(geometry = geometry)) + 
-      geom_sf(data = reservoir_df[1,], aes(geometry = reservoir_geometry, fill = NULL)) +
+      geom_sf(data = reservoir_df[1,], aes(geometry = reservoir_geometry)) +
       geom_sf(aes(color = subseg_id)) +
       theme(legend.position = "none") + #legend is causing an error.  Unsure why
       geom_sf(aes(geometry = dam_geometry), shape = 15, size = 4) + 
       coord_sf(crs = 102039) + 
       ggtitle(label = paste("GRAND_ID:", reservoir, reservoir_df$RES_NAME[1]),
               subtitle = paste("Seg IDs:", paste(reservoir_df$subseg_id, collapse = ",")))
-    ggsave(filename = paste0(reservoir, ".png"))
+    ggsave(filename = file.path(output_dir, paste0(reservoir, ".png")))
   }
 }
