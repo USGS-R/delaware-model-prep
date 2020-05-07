@@ -89,7 +89,6 @@ intersect_network_with_reservoirs <- function(stream_network_file, dams_reservoi
 #not built into pipeline
 plot_reservoir_reach_overlaps <- function(subseg_reservoir_rds = '1_network/out/subseg_reservoir_mapping.rds',
                                           output_dir = '1_network/tmp') {
-  browser()
   network_res_intersection_all_geoms <- readRDS(subseg_reservoir_rds)
   for(reservoir in na.omit(unique(network_res_intersection_all_geoms$GRAND_ID))) {
     reservoir_df <- network_res_intersection_all_geoms %>% 
