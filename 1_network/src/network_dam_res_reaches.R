@@ -40,6 +40,7 @@ filter_dams_reservoirs_by_boundary <- function(dams_shp_rds, reservoirs_shp_rds,
 #' @param dams_reservoirs_file RDS file containing sf objects for dams and reservoirs in the basin (in a list
 #' @param out_ind char output indicator file
 intersect_network_with_reservoirs <- function(stream_network_file, dams_reservoirs_file, out_ind) {
+  
   stream_network <- readRDS(stream_network_file)
   dams_reservoirs <- readRDS(dams_reservoirs_file)
   
@@ -50,6 +51,7 @@ intersect_network_with_reservoirs <- function(stream_network_file, dams_reservoi
     tidyr::separate_rows(ends_subseg, sep = ";")
   dams_tibble <- as_tibble(dams_reservoirs$dams)
   reservoirs_tibble <- as_tibble(dams_reservoirs$reservoirs)
+  
   network_res_intersection <- st_intersection(stream_network$edges, dams_reservoirs$reservoirs) %>% 
     mutate(intersected_subseg_length = st_length(geometry),
            frac_res_overlap = intersected_subseg_length/subseg_length) %>% 
@@ -87,6 +89,8 @@ intersect_network_with_reservoirs <- function(stream_network_file, dams_reservoi
 
 ##### plot function ######
 #not built into pipeline
+#' Plot each reservoir, with intersecting subsegments and dam
+#' @param subseg_reservoir_rds rds 1_network/out/subseg_reservoir_mapping.rds.ind from pipeline
 plot_reservoir_reach_overlaps <- function(subseg_reservoir_rds = '1_network/out/subseg_reservoir_mapping.rds',
                                           output_dir = '1_network/tmp') {
   network_res_intersection_all_geoms <- readRDS(subseg_reservoir_rds)

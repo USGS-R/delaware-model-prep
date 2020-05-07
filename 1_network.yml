@@ -34,6 +34,7 @@ targets:
     command: unzip('1_network/in/delaware_stream_temp_by_segment.zip', exdir=I('1_network/in'))
     
   #download reservoirs and dams from drive
+  #gd_confirm targets are only used to intialize indicator files, should be left commented
   #1_network/in/dams-rev01-global-shp.zip.ind:
   #  command: gd_confirm_posted(target_name)
   1_network/in/dams-rev01-global-shp.zip:
