@@ -1,9 +1,11 @@
 #' @param zip char path to input zip file containing shapefile
 #' @param extract_dir char directory to unzip to, and read shapefile from
 #' @param out_ind char indicator file to represent output
-zipped_shp_to_rds <- function(zip, extract_dir, out_ind) {
+zipped_shp_to_rds <- function(zip, out_ind) {
+  extract_dir <- file.path(tempdir(), 'shapefile_tmp')
   unzip(zip, exdir = extract_dir)
   read_sf(extract_dir) %>% saveRDS(file = as_data_file(out_ind))
+  unlink(extract_dir)
   gd_put(out_ind)
 }
 
@@ -11,21 +13,21 @@ zipped_shp_to_rds <- function(zip, extract_dir, out_ind) {
 #' @param reservoirs_file directory of reservoir shapefile
 #' @param boundary polygon of basin boundaries to subset dams/reservoirs by
 #' @param outind output indicator file
-filter_dams_reservoirs_by_boundary <- function(dams_shp_rds, reservoirs_shp_rds, 
-                                               boundary_rds, out_ind) {
+filter_dams_reservoirs_by_boundary <- function(dams_shp_ind, reservoirs_shp_ind, 
+                                               boundary_ind, out_ind) {
   #dams are points, reservoirs are polygons
-  dams_shp <- readRDS(dams_shp_rds) %>% 
+  dams_shp <- readRDS(sc_retrieve(dams_shp_ind)) %>% 
     st_transform(crs = 102039) %>% 
     filter(COUNTRY == "United States")
   
   #Assumes GRAND IDs match up for corresponding reservoirs and dams
   #There are some empty/invalid geometries outside the US, this 
   #avoids them
-  res_shp <- readRDS(reservoirs_shp_rds) %>% 
+  res_shp <- readRDS(sc_retrieve(reservoirs_shp_ind)) %>% 
     st_transform(crs = 102039) %>% 
     filter(GRAND_ID %in% dams_shp$GRAND_ID)
   
-  boundary <- readRDS(boundary_rds)
+  boundary <- readRDS(sc_retrieve(boundary_ind))
   
   subset_dams <- st_intersection(dams_shp, boundary)
   subset_res <- st_intersection(res_shp, boundary)
@@ -39,10 +41,10 @@ filter_dams_reservoirs_by_boundary <- function(dams_shp_rds, reservoirs_shp_rds,
 #' @param stream_network_file RDS file containing stream network edge and vertex geometries
 #' @param dams_reservoirs_file RDS file containing sf objects for dams and reservoirs in the basin (in a list
 #' @param out_ind char output indicator file
-intersect_network_with_reservoirs <- function(stream_network_file, dams_reservoirs_file, out_ind) {
+intersect_network_with_reservoirs <- function(stream_network_ind, dams_reservoirs_ind, out_ind) {
   
-  stream_network <- readRDS(stream_network_file)
-  dams_reservoirs <- readRDS(dams_reservoirs_file)
+  stream_network <- readRDS(sc_retrieve(stream_network_ind))
+  dams_reservoirs <- readRDS(sc_retrieve(dams_reservoirs_ind))
   
   #create some non-sf tibbles to allow joining by ID rather than geometry
   network_edges_tibble <- as_tibble(stream_network$edges)
