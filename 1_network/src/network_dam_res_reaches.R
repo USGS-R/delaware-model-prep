@@ -2,10 +2,11 @@
 #' @param extract_dir char directory to unzip to, and read shapefile from
 #' @param out_ind char indicator file to represent output
 zipped_shp_to_rds <- function(zip, out_ind) {
-  extract_dir <- file.path(tempdir(), 'shapefile_tmp')
+  extract_dir <- file.path(tempdir(), 
+                           tools::file_path_sans_ext(basename(zip)))
   unzip(zip, exdir = extract_dir)
   read_sf(extract_dir) %>% saveRDS(file = as_data_file(out_ind))
-  unlink(extract_dir)
+  unlink(extract_dir, recursive = TRUE)
   gd_put(out_ind)
 }
 
