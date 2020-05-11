@@ -16,19 +16,20 @@ zipped_shp_to_rds <- function(zip, out_ind) {
 #' @param outind output indicator file
 filter_dams_reservoirs_by_boundary <- function(dams_shp_ind, reservoirs_shp_ind, 
                                                boundary_ind, out_ind) {
+  
+  boundary <- readRDS(sc_retrieve(boundary_ind))
+  
   #dams are points, reservoirs are polygons
   dams_shp <- readRDS(sc_retrieve(dams_shp_ind)) %>% 
-    st_transform(crs = 102039) %>% 
+    st_transform(crs = sf::st_crs(boundary)) %>% 
     filter(COUNTRY == "United States")
   
   #Assumes GRAND IDs match up for corresponding reservoirs and dams
   #There are some empty/invalid geometries outside the US, this 
   #avoids them
   res_shp <- readRDS(sc_retrieve(reservoirs_shp_ind)) %>% 
-    st_transform(crs = 102039) %>% 
+    st_transform(crs = sf::st_crs(boundary)) %>% 
     filter(GRAND_ID %in% dams_shp$GRAND_ID)
-  
-  boundary <- readRDS(sc_retrieve(boundary_ind))
   
   subset_dams <- st_intersection(dams_shp, boundary)
   subset_res <- st_intersection(res_shp, boundary)
