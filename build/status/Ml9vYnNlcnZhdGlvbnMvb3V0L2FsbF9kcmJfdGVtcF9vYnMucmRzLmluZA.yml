@@ -1,13 +1,14 @@
 version: 0.3.0
 name: 2_observations/out/all_drb_temp_obs.rds.ind
 type: file
-hash: 36ff2c4db162c1324ea6503646121d74
-time: 2020-03-28 16:54:05 UTC
+hash: 282734e40fe28911a93c435c60850854
+time: 2020-05-06 21:52:49 UTC
 depends:
-  2_observations/in/daily_temperatures.rds.ind: 9d21bbf27e3058df815ce98580b5798a
-  2_observations/out/crosswalk_site_reach.rds.ind: bbd31de753b3d392a4626e78cc95f611
+  2_observations/in/daily_temperatures.rds.ind: 38982922cf2adfc829f37e9b064bab07
+  2_observations/out/NGWOS_sites_data.rds.ind: ae097fe78faf030b69835e2e88399b92
+  2_observations/out/crosswalk_site_reach.rds.ind: 77f888e7be378ff7a512d2fd06028cf4
 fixed: 4ff1bd3c2db1401fb9775c5366bf396f
 code:
   functions:
-    filter_temp_data: b9aa9bdb0c0f2d9245d48b0b9e1fc666
+    filter_temp_data: 9ddc379ffdccd06f9cde94fdd8bc81e1
 

@@ -12,6 +12,9 @@
 *.geojson
 *.png
 *.csv
+*.npy
+!3_predictions/out/model_evaluation.csv
+*.gif
 # remake
 .remake/
 # in folder for 1_network
@@ -20,3 +23,6 @@
 .httr-oauth
 *.DS_Store
 __MACOS*
+
+# commit summary data
+!2_observations/out/drb_temp_summary.csv

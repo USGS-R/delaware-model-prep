@@ -1,24 +1,72 @@
 target_default: 3_predictions
 
 packages:
-  - sf
-  - tidyverse
-  - lwgeom
-  - smoothr
-  - igraph
-  - purrr
+  - RcppCNPy
+  - dplyr
+  - feather
+  - lubridate
+  
+sources:
+  - 3_predictions/src/munge_predictions.R
 
 targets:
   3_predictions:
     depends:
-     - 3_predictions/in/uncal_sntemp_preds.csv.ind
-     - 3_predictions/in/uncal_sntemp_input_output.feather.ind
-
-  # predictions using defaults provided by Markstrom on 10-01
-  3_predictions/in/uncal_sntemp_preds.csv:
-    command: gd_get('3_predictions/in/uncal_sntemp_preds.csv.ind')
+     - 3_predictions/out/compare_predictions_obs.feather.ind
+     - 3_predictions/out/model_evaluation.csv
 
   # segment-level drivers, intermediate model variables, and stream temperature predictions using uncalibrated PRMS-SNTemp
   #  from https://github.com/jzwart/delaware-water-temp/blob/626d6d159daccfcf52c5e7fddf88d24031f35e6d/4_model_for_PGDL.yml#L42-L46
   3_predictions/in/uncal_sntemp_input_output.feather:
     command: gd_get('3_predictions/in/uncal_sntemp_input_output.feather.ind')
+    
+  # pull out predictions from SNTEMP in/out - updated in April 2020
+  # to use drivers that run through 2019
+  3_predictions/out/uncal_sntemp_preds.csv.ind:
+    command: pull_sntemp_preds(
+      sntemp_ind = '3_predictions/in/uncal_sntemp_input_output.feather.ind',
+      out_ind = target_name)
+      
+  3_predictions/out/uncal_sntemp_preds.csv:
+    command: gd_get('3_predictions/out/uncal_sntemp_preds.csv.ind')
+
+
+  # Xiaowei's original output using 100% of process model output in training period
+  # original file he sent was titled prd_RGCN_full_obstemp_cv2_full.npy
+  3_predictions/in/rgcn_v1_preds_raw.npy:
+    command: gd_get('3_predictions/in/rgcn_v1_preds_raw.npy.ind')
+    
+  3_predictions/out/rgcn_v1_preds.feather.ind:
+    command: munge_rgcn_output(in_ind = '3_predictions/in/rgcn_v1_preds_raw.npy.ind', out_ind = target_name)
+    
+  3_predictions/out/rgcn_v1_preds.feather:
+    command: gd_get('3_predictions/out/rgcn_v1_preds.feather.ind')
+    
+  # this is a test of Jeff's output, sent to Sam on 3/31
+  # RGCN is what XJ originally called the model = 
+  # river graph convolutional network
+  3_predictions/in/rgcn_v2_preds.feather:
+    command: gd_get('3_predictions/in/rgcn_v2_preds.feather.ind')
+    
+  # Jeff's full DRB model
+  3_predictions/in/rgcn_v2_preds_full.feather:
+    command: gd_get('3_predictions/in/rgcn_v2_preds_full.feather.ind')
+    
+  # put it all together!
+  3_predictions/out/compare_predictions_obs.feather.ind:
+    command: combine_preds_obs(
+      obs_ind = '2_observations/out/obs_temp_drb.rds.ind',
+      sntemp_ind = '3_predictions/out/uncal_sntemp_preds.csv.ind',
+      rgcn_v1_ind = '3_predictions/out/rgcn_v1_preds.feather.ind',
+      rgcn_v2_ind = '3_predictions/in/rgcn_v2_preds.feather.ind',
+      rgcn_v2_full_ind = '3_predictions/in/rgcn_v2_preds_full.feather.ind',
+      out_ind = target_name
+      )
+      
+  3_predictions/out/compare_predictions_obs.feather:
+    command: gd_get('3_predictions/out/compare_predictions_obs.feather.ind')
+      
+  # write some model comparisons/stats and git commit for each comparison
+  
+  3_predictions/out/model_evaluation.csv:
+    command: calc_metrics(compare_ind = '3_predictions/out/compare_predictions_obs.feather.ind', out_file = target_name)
