@@ -251,7 +251,7 @@ create_boundary <- function(subset_network, national_network, out_ind) {
   
   gf_catchments <- sf::read_sf(national_network, layer='nhruNationalIdentifier') %>%
     filter(POI_ID %in% gf_reaches$POI_ID) %>%
-    lwgeom::st_make_valid()
+    sf::st_make_valid()
   
   # Create, plot, and save a boundary of the full Delaware River Basin (DRB)
   gf_boundary <- st_union(gf_catchments) %>%

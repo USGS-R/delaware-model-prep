@@ -23,7 +23,7 @@ crosswalk_sites_to_reaches <- function(network_ind, boundary_ind, sites_ind, ngw
   # Convert to sfc
   obs_site_points <- purrr::map2(sites$longitude, sites$latitude, function(lat, lon) {
     st_point(c(lat, lon), dim='XY')})
-  
+
   obs_sites <- sites %>%
     st_set_geometry(st_sfc(obs_site_points)) %>%
     st_set_crs(4326) %>%
