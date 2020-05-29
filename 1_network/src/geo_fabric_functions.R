@@ -238,7 +238,7 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
     vertices = reach_net_vertices)
   
   saveRDS(reach_net, as_data_file(out_ind))
-  gd_put(out_ind, as_data_file(out_ind))
+  gd_put(out_ind)
 }
 
 create_boundary <- function(subset_network, national_network, out_ind) {
@@ -258,7 +258,7 @@ create_boundary <- function(subset_network, national_network, out_ind) {
     smoothr::fill_holes(threshold = units::set_units(100, km^2))
   
   saveRDS(gf_boundary, as_data_file(out_ind))
-  gd_put(out_ind, as_data_file(out_ind))
+  gd_put(out_ind)
 
 }
 

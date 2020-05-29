@@ -47,5 +47,5 @@ crosswalk_sites_to_reaches <- function(network_ind, boundary_ind, sites_ind, ngw
   
   # write file and push to GD
   saveRDS(crosswalk_site_reach, as_data_file(out_ind))
-  gd_put(out_ind, as_data_file(out_ind))
+  gd_put(out_ind)
 }

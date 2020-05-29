@@ -1,12 +1,12 @@
 version: 0.3.0
 name: 9_collaborator_data/mkrsp/delaware_sites_summary.geojson.ind
 type: file
-hash: 75f6373865f190081f1a4b6a4e195884
-time: 2020-03-28 17:00:05 UTC
+hash: 9e4972ef6a0673c5df421551361fdf41
+time: 2020-05-29 12:13:32 UTC
 depends:
-  9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind: e2990f4ce88c35bde2a7640d6e8a34ea
+  9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind: 15157a8a29dc65cf817a9e77ca882bcb
 fixed: 0a96626ec40b95c4d40dfd1267b0c161
 code:
   functions:
-    generate_site_geojson: 726aaeb95bf15c917dbfd55b5bdbb2b8
+    generate_site_geojson: 2f15776805f881dad4c38dfe86a23950
 
