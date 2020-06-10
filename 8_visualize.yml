@@ -20,6 +20,8 @@ targets:
       - 8_visualize/out/site_obscount_freq_dist.png
       - 8_visualize/out/nreaches_nobs_nyears.png
       - 8_visualize/out/map_network_subset.png
+      - 8_visualize/out/rgcn2_full_rmse_on_network.png
+      - 8_visualize/out/sntemp_rmse_on_network.png
 
 
   # map of network and subset

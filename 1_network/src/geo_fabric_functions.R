@@ -238,7 +238,7 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
     vertices = reach_net_vertices)
   
   saveRDS(reach_net, as_data_file(out_ind))
-  gd_put(out_ind, as_data_file(out_ind))
+  gd_put(out_ind)
 }
 
 create_boundary <- function(subset_network, national_network, out_ind) {
@@ -251,14 +251,14 @@ create_boundary <- function(subset_network, national_network, out_ind) {
   
   gf_catchments <- sf::read_sf(national_network, layer='nhruNationalIdentifier') %>%
     filter(POI_ID %in% gf_reaches$POI_ID) %>%
-    lwgeom::st_make_valid()
+    sf::st_make_valid()
   
   # Create, plot, and save a boundary of the full Delaware River Basin (DRB)
   gf_boundary <- st_union(gf_catchments) %>%
     smoothr::fill_holes(threshold = units::set_units(100, km^2))
   
   saveRDS(gf_boundary, as_data_file(out_ind))
-  gd_put(out_ind, as_data_file(out_ind))
+  gd_put(out_ind)
 
 }
 
