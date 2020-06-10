@@ -8,6 +8,6 @@ generate_site_geojson <- function(summary_ind, out_ind) {
     geojsonsf::sf_geojson()
   
   geojsonio::geojson_write(dat_write, file = as_data_file(out_ind), convert_wgs84 = TRUE)
-  gd_put(out_ind, as_data_file(out_ind))
+  gd_put(out_ind)
   
 }

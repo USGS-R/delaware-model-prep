@@ -3,16 +3,17 @@ target_default: everything
 include:
   - 1_network.yml
   - 2_observations.yml
-  - 8_visualize.yml
-  - 9_collaborator_data.yml
   - 3_predictions.yml
+  - 9_collaborator_data.yml
+  - 8_visualize.yml
+
 
 targets:
   everything:
     depends:
       - 1_network
       - 2_observations
-      - 8_visualize
-      - 9_collaborator_data
       - 3_predictions
+      - 9_collaborator_data
+      - 8_visualize
 

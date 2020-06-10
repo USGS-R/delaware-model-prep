@@ -59,11 +59,10 @@ combine_preds_obs <- function(obs_ind, sntemp_ind, rgcn_v1_ind, rgcn_v2_ind, rgc
 calc_metrics <- function(compare_ind, out_file) {
   
   compare <- read_feather(sc_retrieve(compare_ind))
-  
   # make data long, filter where there are no observations
   # calculate error and squared error
   r_compare <- compare %>%
-    pivot_longer(c(-seg_id_nat, -date, -temp_c), names_to = 'model', values_to = 'predicted') %>%
+    pivot_longer(c(-seg_id_nat, -site_id, -date, -temp_c), names_to = 'model', values_to = 'predicted') %>%
     filter(!is.na(predicted)) %>%
     filter(!is.na(temp_c))
   

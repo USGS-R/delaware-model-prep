@@ -59,7 +59,8 @@ munge_temp_dat <- function(sites_ind, dat_ind, out_ind) {
   drb_dat <- drb_dat %>%
     left_join(sites) %>%
     group_by(subseg_id, seg_id_nat, date) %>%
-    summarize(temp_c = mean(temp_C)) %>%
+    summarize(temp_c = mean(temp_C),
+              site_id = paste0(site_id, collapse = ', ')) %>%
     ungroup()
   
   saveRDS(drb_dat, as_data_file(out_ind))
