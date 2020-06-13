@@ -13,8 +13,8 @@ library(igraph)
 
 calc_dist_matrices <- function(network_ind, labels=c('subseg_id','seg_id_nat'), out_ind) {
   labels <- match.arg(labels)
-  
-  network <- readRDS(sc_retrieve(network_ind))
+
+  network <- readRDS(sc_retrieve(network_ind, 'getters.yml'))
   # recombine the reach information so that what I was calling the "edges" of
   # the river network (the river reaches) become the vertices of the igraph
   # object, where the distance from one vertex to the next is the distance (or
@@ -25,7 +25,7 @@ calc_dist_matrices <- function(network_ind, labels=c('subseg_id','seg_id_nat'), 
     left_join(select(st_set_geometry(network$edges, NULL), subseg_id, subseg_length), by=c('to_subseg'='subseg_id')) %>%
     rename(from_reach=subseg_id, to_reach=to_subseg, reach_length=subseg_length) %>%
     # remove the 7 rows where a subseg_id empties to NA (the river outlets); the subseg_ids are still present in the network as to_subsegs
-    filter(!is.na(to_reach)) 
+    filter(!is.na(to_reach))
   if(labels=='seg_id_nat') {
     subseg_seg_map <- network$edges %>% st_drop_geometry() %>% select(subseg_id, seg_id_nat)
     edges <- edges %>%
@@ -37,7 +37,7 @@ calc_dist_matrices <- function(network_ind, labels=c('subseg_id','seg_id_nat'), 
     }
   }
   graph <-  igraph::graph_from_data_frame(edges, directed = TRUE) # df must contain "a symbolic edge list in the first two columns. Additional columns are considered as edge attributes"
-  
+
   dists_complete <- distances(graph, weights = edge.attributes(graph)$reach_length, mode='all') # symmetric
   dists_downstream <- distances(graph, weights = edge.attributes(graph)$reach_length, mode='out') # shortest paths FROM each vertex.
   dists_upstream <- distances(graph, weights = edge.attributes(graph)$reach_length, mode='in') # shortest paths TO each vertex (flowing upstream only)

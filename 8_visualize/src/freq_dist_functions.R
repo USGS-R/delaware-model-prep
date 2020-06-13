@@ -1,24 +1,24 @@
 get_freq_dist <- function(dat_ind, out_file) {
   # find the well-observed sites
-  dat <- readRDS(sc_retrieve(dat_ind))
+  dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
   head(dat)
-  
+
   site_meta <- group_by(dat, subseg_id) %>%
     summarize(n_dates = n())
-  
+
   obs <- seq(from = 1, to = 20000, by = 1)
   n_sites <- c()
   for (i in 1:length(obs)) {
     n_sites[i] <- length(which(site_meta$n_dates >= obs[i]))
   }
-  
+
   freq_dist <- data.frame(n_obs = obs, n_sites = n_sites)
-  
+
   saveRDS(freq_dist, out_file)
 }
 
 plot_freq_dist <- function(freq_dat, out_file, cutoffs) {
-  
+
   freq_dist <- readRDS(freq_dat)
   vsegments <- filter(freq_dist, n_obs %in% cutoffs)
 
@@ -36,10 +36,10 @@ plot_freq_dist <- function(freq_dat, out_file, cutoffs) {
               nudge_x = 0.05, size = 3) +
     labs(x = 'Days of observation', y = 'Number of stream reaches') +
     theme_bw()
-  
+
   ggsave(out_file, p, height = 4, width = 6)
-  
+
 }
 
-  
-  
+
+

@@ -5,7 +5,7 @@ select_sntemp_subsegs <- function(
   network_ind = '1_network/out/network.rds.ind',
   out_rds) {
 
-  network <- readRDS(sc_retrieve(network_ind))
+  network <- readRDS(sc_retrieve(network_ind, 'getters.yml'))
   sntemp_edges <- network$edges %>%
     mutate(end_subseg=sprintf('%dd', subseg_seg)) %>%
     filter(
@@ -20,7 +20,7 @@ select_sntemp_subsegs <- function(
 subset_dist_to_subsegs <- function(subsegs_rds, dist_ind, out_ind){
 
   subsegs <- readRDS(subsegs_rds)
-  dist_mats <- readRDS(sc_retrieve(dist_ind))
+  dist_mats <- readRDS(sc_retrieve(dist_ind, 'getters.yml'))
   subset_dists <- lapply(dist_mats, function(dist_mat) {
     subset_dist <- dist_mat[subsegs$subseg_id, ][, subsegs$subseg_id]
     colnames(subset_dist) <- subsegs$seg_id_nat
@@ -38,7 +38,7 @@ subset_sntemp_preds = function(out_file,
                                full_data_ind,
                                gd_config = 'lib/cfg/gd_config.yml'){
 
-  stream_temp_intermediates_wide <- feather::read_feather(sc_retrieve(full_data_ind))
+  stream_temp_intermediates_wide <- feather::read_feather(sc_retrieve(full_data_ind, 'getters.yml'))
 
   # subset set of seg_id_nats
   sub_net <- read_csv(sub_net_file, col_types='ccddd')
