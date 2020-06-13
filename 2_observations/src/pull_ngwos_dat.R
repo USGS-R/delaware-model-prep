@@ -1,9 +1,11 @@
 retrieve_ngwos <- function(out_ind, sites_ind) {
   # get latest NGWOS data
-  
-  
-  ngwos_meta <- readxl::read_xlsx(sc_retrieve(sites_ind))
-  
+
+
+  ngwos_meta <- readxl::read_xlsx(
+    sc_retrieve(sites_ind, 'getters.yml'), sheet=1, na=c('','NA'),
+    col_types=replace(rep('text', 20), 13:17, 'numeric'))
+
   # clean up site IDs
   # some listed as TBD and should be removed
   temp_sites <- filter(ngwos_meta, !is.na(Temp) & !(ID %in% 'TBD'))
