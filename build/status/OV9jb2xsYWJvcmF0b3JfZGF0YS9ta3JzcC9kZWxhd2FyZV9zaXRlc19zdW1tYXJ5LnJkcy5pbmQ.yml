@@ -1,13 +1,13 @@
 version: 0.3.0
 name: 9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind
 type: file
-hash: 15157a8a29dc65cf817a9e77ca882bcb
-time: 2020-05-28 18:26:24 UTC
+hash: 2ca0919e7b40a04d94fc15175369e42c
+time: 2020-06-13 20:44:07 UTC
 depends:
-  2_observations/out/all_drb_temp_obs.rds.ind: 44b7b1c4714ed08f02fd5cbc4fb7f0e8
-  2_observations/out/crosswalk_site_reach.rds.ind: b8836bde3b82691ce0e57dc54714ad1a
+  2_observations/out/all_drb_temp_obs.rds.ind: 4cd39582f6469d1659eaf3c7d35b0255
+  2_observations/out/crosswalk_site_reach.rds.ind: ebfdc1e210d1537fd47a32d61ef72e50
 fixed: 5361efc3161e699166138ed903e4ce27
 code:
   functions:
-    generate_site_summary: d216db8cfaf490d2a7b3dd93f3e700d4
+    generate_site_summary: 6b2d476aa3c7a81c028498891dff9725
 
