@@ -23,40 +23,39 @@ targets:
      - 1_network/out/network.rds.ind
      - 1_network/out/subseg_distance_matrix.rds.ind
 
-  # THESE DATA TARGETS ARE FOR REPRODUCIBILITY BUT NOT LINKED TO THE PIPELINE:
   # store the DRB network from Steve in the google drive folder and fetch it.
   # This first target only needed to be run one time:
   #1_network/in/delaware_stream_temp_by_segment.zip.ind:
   #  command: gd_confirm_posted(target_name)
-  1_network/in/delaware_stream_temp_by_segment.zip:
-    command: gd_get('1_network/in/delaware_stream_temp_by_segment.zip.ind')
+  #1_network/in/delaware_stream_temp_by_segment.zip:
+  #  command: gd_get('1_network/in/delaware_stream_temp_by_segment.zip.ind')
   1_network/in/delaware_stream_temp_by_segment/delaware_segments/delaware_segments.shp:
     command: unzip('1_network/in/delaware_stream_temp_by_segment.zip', exdir=I('1_network/in'))
-    
+
   #download reservoirs and dams from drive
   #gd_confirm targets are only used to intialize indicator files, should be left commented
   #1_network/in/dams-rev01-global-shp.zip.ind:
   #  command: gd_confirm_posted(target_name)
-  1_network/in/dams-rev01-global-shp.zip:
-    command: gd_get('1_network/in/dams-rev01-global-shp.zip.ind')
+  #1_network/in/dams-rev01-global-shp.zip:
+  #  command: gd_get('1_network/in/dams-rev01-global-shp.zip.ind')
   1_network/out/global_dams.rds.ind:
     command: zipped_shp_to_rds(out_ind = target_name,
       zip = '1_network/in/dams-rev01-global-shp.zip')
-  1_network/out/global_dams.rds:
-    command: gd_get('1_network/out/global_dams.rds.ind')
-    
+  #1_network/out/global_dams.rds:
+  #  command: gd_get('1_network/out/global_dams.rds.ind')
+
   #1_network/in/reservoirs-rev01-global-shp.zip.ind:
    # command: gd_confirm_posted(target_name)
-  1_network/in/reservoirs-rev01-global-shp.zip:
-    command: gd_get('1_network/in/reservoirs-rev01-global-shp.zip.ind')
+  #1_network/in/reservoirs-rev01-global-shp.zip:
+  #  command: gd_get('1_network/in/reservoirs-rev01-global-shp.zip.ind')
   1_network/out/global_reservoirs.rds.ind:
-    command: zipped_shp_to_rds(out_ind = target_name, 
-      zip = '1_network/in/reservoirs-rev01-global-shp.zip')
-  1_network/out/global_reservoirs.rds:
-    command: gd_get('1_network/out/global_reservoirs.rds.ind')
- 
- 
-    
+    command: zipped_shp_to_rds(out_ind = target_name,
+      zip_ind = '1_network/in/reservoirs-rev01-global-shp.zip.ind')
+  #1_network/out/global_reservoirs.rds:
+  #  command: gd_get('1_network/out/global_reservoirs.rds.ind')
+
+
+
   # download and indicate the national geospatial fabric.
   # comes from ScienceBase: https://www.sciencebase.gov/catalog/item/5362b683e4b0c409c6289bf6
   1_network/in/GeospatialFabric_National.gdb.ind:
@@ -68,8 +67,8 @@ targets:
       subset_network = I('1_network/in/delaware_stream_temp_by_segment/delaware_segments/delaware_segments.shp'),
       national_network = I('1_network/in/GeospatialFabric_National.gdb'))
 
-  1_network/out/network.rds:
-    command: gd_get('1_network/out/network.rds.ind')
+  #1_network/out/network.rds:
+  #  command: gd_get('1_network/out/network.rds.ind')
 
   1_network/out/boundary.rds.ind:
     command: create_boundary(
@@ -77,30 +76,30 @@ targets:
       subset_network = I('1_network/in/delaware_stream_temp_by_segment/delaware_segments/delaware_segments.shp'),
       national_network = I('1_network/in/GeospatialFabric_National.gdb'))
 
-  1_network/out/boundary.rds:
-    command: gd_get('1_network/out/boundary.rds.ind')
+  #1_network/out/boundary.rds:
+  #  command: gd_get('1_network/out/boundary.rds.ind')
 
   # generate network distance matrix
 
   1_network/out/subseg_distance_matrix.rds.ind:
     command: calc_dist_matrices(network_ind = '1_network/out/network.rds.ind', out_ind = target_name)
 
-  1_network/out/subseg_distance_matrix.rds:
-    command: gd_get('1_network/out/subseg_distance_matrix.rds.ind')
-    
-    
-  #intersect reservoirs and reaches  
+  #1_network/out/subseg_distance_matrix.rds:
+  #  command: gd_get('1_network/out/subseg_distance_matrix.rds.ind')
+
+
+  #intersect reservoirs and reaches
   1_network/out/filtered_dams_reservoirs.rds.ind:
-    command: filter_dams_reservoirs_by_boundary(out_ind = target_name, 
+    command: filter_dams_reservoirs_by_boundary(out_ind = target_name,
       dams_shp_ind = '1_network/out/global_dams.rds.ind',
       reservoirs_shp_ind = '1_network/out/global_reservoirs.rds.ind',
       boundary_ind = '1_network/out/boundary.rds.ind')
-  1_network/out/filtered_dams_reservoirs.rds:
-    command: gd_get('1_network/out/filtered_dams_reservoirs.rds.ind')
-      
+  #1_network/out/filtered_dams_reservoirs.rds:
+  #  command: gd_get('1_network/out/filtered_dams_reservoirs.rds.ind')
+
   1_network/out/subseg_reservoir_mapping.rds.ind:
     command: intersect_network_with_reservoirs(out_ind = target_name,
       stream_network_ind = '1_network/out/network.rds.ind',
       dams_reservoirs_ind = '1_network/out/filtered_dams_reservoirs.rds.ind')
-  1_network/out/subseg_reservoir_mapping.rds:
-    command: gd_get('1_network/out/subseg_reservoir_mapping.rds.ind')
+  #1_network/out/subseg_reservoir_mapping.rds:
+  #  command: gd_get('1_network/out/subseg_reservoir_mapping.rds.ind')
