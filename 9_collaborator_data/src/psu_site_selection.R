@@ -1,37 +1,51 @@
 # pull data for penn state peeps
 filter_sites <- function(geo_dat, dat_ind, years, obs_per_year, min_drainage, max_drainage, out_file) {
-  # first find sites that are highly observed
-  cross <- readRDS(sc_retrieve(dat_ind)) %>%
-    select(subseg_id, seg_id_nat) %>% distinct()
+  dat_raw <- readRDS(sc_retrieve(dat_ind, 'getters.yml')) %>%
+    filter(date < as.Date('2017-01-01'))
+
+  # extract a crosswalk/reach info table. include a comma-separated list of all
+  # monitoring sites that contributed at least one observation at a reach.
+  cross <- dat_raw %>%
+    select(subseg_id, seg_id_nat, site_id) %>%
+    distinct() %>%
+    group_by(subseg_id, seg_id_nat) %>%
+    summarize(site_ids =
+      strsplit(site_id, ', ', fixed=TRUE) %>%
+        unlist() %>%
+        table() %>%
+        sort(decreasing=TRUE) %>%
+        names() %>%
+        paste(collapse=', ')
+    )
 
   # get site metadata from national layer
   geo <- sf::read_sf(geo_dat, layer='nsegmentNationalIdentifier') %>%
     filter(seg_id_nat %in% cross$seg_id_nat)
 
-  dat <- readRDS(sc_retrieve(dat_ind)) %>%
+  obs_counts_total <- dat_raw %>%
     group_by(subseg_id) %>%
     summarize(n_dates = n())
 
-  dat_years <- readRDS(sc_retrieve(dat_ind)) %>%
+  obs_counts_annual <- dat_raw %>%
     mutate(year = lubridate::year(date)) %>%
     filter(year >=1980) %>%
     group_by(subseg_id, year) %>%
     summarize(n_per_year = n())
 
-  # how about -- 10 years with >150 days (5 months) of obs?
-  dat_filtered <- dat_years %>%
+  # filter by number of years with a min number of obs per year
+  dat_filtered <- obs_counts_annual %>%
     filter(n_per_year >= obs_per_year) %>%
     group_by(subseg_id) %>%
-    summarize(n_years_5months = n()) %>%
+    summarize(n_hiobs_years = n()) %>%
     ungroup() %>%
-    filter(n_years_5months >= years) %>%
-    left_join(cross) %>%
-    left_join(dat) %>%
-    left_join(select(geo, MAX_CUMDRAINAG, seg_id_nat)) %>%
+    filter(n_hiobs_years >= years) %>%
+    left_join(cross, by='subseg_id') %>%
+    left_join(obs_counts_total, by='subseg_id') %>%
+    left_join(select(geo, MAX_CUMDRAINAG, seg_id_nat), by='seg_id_nat') %>%
+    select(subseg_id, seg_id_nat, site_ids, n_hiobs_years, n_dates, everything()) %>%
     arrange(MAX_CUMDRAINAG) %>%
     mutate(rank = 1:n())
 
-  # 27 sites
   # now take off tails (really small, really big)
   normal_sized <- filter(dat_filtered, MAX_CUMDRAINAG > min_drainage & MAX_CUMDRAINAG < max_drainage)
 
@@ -49,8 +63,8 @@ write_sites <- function(dat, out_ind) {
 map_highly_obs <- function(dat, cross_ind, network_ind, out_file, title) {
 
   sites <- readRDS(dat)
-  drb_net <- readRDS(sc_retrieve(network_ind))
-  crosswalk_sf <- readRDS(sc_retrieve(cross_ind)) %>%
+  drb_net <- readRDS(sc_retrieve(network_ind, 'getters.yml'))
+  crosswalk_sf <- readRDS(sc_retrieve(cross_ind, 'getters.yml')) %>%
     st_as_sf(coords = c('longitude', 'latitude'), crs = 4326) %>%
     filter(seg_id_nat %in% unique(sites$seg_id_nat)) %>%
     distinct(seg_id_nat, geometry, .keep_all = TRUE)
@@ -75,9 +89,9 @@ map_highly_obs <- function(dat, cross_ind, network_ind, out_file, title) {
 # plot upstream reaches from POI
 plot_upstream <- function(POIs, dist_mat_ind, labels=c('subseg_id','seg_id_nat'), network_ind) {
 
-  dist_mat <- readRDS(sc_retrieve(dist_mat_ind))
+  dist_mat <- readRDS(sc_retrieve(dist_mat_ind, 'getters.yml'))
   dist_mat <- dist_mat$upstream
-  network <- readRDS(sc_retrieve(network_ind))
+  network <- readRDS(sc_retrieve(network_ind, 'getters.yml'))
 
   labels <- match.arg(labels)
 
@@ -324,7 +338,7 @@ write_distance <- function(dat, dist_type='updown', out_ind) {
 dist_heatmap2 <- function(dist_ind, dist_type='updown', labels=c('subseg_id','seg_id_nat'), title, out_file) {
 
   labels <- match.arg(labels)
-  dat <- readRDS(sc_retrieve(dist_ind))[[dist_type]]
+  dat <- readRDS(sc_retrieve(dist_ind, 'getters.yml'))[[dist_type]]
 
   dat_df <- as_tibble(dat) %>%
     mutate(from_reach=rownames(dat)) %>%
@@ -361,8 +375,8 @@ dist_heatmap2 <- function(dist_ind, dist_type='updown', labels=c('subseg_id','se
   return(g)
 }
 
-get_upstream_sites <- function(dist_ind, network_ind, sites, geo_dat, out_file) {
-  dist <- readRDS(sc_retrieve(dist_ind))
+get_upstream_sites <- function(dist_ind, network_ind, sites, azrh_file, geo_dat, out_file) {
+  dist <- readRDS(sc_retrieve(dist_ind, 'getters.yml'))
   dist <- dist$upstream
   sites <- readRDS(sites)
 
@@ -381,7 +395,7 @@ get_upstream_sites <- function(dist_ind, network_ind, sites, geo_dat, out_file) 
     arrange(outlet_subseg)
 
   # translate to national IDs
-  network <- readRDS(sc_retrieve(network_ind))
+  network <- readRDS(sc_retrieve(network_ind, 'getters.yml'))
   network <- network$edges %>% dplyr::select(subseg_id, seg_id_nat) %>% sf::st_drop_geometry()
   dist_dat_nat <- dist_dat %>%
     left_join(rename(network, outlet = seg_id_nat), by = c('outlet_subseg' = 'subseg_id')) %>%
@@ -407,14 +421,18 @@ get_upstream_sites <- function(dist_ind, network_ind, sites, geo_dat, out_file) 
       length_m = Shape_Length, # length of the segment in m
       MAX_CUMDRAINAG) %>%
     sf::st_drop_geometry()
+  geo_azrh <- readr::read_csv(azrh_file, col_types='id') %>%
+    rename(seg_id_nat = `$id`)
   geo_united <- geo_segs %>%
     filter(seg_id_nat %in% dist_dat_nat$seg_id_nat) %>%
     left_join(geo_hrus, by=c('seg_id'='hru_segment', 'region')) %>%
+    left_join(geo_azrh, by='seg_id_nat') %>%
     mutate(area_m2 = ifelse(is.na(area_m2), 0, area_m2)) %>% # there are 15 segments with no associated HRUs
     group_by(seg_id_nat) %>%
     summarize(
       hrus_area_km2 = sum(area_m2)/1000000,
-      seg_length_km = unique(length_m)/1000)
+      seg_length_km = unique(length_m)/1000,
+      seg_azrh_rad = unique(azrh))
 
   dist_dat_nat_geo <- dist_dat_nat %>%
     left_join(geo_united, by='seg_id_nat')
@@ -423,7 +441,7 @@ get_upstream_sites <- function(dist_ind, network_ind, sites, geo_dat, out_file) 
 }
 
 filter_obs <- function(dat_ind, subset, out_ind) {
-  dat <- readRDS(sc_retrieve(dat_ind))
+  dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
   subset_sites <- readRDS(subset)
 
   filt_dat <- filter(dat, seg_id_nat %in% unique(subset_sites$seg_id_nat))

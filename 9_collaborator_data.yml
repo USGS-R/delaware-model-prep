@@ -31,6 +31,7 @@ targets:
      - 9_collaborator_data/umn/obs_flow_full.csv.ind
      - 9_collaborator_data/umn/obs_flow_subset.csv.ind
      - 9_collaborator_data/psu/highly_observed_sites.csv.ind
+     - 9_collaborator_data/psu/highly_observed_map.png
      - 9_collaborator_data/psu/highly_obs_distance_matrix.csv.ind
      - 9_collaborator_data/psu/highly_obs_distance_heatmap.png
      - 9_collaborator_data/psu/sntemp_preds_aggregated.feather.ind
@@ -47,16 +48,10 @@ targets:
       dat_ind = '2_observations/out/all_drb_temp_obs.rds.ind',
       crosswalk_ind = '2_observations/out/crosswalk_site_reach.rds.ind')
 
-  9_collaborator_data/mkrsp/delaware_sites_summary.rds:
-    command: gd_get('9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind')
-
   # convert summary to geojson
 
   9_collaborator_data/mkrsp/delaware_sites_summary.geojson.ind:
     command: generate_site_geojson(summary_ind = '9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind', out_ind = target_name)
-
-  9_collaborator_data/mkrsp/delaware_sites_summary.geojson:
-    command: gd_get('9_collaborator_data/mkrsp/delaware_sites_summary.geojson.ind')
 
   ###### University of Minnesota #####
   # also should include:
@@ -79,8 +74,6 @@ targets:
       subsegs_rds = '9_collaborator_data/umn/sntemp_segs.rds',
       dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       out_ind = target_name)
-  9_collaborator_data/umn/distance_matrix.rds:
-    command: gd_get('9_collaborator_data/umn/distance_matrix.rds.ind')
 
   # networks and distance matrices
   # npy version of distance matrix - this target seems to rebuild a few times if given the chance. huh.
@@ -89,9 +82,6 @@ targets:
       dist_mat_ind = '9_collaborator_data/umn/distance_matrix.rds.ind',
       out_ind = target_name)
 
-  9_collaborator_data/umn/distance_matrix.npz:
-    command: gd_get('9_collaborator_data/umn/distance_matrix.npz.ind')
-
   9_collaborator_data/umn/network_subset.rds.ind:
     command: make_subnetwork(
       out_ind = target_name,
@@ -99,9 +89,6 @@ targets:
       network_ind = '1_network/out/network.rds.ind',
       distance_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       summary_ind = '9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind')
-
-  9_collaborator_data/umn/network_subset.rds:
-    command: gd_get('9_collaborator_data/umn/network_subset.rds.ind')
 
   # create distance matrix of subset
   9_collaborator_data/umn/network_subset_sntemp_segs.rds:
@@ -114,22 +101,13 @@ targets:
       dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       out_ind = target_name)
 
-  9_collaborator_data/umn/distance_matrix_subset.rds:
-    command: gd_get('9_collaborator_data/umn/distance_matrix_subset.rds.ind')
-
   # npy version of distance matrix_subset
   9_collaborator_data/umn/distance_matrix_subset.npz.ind:
     command: save_dist_matrices(dist_mat_ind = '9_collaborator_data/umn/distance_matrix_subset.rds.ind', out_ind = target_name)
 
-  9_collaborator_data/umn/distance_matrix_subset.npz:
-    command: gd_get('9_collaborator_data/umn/distance_matrix_subset.npz.ind')
-
   # temp data
   9_collaborator_data/umn/obs_temp_full.csv.ind:
     command: write_to_csv(dat_ind = '2_observations/out/obs_temp_drb.rds.ind', out_ind = target_name)
-
-  9_collaborator_data/umn/obs_temp_full.csv:
-    command: gd_get('9_collaborator_data/umn/obs_temp_full.csv.ind')
 
   9_collaborator_data/umn/obs_temp_subset.csv.ind:
     command: filter_subset(
@@ -137,24 +115,15 @@ targets:
       subnet_ind = '9_collaborator_data/umn/network_subset.rds.ind',
       out_ind = target_name)
 
-  9_collaborator_data/umn/obs_temp_subset.csv:
-    command: gd_get('9_collaborator_data/umn/obs_temp_subset.csv.ind')
-
   # flow_data
   9_collaborator_data/umn/obs_flow_full.csv.ind:
     command: write_to_csv(dat_ind = '2_observations/out/obs_flow_drb.rds.ind', out_ind = target_name)
-
-  9_collaborator_data/umn/obs_flow_full.csv:
-    command: gd_get('9_collaborator_data/umn/obs_flow_full.csv.ind')
 
   9_collaborator_data/umn/obs_flow_subset.csv.ind:
     command: filter_subset(
       dat_ind = '2_observations/out/obs_flow_drb.rds.ind',
       subnet_ind = '9_collaborator_data/umn/network_subset.rds.ind',
       out_ind = target_name)
-
-  9_collaborator_data/umn/obs_flow_subset.csv:
-    command: gd_get('9_collaborator_data/umn/obs_flow_subset.csv.ind')
 
   #### Penn State ####
   9_collaborator_data/psu/highly_observed_sites.rds:
@@ -170,9 +139,6 @@ targets:
   9_collaborator_data/psu/highly_observed_sites.csv.ind:
     command: write_sites(dat = '9_collaborator_data/psu/highly_observed_sites.rds', out_ind = target_name)
 
-  9_collaborator_data/psu/highly_observed_sites.csv:
-    command: gd_get('9_collaborator_data/psu/highly_observed_sites.csv.ind')
-
   9_collaborator_data/psu/highly_observed_map.png:
     command: map_highly_obs(
       out_file = target_name,
@@ -187,18 +153,12 @@ targets:
       dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       out_ind = target_name)
 
-  9_collaborator_data/psu/highly_obs_distance_matrix.rds:
-    command: gd_get('9_collaborator_data/psu/highly_obs_distance_matrix.rds.ind')
-
   # this target builds a few times for some reason
   9_collaborator_data/psu/highly_obs_distance_matrix.csv.ind:
     command: write_distance(
       out_ind = target_name,
       dat = '9_collaborator_data/psu/highly_obs_distance_matrix.rds',
       dist_type = I('updown'))
-
-  9_collaborator_data/psu/highly_obs_distance_matrix.csv:
-    command: gd_get('9_collaborator_data/psu/highly_obs_distance_matrix.csv')
 
   9_collaborator_data/psu/highly_obs_distance_heatmap.png:
     command: dist_heatmap2(
@@ -208,12 +168,18 @@ targets:
       labels = I('subseg_id'),
       title = I('Full Network - Upstream & Downstream'))
 
+  9_collaborator_data/psu/prms_azrh.csv:
+    command: download.file(
+      destfile = target_name,
+      url = I('https://raw.githubusercontent.com/nhm-params-v10-usgs/nhmparamdb_v10_CONUS/434d5da5c4f5a1184d4bd07839322ab1bcb4c3c5/azrh.csv'))
+
   9_collaborator_data/psu/high_obs_upstream_sites.csv:
     command: get_upstream_sites(
       out_file = target_name,
       dist_ind = '1_network/out/subseg_distance_matrix.rds.ind',
       network_ind = '1_network/out/network.rds.ind',
       sites = '9_collaborator_data/psu/highly_observed_sites.rds',
+      azrh_file = '9_collaborator_data/psu/prms_azrh.csv',
       geo_dat = I('1_network/in/GeospatialFabric_National.gdb'))
 
   9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather:
@@ -227,8 +193,6 @@ targets:
       ind_file = target_name,
       sub_net_file ='9_collaborator_data/psu/high_obs_upstream_sites.csv',
       subset_data_file = '9_collaborator_data/psu/sntemp_preds_high_obs_sites.feather')
-  9_collaborator_data/psu/sntemp_preds_aggregated.feather:
-    command: gd_get('9_collaborator_data/psu/sntemp_preds_aggregated.feather.ind')
 
   9_collaborator_data/psu/temp_obs_high_obs_sites.csv.ind:
     command: filter_obs(
@@ -236,15 +200,9 @@ targets:
       subset = '9_collaborator_data/psu/highly_observed_sites.rds',
       out_ind = target_name)
 
-  9_collaborator_data/psu/temp_obs_high_obs_sites.csv:
-    command: gd_get('9_collaborator_data/psu/temp_obs_high_obs_sites.csv.ind')
-
   9_collaborator_data/psu/flow_obs_high_obs_sites.csv.ind:
     command: filter_obs(
       dat_ind = '2_observations/out/obs_flow_drb.rds.ind',
       subset = '9_collaborator_data/psu/highly_observed_sites.rds',
       out_ind = target_name)
-
-  9_collaborator_data/psu/flow_obs_high_obs_sites.csv:
-    command: gd_get('9_collaborator_data/psu/flow_obs_high_obs_sites.csv.ind')
 

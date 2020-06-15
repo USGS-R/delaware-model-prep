@@ -1,5 +1,5 @@
 revise_raw_network <- function(subset_network, national_network, out_ind) {
-  
+
   # Read in the Delaware PRMS-stream_temp stream network and the GF
   del_prms <- sf::read_sf(subset_network)
   #sf::st_layers('data/GeospatialFabric_National.gdb') # POIs, one, nhdflowline_en, nhdflowline, regionOutletDA, nhruNationalIdentifier, nsegmentNationalIdentifier
@@ -7,19 +7,19 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
     filter(seg_id_nat %in% del_prms$seg_id_nat) %>%
     mutate(to_seg = ifelse(tosegment == 0, NA, tosegment)) %>% # tosegment is the downstream segment to which water flows next. replace 0 (none next) with NA
     select(seg_id_nat, seg_id, to_seg, region)
-  
+
   gf_points <- sf::read_sf(national_network, layer='POIs') %>%
     filter(poi_gage_segment %in% gf_reaches$seg_id & region == '02') %>%
     select(GNIS_ID, GNIS_NAME, REACHCODE, seg_id = poi_gage_segment)
-  
-  
+
+
   # inspect. lessons:
   # (1) everything is in region 02, which we used above in filtering gf_points
   gf_reaches %>% pull(region) %>% table()
-  
+
   # Modify reaches according to lessons learned
   gf_reaches[gf_reaches$seg_id == 357, 'to_seg'] <- NA # there's a huge gap between the two reaches
-  
+
   # Augment gf_reaches with all end points of all reaches. I initially tried to
   # find points in gf_points, but at least one doesn't exist (the outlet to 155)
   # and I realized what I wanted most was the end points anyway.
@@ -29,7 +29,7 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
       end_points <- reach[1,] %>% {st_cast(sf::st_geometry(.), "POINT")} %>% {c(head(.,1),tail(.,1))}
       return(end_points)
     }))
-  
+
   reaches_bounded <- reaches_bounded %>%
     mutate(
       which_end_up = sapply(seg_id, function(segid) {
@@ -47,13 +47,13 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
       up_point = purrr::map2(end_points, which_end_up, function(endpoints, whichendup) { endpoints[[whichendup]] }),
       down_point = purrr::map2(end_points, which_end_up, function(endpoints, whichendup) { endpoints[[c(1,2)[-whichendup]]] })) %>%
     select(-end_points)
-  
+
   # split reaches into segments where necessary so that every pair of points is
   # connected by a segment, and no segments pass through and beyond a point
   reach_net_info <- lapply(unique(reaches_bounded$seg_id), function(segid) {
     reach <- filter(reaches_bounded, seg_id == segid)
     from_reaches <- filter(reaches_bounded, to_seg == reach$seg_id)
-    
+
     reach_points <- tibble(
       point_raw = c(reach$up_point, from_reaches$down_point, reach$down_point),
       pt_seg = c(segid, from_reaches$seg_id, segid),
@@ -62,7 +62,7 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
       st_set_geometry('point_snapped') %>%
       st_set_crs(st_crs(reach)) %>%
       mutate(point_id = sprintf('%d%s', pt_seg, substring(pt_seg_flowend, 1, 1)))
-    
+
     # split the reach into segments between neighboring pairs of points
     net_geoms <- lwgeom::st_split(st_geometry(reach), st_geometry(reach_points)) %>%
       st_collection_extract("LINESTRING")
@@ -79,7 +79,7 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
         })) # 'left' and 'right' are positions within the linestring
     net_vertices <- net_edges %>% # one row per edge end (non-unique vertex) but geometry is still the edge
       gather('subseg_lineend', 'point', left, right)
-    
+
     # navigate the set of subsegments by point to figure out their order
     start_point <- filter(reach_points, pt_seg_flowend == 'up')
     # vertex_order will contain indices into net_vertices, ordered from upstream to downstream
@@ -110,14 +110,14 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
       arrange(vertex_order) %>%
       mutate(
         subseg_updown=paste(substring(subseg_lineend,1,1), collapse=''), # lr means left side of linestring is upstream, flows to right side = downstream
-        pt_subseg_flowend=ifelse(substring(subseg_updown,1,1) == substring(subseg_lineend,1,1), 'up', 'down')) %>% 
+        pt_subseg_flowend=ifelse(substring(subseg_updown,1,1) == substring(subseg_lineend,1,1), 'up', 'down')) %>%
       ungroup() %>%
       select(subseg_id, subseg_seg, subseg_updown, geometry, pt_subseg_flowend, point)
-    
+
     # join with info about how these subsegment endpoints relate to the original network
     net_vertices_ord_sf <- st_set_crs(do.call(c, net_vertices_ordered$point), st_crs(reach)) # format REORDERED vertex points for computing distances to reach points
     net_dists <- st_distance(net_vertices_ord_sf, reach_points) # row = net_vertex_ordered, col=reach_point
-    net_info_flat <- net_vertices_ordered %>% 
+    net_info_flat <- net_vertices_ordered %>%
       mutate(reach_point_matches = lapply(seq_len(nrow(net_dists)), function(i) {
         which(net_dists[i,] < units::set_units(1, 'm')) # find essentially equal points. should be completely equal (dist = 0, but be tolerant)
       })) %>%
@@ -125,7 +125,7 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
       mutate(point_id = reach_points$point_id[reach_point_matches]) %>%
       left_join(st_drop_geometry(reach_points), by='point_id') %>%
       select(-reach_point_matches)
-    
+
     # pull out a table of unique vertices, weeding out duplication in (1)
     # original reach endpoints or contributing reach end points and (2) the end
     # and start of subsequent line subsegments generated in this loop
@@ -143,7 +143,7 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
         ends_subseg = if(any(pt_subseg_flowend=='down')) subseg_id[pt_subseg_flowend=='down'] else as.character(NA)) %>%
       { st_set_geometry(., st_set_crs(do.call(st_sfc, .$point_geom), st_crs(reach))) } %>%
       select(-point_geom)
-    
+
     # pull out a table of unique edges (subsegments)
     net_edges_dups <- net_info_flat %>%
       group_by(subseg_id) %>%
@@ -162,10 +162,10 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
         to_subseg = c(subseg_id[-1], ''),
         subseg_length = st_length(geometry)) %>%
       select(subseg_id, subseg_seg, subseg_updown, subseg_length, starts_with_pts, ends_with_pts, from_segs, to_seg, to_subseg, geometry)
-    
-    return(list(vertices=net_vertices_final, edges=net_edges_final))  
+
+    return(list(vertices=net_vertices_final, edges=net_edges_final))
   })
-  
+
   # create vertex table from reach_net_info, then remove duplicates and
   # consolidate info in starts_subseg and ends_subseg
   reach_net_vertices <- do.call(rbind, lapply(reach_net_info, `[[`, 'vertices')) %>%
@@ -178,7 +178,7 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
       point_ids = paste(sort(unique(unlist(strsplit(point_ids, ';')))), collapse=';'),
       starts_subseg = paste(unique(na.exclude(starts_subseg)), collapse=';'), # should only be 0 or 1 per row, but this paste() turns 0 into ''
       ends_subseg = paste(sort(unique(na.exclude(ends_subseg))), collapse=';'))
-  
+
   # Edge table needs more infor on to_subseg that can only be acquired now that we
   # have all the subsegs prepared. For each subseg, find out which seg it feeds
   # into and identify the specific subseg it feeds to
@@ -211,7 +211,7 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
       ends_with_pts = paste(grep(sprintf('(^|;)(%s)(;|$)', ends_with_pts), reach_net_vertices$point_ids, value=TRUE), collapse=';')) %>%
     ungroup() %>%
     rename(start_pt=starts_with_pts, end_pt=ends_with_pts)# it's really just one point at each end of each subseg
-  
+
   # For plotting's sake, augment reach info with connections to the upstream reaches. In each row of
   # reaches_updown (an edge in the graph), the outlet (pour point) of from_seg is the upstream point, seg_id is used as
   # the ID of the segment's downstream-most point, and the segment
@@ -223,7 +223,7 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
     left_join(
       reach_key_info %>% st_set_geometry(NULL) %>% select(prev_subseg = subseg_id, subseg_id = to_subseg),
       by = 'subseg_id')
-  
+
   # add seg_id_nat back into the reaches table
   reach_net_edges_nat <- reach_net_edges %>%
     mutate(last_in_seg = mapply(function(ss_s, e_p) { grepl(sprintf('(^|;)%dd($|;)', ss_s), e_p) }, subseg_seg, end_pt)) %>%
@@ -236,27 +236,27 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
   reach_net <- list(
     edges = reach_net_edges_nat,
     vertices = reach_net_vertices)
-  
+
   saveRDS(reach_net, as_data_file(out_ind))
   gd_put(out_ind)
 }
 
 create_boundary <- function(subset_network, national_network, out_ind) {
-  
+
   # Read in the Delaware PRMS-stream_temp stream network and the GF
   del_prms <- sf::read_sf(subset_network)
 
   gf_reaches <- sf::read_sf(national_network, layer='nsegmentNationalIdentifier') %>%
     filter(seg_id_nat %in% del_prms$seg_id_nat) # confirmed: gf_reaches$Shape_Length == round(sf::st_length(gf_reaches))
-  
+
   gf_catchments <- sf::read_sf(national_network, layer='nhruNationalIdentifier') %>%
     filter(POI_ID %in% gf_reaches$POI_ID) %>%
-    sf::st_make_valid()
-  
+    lwgeom::st_make_valid()
+
   # Create, plot, and save a boundary of the full Delaware River Basin (DRB)
   gf_boundary <- st_union(gf_catchments) %>%
     smoothr::fill_holes(threshold = units::set_units(100, km^2))
-  
+
   saveRDS(gf_boundary, as_data_file(out_ind))
   gd_put(out_ind)
 
@@ -267,28 +267,28 @@ create_boundary <- function(subset_network, national_network, out_ind) {
 
 #' Subset to just a portion of the network
 #'
-#' The goal of this function is to subset the network to provide a smaller set of 
+#' The goal of this function is to subset the network to provide a smaller set of
 #' reaches and data to provide to collaborators.
 #'
 #' @param lower_reach seg_id of lowest reach in the intended sub-network
-#' @param exclude_reaches 
+#' @param exclude_reaches
 #' @param network_ind indicator file of full network from which to subset
 #' @param dists indicator file of distance matrix
 #' @param labels
-#' @return 
+#' @return
 #' @examples
 #' reaches <- readRDS('out/network_full.rds')$edges
 #' vertices <- readRDS('out/network_full.rds')$vertices
 #' sites <- drb_sites # build drb_sites in map_sites_to_reaches.R
 
-make_subnetwork <- function(lower_reach, exclude_reaches = c(), 
+make_subnetwork <- function(lower_reach, exclude_reaches = c(),
                             network_ind, distance_ind, summary_ind, labels=c('subseg_id','seg_id_nat'), out_ind) {
   labels <- match.arg(labels)
-  
-  dists <- readRDS(sc_retrieve(distance_ind))
-  drb_net <- readRDS(sc_retrieve(network_ind))
-  summary <- readRDS(sc_retrieve(summary_ind))
-  
+
+  dists <- readRDS(sc_retrieve(distance_ind, 'getters.yml'))
+  drb_net <- readRDS(sc_retrieve(network_ind, 'getters.yml'))
+  summary <- readRDS(sc_retrieve(summary_ind, 'getters.yml'))
+
   up_from_lowermost <- names(which(dists$upstream[lower_reach,] < Inf))
   if(length(exclude_reaches) > 0) {
     up_from_uppermost <- unlist(lapply(exclude_reaches, function(exclude_point) {
@@ -305,18 +305,18 @@ make_subnetwork <- function(lower_reach, exclude_reaches = c(),
   }
   subnet_reaches <- subnet_reaches %>% mutate(to_subseg = ifelse(subseg_id==lower_reach, NA, to_subseg))
   subnet_points <- filter(drb_net$vertices, point_ids %in% c(subnet_reaches$end_pt, subnet_reaches$start_pt))
-  
+
   subnet <- list(edges=subnet_reaches, vertices=subnet_points, lower_reach=lower_reach, exclude_reaches=exclude_reaches)
   # print out a map and some network statistics
   explore_subnetwork(subnet = subnet, crosswalk = summary, drb_net = drb_net)
-  
+
   # write subnet
   saveRDS(subnet, as_data_file(out_ind))
   gd_put(out_ind)
   }
 
 explore_subnetwork <- function(subnet, crosswalk, drb_net) {
-  
+
   crosswalk_sf <- st_as_sf(crosswalk, coords = c('longitude', 'latitude'), crs = 4326)
   g <- ggplot(drb_net$edges) + geom_sf(color='lightgray') +
     geom_sf(data=subnet$edges, color='seagreen') +
@@ -326,27 +326,27 @@ explore_subnetwork <- function(subnet, crosswalk, drb_net) {
     theme_bw() +
     ggtitle('Filtered by bird and fish distance; showing observation counts')
   print(g)
-  
+
   message(sprintf('%d edges, %d vertices', nrow(subnet$vertices), nrow(subnet$edges)))
-  
+
   obs_count <- subnet$edges %>%
     st_drop_geometry() %>%
     left_join(st_drop_geometry(crosswalk_sf), by=c('subseg_id' = 'matched_subseg_id')) %>%
     group_by(subseg_seg) %>%
     summarize(n_sites=length(which(!is.na(site_id))), n_obs=sum(n_obs))
-  
+
   message(sprintf('%d observed reaches, %d observations total', length(which(obs_count$n_sites > 0)), sum(obs_count$n_obs, na.rm=TRUE)))
-  
+
 }
 
 
 plot_subnet <- function(subnet_ind, network_ind, crosswalk_ind, out_file) {
- 
-  network <- readRDS(sc_retrieve(network_ind))
-  subnet <- readRDS(sc_retrieve(subnet_ind))
-  crosswalk <- readRDS(sc_retrieve(crosswalk_ind))
-  
-  just_beyonds <- network$edges %>% 
+
+  network <- readRDS(sc_retrieve(network_ind, 'getters.yml'))
+  subnet <- readRDS(sc_retrieve(subnet_ind, 'getters.yml'))
+  crosswalk <- readRDS(sc_retrieve(crosswalk_ind, 'getters.yml'))
+
+  just_beyonds <- network$edges %>%
     filter(start_pt %in% subnet$vertices$point_ids | end_pt %in% subnet$vertices) %>%
     filter(!subseg_id %in% subnet$edges$subseg_id)
   g <- ggplot(subnet$edges) + geom_sf(color='gold') +
@@ -356,7 +356,7 @@ plot_subnet <- function(subnet_ind, network_ind, crosswalk_ind, out_file) {
     scale_color_brewer('Number of Observations', palette=3) +
     theme_bw() +
     ggtitle('Filtered by bird and fish distance; showing observation counts')
-  
+
   ggsave(out_file, g, width=7, height=6)
 
 }

@@ -1,12 +1,12 @@
 version: 0.3.0
 name: 9_collaborator_data/umn/distance_matrix.npz.ind
 type: file
-hash: c5849663a64bd3a2331b4eb9c2162919
-time: 2020-05-29 12:15:17 UTC
+hash: 45ab2c6f58d9d126b33f2b9ebd193ab1
+time: 2020-06-13 19:28:42 UTC
 depends:
-  9_collaborator_data/umn/distance_matrix.rds.ind: 28c250cdd4bb3646476fa67ff9f36e14
+  9_collaborator_data/umn/distance_matrix.rds.ind: 2bb5658f7fe6f4f22a8033787c620aae
 fixed: 894b115ec1bf351eb2fef0659e75b1db
 code:
   functions:
-    save_dist_matrices: b272883a4caedbae148d90e556f75346
+    save_dist_matrices: 0799f1d7085de5a6473428c782f36a46
 

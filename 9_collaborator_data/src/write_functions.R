@@ -1,12 +1,12 @@
 write_to_csv <- function(dat_ind, out_ind) {
-  dat <- readRDS(sc_retrieve(dat_ind))
+  dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
   readr::write_csv(dat, as_data_file(out_ind))
   gd_put(out_ind)
 }
 
 filter_subset <- function(dat_ind, subnet_ind, out_ind) {
-  dat <- readRDS(sc_retrieve(dat_ind))
-  subnet <- readRDS(sc_retrieve(subnet_ind))
+  dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
+  subnet <- readRDS(sc_retrieve(subnet_ind, 'getters.yml'))
 
   subnet_dat <- filter(dat, seg_id_nat %in% unique(subnet$edges$seg_id_nat))
 
@@ -18,7 +18,7 @@ filter_subset <- function(dat_ind, subnet_ind, out_ind) {
 save_dist_matrices <- function(dist_mat_ind, out_ind) {
   np <- reticulate::import('numpy')
 
-  dist_mat_list <- readRDS(sc_retrieve(dist_mat_ind))
+  dist_mat_list <- readRDS(sc_retrieve(dist_mat_ind, 'getters.yml'))
 
   out_file <- as_data_file(out_ind)
   np$savez_compressed(
