@@ -10,19 +10,16 @@ targets:
   #### 1_network ####
 
   # store the DRB network from Steve in the google drive folder and fetch it.
-  # This first target only needed to be run one time:
-  #1_network/in/delaware_stream_temp_by_segment.zip.ind:
-  #  command: gd_confirm_posted(target_name)
+  # ind file created with gd_confirm_posted('1_network/in/delaware_stream_temp_by_segment.zip.ind')
   1_network/in/delaware_stream_temp_by_segment.zip:
     command: gd_get('1_network/in/delaware_stream_temp_by_segment.zip.ind')
-  #download reservoirs and dams from drive
-  #gd_confirm targets are only used to intialize indicator files, should be left commented
-  #1_network/in/dams-rev01-global-shp.zip.ind:
-  #  command: gd_confirm_posted(target_name)
+  # we downloaded/uploaded reservoirs and dams to Drive.
+  # ind file created with gd_confirm_posted('1_network/in/dams-rev01-global-shp.zip.ind')
   1_network/in/dams-rev01-global-shp.zip:
     command: gd_get('1_network/in/dams-rev01-global-shp.zip.ind')
   1_network/out/global_dams.rds:
     command: gd_get('1_network/out/global_dams.rds.ind')
+  # ind file created with gd_confirm_posted('1_network/in/reservoirs-rev01-global-shp.zip.ind')
   1_network/in/reservoirs-rev01-global-shp.zip:
     command: gd_get('1_network/in/reservoirs-rev01-global-shp.zip.ind')
   1_network/out/global_reservoirs.rds:
@@ -39,10 +36,10 @@ targets:
     command: gd_get('1_network/out/subseg_reservoir_mapping.rds.ind')
 
   #### 2_observations ####
-  # temperature sites
+  # temperature sites (placed on drive from/by ____)
   2_observations/in/all_sites.rds:
     command: gd_get('2_observations/in/all_sites.rds.ind')
-  # munged temperature data
+  # munged temperature data (placed on drive from/by ____)
   2_observations/in/daily_temperatures.rds:
     command: gd_get('2_observations/in/daily_temperatures.rds.ind')
   # list of NGWOS sites from Brian Pellerin, receieved 2020-04-18
@@ -58,13 +55,14 @@ targets:
     command: gd_get('2_observations/out/all_drb_temp_obs.rds.ind')
   2_observations/out/obs_temp_drb.rds:
     command: gd_get('2_observations/out/obs_temp_drb.rds.ind')
+  # discharge data: currently a file that was uploaded to gd (originally from Jeff)
+  # down the road should point to NWIS
   2_observations/out/drb_discharge_daily_dv.csv:
     command: gd_get('2_observations/out/drb_discharge_daily_dv.csv.ind')
   2_observations/out/obs_flow_drb.rds:
     command: gd_get('2_observations/out/obs_flow_drb.rds.ind')
 
   #### 3_observations ####
-
   # segment-level drivers, intermediate model variables, and stream temperature predictions using uncalibrated PRMS-SNTemp
   #  from https://github.com/jzwart/delaware-water-temp/blob/626d6d159daccfcf52c5e7fddf88d24031f35e6d/4_model_for_PGDL.yml#L42-L46
   3_predictions/in/uncal_sntemp_input_output.feather:
@@ -85,17 +83,16 @@ targets:
   # Jeff's full DRB model
   3_predictions/in/rgcn_v2_preds_full.feather:
     command: gd_get('3_predictions/in/rgcn_v2_preds_full.feather.ind')
-
   3_predictions/out/compare_predictions_obs.feather:
     command: gd_get('3_predictions/out/compare_predictions_obs.feather.ind')
 
-  ##### Makerspace #####
+  #### 9_collaborator_data ####
+  ## Makerspace ##
   9_collaborator_data/mkrsp/delaware_sites_summary.rds:
     command: gd_get('9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind')
   9_collaborator_data/mkrsp/delaware_sites_summary.geojson:
     command: gd_get('9_collaborator_data/mkrsp/delaware_sites_summary.geojson.ind')
-
-  ###### University of Minnesota #####
+  ## University of Minnesota ##
   9_collaborator_data/umn/distance_matrix.rds:
     command: gd_get('9_collaborator_data/umn/distance_matrix.rds.ind')
   9_collaborator_data/umn/distance_matrix.npz:
@@ -114,8 +111,7 @@ targets:
     command: gd_get('9_collaborator_data/umn/obs_flow_full.csv.ind')
   9_collaborator_data/umn/obs_flow_subset.csv:
     command: gd_get('9_collaborator_data/umn/obs_flow_subset.csv.ind')
-
-  #### Penn State ####
+  ## Penn State ##
   9_collaborator_data/psu/highly_observed_sites.csv:
     command: gd_get('9_collaborator_data/psu/highly_observed_sites.csv.ind')
   9_collaborator_data/psu/highly_obs_distance_matrix.rds:
