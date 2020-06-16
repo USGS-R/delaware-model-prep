@@ -329,8 +329,8 @@ plot_upstream <- function(POIs, dist_mat_ind, labels=c('subseg_id','seg_id_nat')
 
 }
 
-write_distance <- function(dat, dist_type='updown', out_ind) {
-  dist <- readRDS(dat)
+write_distance <- function(dat_ind, dist_type='updown', out_ind) {
+  dist <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
   write.csv(dist[[dist_type]], as_data_file(out_ind), row.names = TRUE)
   gd_put(out_ind)
 }
