@@ -1,28 +1,25 @@
+# I reserve a temp folder for temporary files I create to explore stuff. You can too.
+temp/
+# Ignore all files in the data directories except *.ind and specified text files
+*/in/*
+*/out/*
+*/mkrsp/*
+*/psu/*
+*/umn/*
+!*.ind
+!2_observations/out/drb_temp_summary.csv
+!3_predictions/out/model_evaluation.csv
+!9_collaborator_data/psu/model_variable_description.txt
+*.gif
+# Ignore files and directories created by local tools (RStudio, remake, Mac OS, etc.)
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
-*.rds
-*.Rds
-*.feather
-*.Feather
-*.geojson
-*.npz
-*.geojson
-*.png
-*.csv
-*.npy
-*.xlsx
-!3_predictions/out/model_evaluation.csv
-*.gif
-# remake
 .remake/
-# in folder for 1_network
-1_network/in/*
-!1_network/in/*.ind
+.snakemake/
+conda/
+*__pycache__
 .httr-oauth
 *.DS_Store
 __MACOS*
-
-# commit summary data
-!2_observations/out/drb_temp_summary.csv

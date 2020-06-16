@@ -157,7 +157,7 @@ targets:
   9_collaborator_data/psu/highly_obs_distance_matrix.csv.ind:
     command: write_distance(
       out_ind = target_name,
-      dat = '9_collaborator_data/psu/highly_obs_distance_matrix.rds',
+      dat_ind = '9_collaborator_data/psu/highly_obs_distance_matrix.rds.ind',
       dist_type = I('updown'))
 
   9_collaborator_data/psu/highly_obs_distance_heatmap.png:
