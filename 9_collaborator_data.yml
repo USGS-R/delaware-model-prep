@@ -206,3 +206,12 @@ targets:
       subset = '9_collaborator_data/psu/highly_observed_sites.rds',
       out_ind = target_name)
 
+  # data for Amy McHugh and Jon Janowicz
+  9_collaborator_data/usgs/sntemp_pred_obs_subset.csv:
+    command: filter_sntemp_obs(
+      sntemp_ind = '3_predictions/in/uncal_sntemp_input_output.feather.ind',
+      flow_ind = '2_observations/out/obs_flow_drb.rds.ind',
+      temp_ind = '2_observations/out/obs_temp_drb.rds.ind',
+      network_ind = '1_network/out/network.rds.ind',
+      out_file = target_name)
+

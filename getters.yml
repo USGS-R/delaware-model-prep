@@ -42,6 +42,10 @@ targets:
   # munged temperature data (placed on drive from/by ____)
   2_observations/in/daily_temperatures.rds:
     command: gd_get('2_observations/in/daily_temperatures.rds.ind')
+
+  2_observations/in/daily_flow.rds:
+    command: gd_get('2_observations/in/daily_temperatures.rds.ind')
+
   # list of NGWOS sites from Brian Pellerin, receieved 2020-04-18
   2_observations/in/NGWOS_site_metadata.xlsx:
     command: gd_get('2_observations/in/NGWOS_site_metadata.xlsx.ind')
