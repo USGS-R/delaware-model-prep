@@ -1,0 +1,71 @@
+target_default: 4_model_evaluation
+
+packages:
+  - dplyr
+  - docstring
+  - readr
+  - feather
+
+sources:
+  - 4_model_evaluation/src/evaluate_models.R
+  - 4_model_evaluation/src/model_evaluation_functions.R
+  - 4_model_evaluation/src/modify_data.R
+
+
+targets:
+  4_model_evaluation:
+    depends:
+
+
+  #fetching the data
+  modify_long_dat:
+    command: modify_data('3_predictions/out/compare_predictions_obs.feather.ind')
+
+    4_model_evaluation/out/model_evaluation.csv:
+    command: procc_data(dat_in = modify_long_dat, out_file = target_name)
+
+  # general metrics at all, seg, year, month scales
+ # 4_model_evaluation/out/gen_metrics_all_obs.csv:
+  #  command: calc_all_metric(file_path = target_name,
+   #   dat_in = modify_long_dat, grouping = NA)
+    #depends: code/model_evaluation_functions.R
+
+  #4_model_evaluation/out/gen_metrics_by_seg.csv:
+   # command: calc_all_metric(file_path = target_name,
+    #  dat_in = modify_long_dat, grouping = I('seg_id_nat'))
+    #depends: code/model_evaluation_functions.R
+
+  #4_model_evaluation/out/gen_metrics_by_year.csv:
+   # command: calc_all_metric(file_path = target_name,
+    #  dat_in = modify_long_dat, grouping = I('year'))
+    #depends: code/model_evaluation_functions.R
+
+  #4_model_evaluation/out/gen_metrics_by_month.csv:
+   # command: calc_all_metric(file_path = target_name,
+    #  dat_in = modify_long_dat, grouping = I('month'))
+    #depends: code/model_evaluation_functions.R
+
+  # exceedance metrics
+  #4_model_evaluation/out/exceedance_metrics_all_obs.csv:
+   # command: calc_exc_metric(file_path = target_name,
+    #  dat_in = modify_long_dat, grouping = NA)
+    #depends: code/model_evaluation_functions.R
+
+  #4_model_evaluation/out/exceedance_metrics_by_seg.csv:
+   # command: calc_exc_metric(file_path = target_name,
+    #  dat_in = modify_long_dat, grouping = I('seg_id_nat'))
+    #depends: code/model_evaluation_functions.R
+
+  #4_model_evaluation/out/exceedance_metrics_by_year.csv:
+   # command: calc_exc_metric(file_path = target_name,
+    #  dat_in = modify_long_dat, grouping = I('year'))
+    #depends: code/model_evaluation_functions.R
+
+  #4_model_evaluation/out/exceedance_metrics_by_month.csv:
+   # command: calc_exc_metric(file_path = target_name
+    #  ,dat_in = modify_long_dat, grouping = I('month'))
+    #depends: code/model_evaluation_functions.R
+
+  # max timing and magnitude exceedance_metrics_by_month
+  #4_model_evaluation/out/max_metrics_by_seg_year.csv:
+    #command: calc_max_metric(file_path = target_name , dat_in = modify_long_dat)
