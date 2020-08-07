@@ -4,6 +4,7 @@ include:
   - 1_network.yml
   - 2_observations.yml
   - 3_predictions.yml
+  - 4_evaluation.yml
   - 9_collaborator_data.yml
   - 8_visualize.yml
 
@@ -14,6 +15,7 @@ targets:
       - 1_network
       - 2_observations
       - 3_predictions
+      - 4_evaluation
       - 9_collaborator_data
       - 8_visualize
 
