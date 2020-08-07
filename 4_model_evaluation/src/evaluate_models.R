@@ -4,13 +4,8 @@
 calc_all_metric <- function(file_path, dat_in, grouping) {
   dat_in <- dat_in %>%
     mutate(year = lubridate::year(date),
-           month = lubridate::month(date))
-    dates <- group_by(dat_in, model) %>%
-      #to find the start (min) and end (max) date for each model
-      summarize(start = min(date), end = max(date))
-
-     start <- max(dates$start)
-    end <- min(dates$end)
+           month = lubridate::month(date)) %>%
+    group_by(model)
 
   group_test <- deparse(substitute(grouping))
   if (group_test == 'NA') {
@@ -22,14 +17,14 @@ calc_all_metric <- function(file_path, dat_in, grouping) {
 
   metrics <- dat_mod %>%
     summarize(n = n(),
-              mae = calc_mae(observe_data = temp_c,
-                    predict_data = predicted),
-              rmse =  calc_rmse(observe_data = temp_c,
-                      predict_data = predicted),
-              mare = calc_mare(observe_data = temp_c,
-                      predict_data = predicted),
-              nse = calc_nash(observe_col = temp_c,
-                     predict_col =  predicted))
+              mae = calc_mae(observe_data = obs_temp_c,
+                             predict_data = pred_temp_c),
+              rmse =  calc_rmse(observe_data = obs_temp_c,
+                                predict_data = pred_temp_c),
+              mare = calc_mare(observe_data = obs_temp_c,
+                               predict_data = pred_temp_c),
+              nse = calc_nash(observe_col = obs_temp_c,
+                              predict_col =  pred_temp_c))
   write_csv(metrics, path = file_path)
   return(file_path)
 }
