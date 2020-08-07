@@ -16,18 +16,19 @@ calc_all_metric <- function(file_path, dat_in, grouping) {
   }
 
   metrics <- dat_mod %>%
-    summarize(n = n(),
-              mae = calc_mae(observe_data = obs_temp_c,
-                             predict_data = pred_temp_c),
-              rmse =  calc_rmse(observe_data = obs_temp_c,
-                                predict_data = pred_temp_c),
-              mare = calc_mare(observe_data = obs_temp_c,
-                               predict_data = pred_temp_c),
-              nse = calc_nash(observe_col = obs_temp_c,
-                              predict_col =  pred_temp_c))
+    dplyr::summarize(n = n(),
+              mae = calc_mae(observe_data = temp_c,
+                             predict_data = predicted),
+              rmse =  calc_rmse(observe_data = temp_c,
+                                predict_data = predicted),
+              mare = calc_mare(observe_data = temp_c,
+                               predict_data = predicted),
+              nse = calc_nash(observe_col = temp_c,
+                              predict_col =  predicted))
   write_csv(metrics, path = file_path)
   return(file_path)
 }
+
 
 # Calls exceedance metric to find when the exceedance of certain temperature was predicted correctly by the models.
 calc_exc_metric <- function(file_path, dat_in, grouping) {
@@ -44,7 +45,7 @@ calc_exc_metric <- function(file_path, dat_in, grouping) {
       group_by(model, .data[[grouping]])
   }
   exceedance_metric <- dat_mod %>%
-  summarize(n = n(),
+    dplyr::summarize(n = n(),
             true_pos = calc_exceedance(observe_col = temp_c,
                             predict_col = predicted,
                             metric = 'prop_true_pos',
