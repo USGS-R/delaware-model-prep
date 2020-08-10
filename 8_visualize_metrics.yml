@@ -1,0 +1,220 @@
+target_default: 8_visualize
+
+packages:
+  - sf
+  - tidyverse
+  - lwgeom
+  - smoothr
+  - igraph
+  - purrr
+
+sources:
+  - 8_visualize/src/plot_metric_map .R
+
+targets:
+  8_visualize:
+    depends:
+      - 8_visualize/out/rgcn2_full_mae_on_network.png
+      - 8_visualize/out/sntemp_full_mae_on_network.png
+      - 8_visualize/out/rgcn2_full_rmse_on_network.png
+      - 8_visualize/out/sntemp_full_rmse_on_network.png
+      - 8_visualize/out/rgcn2_full_mare_on_network.png
+      - 8_visualize/out/sntemp_full_mare_on_network.png
+      - 8_visualize/out/rgcn2_full_nse_on_network.png
+      - 8_visualize/out/sntemp_full_nse_on_network.png
+      - 8_visualize/out/rgnc2_full_true_pos_on_network.png
+      - 8_visualize/out/sntemp_full_true_pos_on_network.png
+      - 8_visualize/out/rgnc2_full_true_neg_on_network.png
+      - 8_visualize/out/sntemp_full_true_neg_on_network.png
+      - 8_visualize/out/rgnc2_full_false_pos_on_network.png
+      - 8_visualize/out/sntemp_full_false_pos_on_network.png
+      - 8_visualize/out/rgnc2_full_false_neg_on_network.png
+      - 8_visualize/out/sntemp_full_false_neg_on_network.png
+      - 8_visualize/out/rgnc2_full_max_temp_error_on_network.png
+      - 8_visualize/out/sntemp_full_max_temp_error_on_network.png
+      - 8_visualize/out/rgnc2_full_max_temp_time_on_network.png
+      - 8_visualize/out/sntemp_full_max_temp_time_on_network.png
+
+
+  # plot evaluation metrics
+  # mae for rgnc2_full model
+  8_visualize/out/rgcn2_full_mae_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/gen_metrics_by_seg.csv',
+                metric_col = I('mae'),
+                plot_model = I('rgcn2_full_full'),
+                legend_text = I('RGNC-Model Mean Absolute Error'))
+
+   # mae for sntmep full model
+  8_visualize/out/sntemp_full_mae_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/gen_metrics_by_seg.csv',
+                metric_col = I('mae'),
+                plot_model = I('sntemp_full'),
+                legend_text = I('SNTEMP-Model Mean Absolute Error'))
+
+  # rmse for rgnc full model
+  8_visualize/out/rgcn2_full_rmse_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/gen_metrics_by_seg.csv',
+                metric_col = I('rmse'),
+                plot_model = I('rgcn2_full_full'),
+                legend_text = I('RGNC-Model RMSE'))
+
+  # rmse for sntemp full model
+  8_visualize/out/sntemp_full_rmse_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/gen_metrics_by_seg.csv',
+                metric_col = I('rmse'),
+                plot_model = I('sntemp_full'),
+                legend_text = I('SNTEMP-Model RMSE'))
+
+  # mare for rgnc full model
+  8_visualize/out/rgcn2_full_mare_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/gen_metrics_by_seg.csv',
+                metric_col = I('mare'),
+                plot_model = I('rgcn2_full_full'),
+                legend_text = I('RGNC-Model Mean Absolute Relative Error'))
+
+  # mare for sntemp full model
+  8_visualize/out/sntemp_full_mare_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/gen_metrics_by_seg.csv',
+                metric_col = I('mare'),
+                plot_model = I('sntemp_full'),
+                legend_text = I('SNTEMP-Model Mean Absolute Relative Error'))
+
+
+  #nse for srgnc full model
+  8_visualize/out/rgcn2_full_nse_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/gen_metrics_by_seg.csv',
+                metric_col = I('nse'),
+                plot_model = I('rgcn2_full_full'),
+                legend_text = I('RGNC-Model Coefficient of Efficiency'))
+
+  #nse for sntemp full model
+  8_visualize/out/sntemp_full_nse_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/gen_metrics_by_seg.csv',
+                metric_col = I('nse'),
+                plot_model = I('sntemp_full'),
+                legend_text = I('SNTEMP-Model Coefficient of Efficiency'))
+
+  # exceedance for rgnc model
+  8_visualize/out/rgnc2_full_true_pos_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/exceedance_metrics_by_seg.csv',
+                metric_col = I('true_pos'),
+                plot_model = I('rgcn2_full_full'),
+                legend_text = I('RGNC-Model Exceedance (T-Pos)'))
+
+  # exceedance for sntemp model
+  8_visualize/out/sntemp_full_true_pos_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/exceedance_metrics_by_seg.csv',
+                metric_col = I('true_pos'),
+                plot_model = I('sntemp_full'),
+                legend_text = I('SNTEMP-Model Exceedance (T-Pos)'))
+
+   # exceedance for rgnc model
+  8_visualize/out/rgnc2_full_true_neg_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/exceedance_metrics_by_seg.csv',
+                metric_col = I('true_neg'),
+                plot_model = I('rgcn2_full_full'),
+                legend_text = I('RGNC-Model Exceedance (T-Neg)'))
+
+  # exceedance for sntemp model
+  8_visualize/out/sntemp_full_true_neg_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/exceedance_metrics_by_seg.csv',
+                metric_col = I('true_neg'),
+                plot_model = I('sntemp_full'),
+                legend_text = I('SNTEMP-Model Exceedance (T-Neg)'))
+
+# exceedance for rgnc model
+  8_visualize/out/rgnc2_full_false_pos_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/exceedance_metrics_by_seg.csv',
+                metric_col = I('false_pos'),
+                plot_model = I('rgcn2_full_full'),
+                legend_text = I('RGNC-Model Exceedance (F-Pos)'))
+
+  # exceedance for sntemp model
+  8_visualize/out/sntemp_full_false_pos_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/exceedance_metrics_by_seg.csv',
+                metric_col = I('false_pos'),
+                plot_model = I('sntemp_full'),
+                legend_text = I('SNTEMP-Model Exceedance (F-Pos)'))
+
+  # exceedance for rgnc model
+  8_visualize/out/rgnc2_full_false_neg_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/exceedance_metrics_by_seg.csv',
+                metric_col = I('false_neg'),
+                plot_model = I('rgcn2_full_full'),
+                legend_text = I('RGNC-Model Exceedance (F-Neg)'))
+
+  # exceedance for sntemp model
+  8_visualize/out/sntemp_full_false_neg_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/exceedance_metrics_by_seg.csv',
+                metric_col = I('false_neg'),
+                plot_model = I('sntemp_full'),
+                legend_text = I('SNTEMP-Model Exceedance (F-Neg)'))
+
+  # max temps for rgnc model
+  8_visualize/out/rgnc2_full_max_temp_error_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/max_metrics_by_seg_year.csv',
+                metric_col = I('error_obs_pred'),
+                plot_model = I('rgcn2_full_full'),
+                legend_text = I('RGNC-Model Max Temps Error'))
+
+  # max temps for sntemp model
+  8_visualize/out/sntemp_full_max_temp_error_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/max_metrics_by_seg_year.csv',
+                metric_col = I('error_obs_pred'),
+                plot_model = I('sntemp_full'),
+                legend_text = I('SNTEMP-Model Max Temps Error'))
+
+# max temps for rgnc model
+  8_visualize/out/rgnc2_full_max_temp_time_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/max_metrics_by_seg_year.csv',
+                metric_col = I('error_max_timing'),
+                plot_model = I('rgcn2_full_full'),
+                legend_text = I('RGNC-Model Max Temps Time Error'))
+
+  8_visualize/out/sntemp_full_max_temp_time_on_network.png:
+    command: plot_metric_map(out_file = target_name,
+                network_ind = '1_network/out/network.rds.ind',
+                metric_file = '4_evaluation/out/max_metrics_by_seg_year.csv',
+                metric_col = I('error_max_timing'),
+                plot_model = I('sntemp_full'),
+                legend_text = I('SNTEMP-Model Max Temps Time Error'))
+
+
