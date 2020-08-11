@@ -3,6 +3,7 @@ crosswalk_sites_to_reaches <- function(network_ind, boundary_ind, sites_ind, ngw
 
   # read in network and boundary files
   drb_net <- readRDS(sc_retrieve(network_ind, 'getters.yml'))
+  #st_crs(drb_net$vertices) <- 4326
   drb_boundary <- readRDS(sc_retrieve(boundary_ind, 'getters.yml'))
 
   # read in sites from WQP, nwisdv, nwisuv
@@ -25,11 +26,15 @@ crosswalk_sites_to_reaches <- function(network_ind, boundary_ind, sites_ind, ngw
     st_point(c(lat, lon), dim='XY')})
 
   obs_sites <- sites %>%
-    st_set_geometry(st_sfc(obs_site_points)) %>%
-    st_set_crs(4326) %>%
+    st_set_geometry(st_sfc(obs_site_points))
+
+  st_crs(obs_sites) <- 4326
+
+  obs_sites <- obs_sites %>%
     st_transform(crs=st_crs(drb_net$vertices))
 
   # Subset to sites in the Delaware River Basin
+  #st_crs(drb_boundary) <- 4326
   drb_sites <- obs_sites[st_intersects(drb_boundary, obs_sites)[[1]], ] # 5028 rows
 
   #### Match sites to reaches ####
@@ -40,7 +45,6 @@ crosswalk_sites_to_reaches <- function(network_ind, boundary_ind, sites_ind, ngw
     # warns: site USGS-01433005 has diverse coordinates across databases, with bbox diagonal = 6.261 m
     # (the algorithm will have matched to the first version of that site, probably the wqp USGS-NY one)
   })
-
   # add geospatial info (drb_sites) and seg_id_nat (drb_net$edges)
   crosswalk_site_reach <- left_join(drb_sites, crosswalk, by='site_id') %>%
     left_join(st_drop_geometry(select(drb_net$edges, subseg_id, seg_id_nat)), by='subseg_id')
