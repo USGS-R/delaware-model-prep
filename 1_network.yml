@@ -22,6 +22,7 @@ targets:
      - 1_network/out/boundary.rds.ind
      - 1_network/out/network.rds.ind
      - 1_network/out/subseg_distance_matrix.rds.ind
+     - 1_network/out/subseg_reservoir_mapping.rds.ind
 
   # unzip the PRMS segments shapefile
   1_network/in/delaware_stream_temp_by_segment/delaware_segments/delaware_segments.shp:
@@ -30,7 +31,7 @@ targets:
   # read the dam and reservoir data
   1_network/out/global_dams.rds.ind:
     command: zipped_shp_to_rds(out_ind = target_name,
-      zip = '1_network/in/dams-rev01-global-shp.zip')
+      zip_ind = '1_network/in/dams-rev01-global-shp.zip.ind')
   1_network/out/global_reservoirs.rds.ind:
     command: zipped_shp_to_rds(out_ind = target_name,
       zip_ind = '1_network/in/reservoirs-rev01-global-shp.zip.ind')
