@@ -33,5 +33,5 @@ plot_metric_map <- function(out_file, network_ind, metric_file, metric_col, plot
     map_theme +
     labs(color = legend_text)
 
-  ggsave(out_file, p, height = 7.5, width = 13)
+  ggsave(out_file, p, height = 7.5, width = 8)
 }
