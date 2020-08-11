@@ -99,7 +99,7 @@ targets:
                 metric_file = '4_evaluation/out/gen_metrics_by_seg.csv',
                 metric_col = I('nse'),
                 plot_model = I('rgcn2_full_full'),
-                legend_text = I('Coefficient of Efficiency NSE'))
+                legend_text = I('NSE'))
 
   #nse for sntemp full model
   8_visualize_metrics/out/sntemp_full_nse_on_network.png:
@@ -108,7 +108,7 @@ targets:
                 metric_file = '4_evaluation/out/gen_metrics_by_seg.csv',
                 metric_col = I('nse'),
                 plot_model = I('sntemp_full'),
-                legend_text = I('Coefficient of Efficiency NSE'))
+                legend_text = I('NSE'))
 
   # exceedance for rgnc model
   8_visualize_metrics/out/rgnc2_full_true_pos_on_network.png:
@@ -207,7 +207,7 @@ targets:
                 metric_file = '4_evaluation/out/max_metrics_by_seg_year.csv',
                 metric_col = I('error_max_timing'),
                 plot_model = I('rgcn2_full_full'),
-                legend_text = I('Max Temp Time Error (days)'))
+                legend_text = I('Max Temp Timing Error (days)'))
 
   8_visualize_metrics/out/sntemp_full_max_temp_time_on_network.png:
     command: plot_metric_map(out_file = target_name,
@@ -215,6 +215,6 @@ targets:
                 metric_file = '4_evaluation/out/max_metrics_by_seg_year.csv',
                 metric_col = I('error_max_timing'),
                 plot_model = I('sntemp_full'),
-                legend_text = I('Max Temp Time Error (days)'))
+                legend_text = I('Max Temp Timing Error (days)'))
 
 
