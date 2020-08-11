@@ -69,11 +69,11 @@ targets:
     depends: 4_evaluation/src/model_evaluation_functions.R
 
   4_evaluation/out/exceedance_metrics_by_month.csv:
-    command: calc_exc_metric(file_path = target_name
-      ,dat_in = modify_long_dat, grouping = I('month'))
+    command: calc_exc_metric(file_path = target_name,
+      dat_in = modify_long_dat, grouping = I('month'))
     depends: 4_evaluation/src/model_evaluation_functions.R
 
   # max timing and magnitude exceedance_metrics_by_month
   4_evaluation/out/max_metrics_by_seg_year.csv:
-    command: calc_max_metric(file_path = target_name , dat_in = modify_long_dat)
+    command: calc_max_metric(file_path = target_name, dat_in = modify_long_dat)
     depends: 4_evaluation/src/model_evaluation_functions.R
