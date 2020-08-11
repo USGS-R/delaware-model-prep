@@ -26,7 +26,6 @@ calc_all_metric <- function(file_path, dat_in, grouping) {
               nse = calc_nash(observe_col = temp_c,
                               predict_col =  predicted))
   write_csv(metrics, path = file_path)
-  return(file_path)
 }
 
 
@@ -62,7 +61,6 @@ calc_exc_metric <- function(file_path, dat_in, grouping) {
                             predict_col = predicted,
                             metric = 'prop_false_neg'))
   write_csv(exceedance_metric, path = file_path)
-  return(file_path)
 }
 
 ## Calls the calc_tim_temp_max that returns the max temperature and time of max temps. This function accepts 2 arguments data_in and date-range. date_range in set to summer days. It groups data by the model, segment_id, and year.
@@ -75,5 +73,4 @@ calc_max_metric <- function(file_path, dat_in, date_range = 170:245){
                     observe_col = temp_c, predict_col = predicted,
                     date_col = date)
   write_csv(max_metric, path = file_path)
-  return(file_path)
 }
