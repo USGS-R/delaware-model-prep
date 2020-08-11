@@ -4,37 +4,42 @@ library(tidyr)
 library(ggplot2)
 library(scipiper)
 
-# put XJ's predictions in folder 3_predictions/in and read in
-dat_all <- npyLoad('3_predictions/in/prd_RGCN_full_obstemp_cv2_full.npy')
-dat_02 <- npyLoad('3_predictions/in/prd_RGCN_full_obstemp_cv2_002.npy')
-
-# transform and munge npy data
-munge_npy <- function(dat) {
-  tdat <- as.data.frame(t(dat))
-  names(tdat) <- c('2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012',
-                   '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020',
-                   '2021', '2022', '2023', '2024', '2025', '2026', '2027', '2028',
-                   '2030', '2031', '2032', '2033', '2034', '2035', '2036', '2037',
-                   '2038', '2039', '2040', '2041', '2044', '2045', '2046', '2047',
-                   '2048', '4182')
-  tdat$date <- seq.Date(from = as.Date('2004-10-01'), to = as.Date('2016-09-30'), by = 1)
+prep_model_compare <- function() {
+  # put XJ's predictions in folder 3_predictions/in and read in
+  dat_all <- npyLoad('3_predictions/in/prd_RGCN_full_obstemp_cv2_full.npy')
+  dat_02 <- npyLoad('3_predictions/in/prd_RGCN_full_obstemp_cv2_002.npy')
   
-  dat_long <- tidyr::gather(tdat, key = 'seg_id_nat', value = 'pgrnn_temp_c', -date)
-  return(dat_long)
+  # transform and munge npy data
+  munge_npy <- function(dat) {
+    tdat <- as.data.frame(t(dat))
+    names(tdat) <- c('2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012',
+                     '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020',
+                     '2021', '2022', '2023', '2024', '2025', '2026', '2027', '2028',
+                     '2030', '2031', '2032', '2033', '2034', '2035', '2036', '2037',
+                     '2038', '2039', '2040', '2041', '2044', '2045', '2046', '2047',
+                     '2048', '4182')
+    tdat$date <- seq.Date(from = as.Date('2004-10-01'), to = as.Date('2016-09-30'), by = 1)
+    
+    dat_long <- tidyr::gather(tdat, key = 'seg_id_nat', value = 'pgrnn_temp_c', -date)
+    return(dat_long)
+  }
+  
+  pgrnn_all <- munge_npy(dat_all) %>% rename(pgrnn_all = pgrnn_temp_c)
+  pgrnn_02 <- munge_npy(dat_02) %>% rename(pgrnn_02 = pgrnn_temp_c)
+  
+  pgrnn <- left_join(pgrnn_all, pgrnn_02)
+  
+  # join with SNTemp predictions
+  sntemp <- read.csv('3_predictions/out/uncal_sntemp_preds.csv', stringsAsFactors = FALSE) %>%
+    tidyr::gather(key = 'seg_id_nat', value = 'pred_temp_degC', -Date) %>%
+    mutate(seg_id_nat = gsub('X', '', seg_id_nat),
+           date = as.Date(Date)) %>% select(-Date)
+  
+  compare <- left_join(rename(sntemp, sntemp = pred_temp_degC), pgrnn)
+  return(compare)
 }
 
-pgrnn_all <- munge_npy(dat_all) %>% rename(pgrnn_all = pgrnn_temp_c)
-pgrnn_02 <- munge_npy(dat_02) %>% rename(pgrnn_02 = pgrnn_temp_c)
 
-pgrnn <- left_join(pgrnn_all, pgrnn_02)
-
-# join with SNTemp predictions
-sntemp <- read.csv('3_predictions/in/uncal_sntemp_preds.csv', stringsAsFactors = FALSE) %>%
-  tidyr::gather(key = 'seg_id_nat', value = 'pred_temp_degC', -Date) %>%
-  mutate(seg_id_nat = gsub('X', '', seg_id_nat),
-         date = as.Date(Date)) %>% select(-Date)
-
-compare <- left_join(pgrnn, rename(sntemp, sntemp = pred_temp_degC))
 
 # merge in observations in this geographic subset
 obs <- read.csv('9_collaborator_data/umn/obs_temp_subset.csv', 
