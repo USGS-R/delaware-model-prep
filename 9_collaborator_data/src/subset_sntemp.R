@@ -129,3 +129,31 @@ aggregate_sntemp_preds = function(ind_file,
   feather::write_feather(x = out, path = out_file)
   gd_put(ind_file)
 }
+
+filter_sntemp_obs <- function(sntemp_ind, flow_ind, temp_ind, network_ind, out_file) {
+  sntemp <- feather::read_feather(sc_retrieve(sntemp_ind, 'getters.yml'))
+  flow <- readRDS(sc_retrieve(flow_ind, 'getters.yml')) %>% mutate(seg_id_nat = as.character(seg_id_nat))
+  temp <- readRDS(sc_retrieve(temp_ind, 'getters.yml')) %>% mutate(seg_id_nat = as.character(seg_id_nat))
+
+  sntemp <- sntemp %>%
+    select(seg_id_nat, date, model_idx, seg_outflow, seg_tave_water)
+
+  network <- readRDS(sc_retrieve(network_ind, remake_file = 'getters.yml'))
+  IDs <- filter(network$edges, subseg_seg %in% c('36', '37', '44', '46')) %>%
+    select(seg_id_nat, subseg_seg) %>% sf::st_drop_geometry() %>% mutate(seg_id_nat = as.character(seg_id_nat))
+
+  out <- left_join(sntemp, select(flow, -subseg_id)) %>%
+    left_join(temp) %>%
+    filter(seg_id_nat %in% IDs$seg_id_nat) %>%
+    left_join(IDs) %>%
+    select(seg_id_nat, subseg_seg, date,
+           pred_discharge_cms = seg_outflow,
+           obs_discharge_cms = discharge_cms,
+           pred_temp_c = seg_tave_water,
+           obs_temp_c = temp_c) %>%
+    filter(date < as.Date('2017-01-01'))
+
+
+  readr::write_csv(out, out_file)
+
+}

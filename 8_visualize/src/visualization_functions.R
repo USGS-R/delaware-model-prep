@@ -10,6 +10,7 @@ plot_subnet <- function(subnet_ind, network_ind, sites_ind, summary_ind, out_fil
   just_beyonds <- network$edges %>%
     filter(start_pt %in% subnet$vertices$point_ids | end_pt %in% subnet$vertices) %>%
     filter(!subseg_id %in% subnet$edges$subseg_id)
+
   g <- ggplot(subnet$edges) + geom_sf(color='gold') +
     geom_sf(data=just_beyonds, color='gray') +
     geom_sf(data=subnet$vertices, color='gold', shape=4, size=2) +

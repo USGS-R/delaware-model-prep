@@ -1,10 +1,10 @@
 version: 0.3.0
 name: 9_collaborator_data/psu/highly_obs_distance_matrix.rds.ind
 type: file
-hash: cbf9bef6012d8ff49566a9656c1452ca
-time: 2020-06-13 19:30:39 UTC
+hash: 32e304691b502d9f0aff4056f299305d
+time: 2020-08-11 20:39:39 UTC
 depends:
-  9_collaborator_data/psu/highly_observed_sites.rds: cd88807e26eb227c40f88b12958e3d46
+  9_collaborator_data/psu/highly_observed_sites.rds: 0182eea645a5089d2608eb040cf4ca1f
   1_network/out/subseg_distance_matrix.rds.ind: 1f6a91bc85dc25c92674f8c19ed5827c
 fixed: ce42a89da1c779ec9c2389a8ec617444
 code:

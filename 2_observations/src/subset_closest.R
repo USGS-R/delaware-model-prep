@@ -38,7 +38,7 @@ subset_closest <- function(sites, reaches, vertices) {
     ) %>%
       st_set_geometry(st_geometry(sites))
   })
-  
+
   # For each site, use nested conditionals to navigate a set of possibilities
   # for what the best site-reach match is. See notes below
   system.time({ # 106 seconds with message
@@ -51,13 +51,13 @@ subset_closest <- function(sites, reaches, vertices) {
           if(bbox_diagonal > units::set_units(1, m)) {
             warning(sprintf('site %s has diverse coordinates across databases, with bbox diagonal = %0.03f m', site_sf$site_id[1], bbox_diagonal))
           }
-          site_sf <- site_sf[1,] # just keep one 
+          site_sf <- site_sf[1,] # just keep one
         }
-        
+
         # Start the site processing
         # message(site_sf$site_id)
         site <- tibble(site_id = site_sf$site_id) # initialize a new non-sf tibble to return
-        
+
         # Calculate distances to the downstream and upstream vertices of the
         # matched reach. I tried using st_split but see
         # https://gis.stackexchange.com/questions/288570/find-nearest-point-along-polyline-using-sf-package-in-r
@@ -72,7 +72,7 @@ subset_closest <- function(sites, reaches, vertices) {
           st_cast('LINESTRING') %>% st_length() %>% units::drop_units()
         fish_dist_downstream_m <- st_combine(subseg_as_points[point_pos_in_subseg:length(subseg_as_points)]) %>%
           st_cast('LINESTRING') %>% st_length() %>% units::drop_units()
-        
+
         # Decide which reach to use. Because the model predicts values for an
         # the downstream point of each stream reach, we will sometimes want to
         # use the reach upstream of the matched reach (if the site point was
@@ -108,10 +108,10 @@ subset_closest <- function(sites, reaches, vertices) {
         # measure to decide whether we were able to snap the site to the river
         # network successfully
         site$bird_dist_to_subseg_m <- site_sf$bird_dist_to_subseg_m
-        
+
         return(site)
       })
   })
-  
+
   return(crosswalk)
 }

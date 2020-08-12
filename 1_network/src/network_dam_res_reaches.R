@@ -2,6 +2,8 @@
 #' @param extract_dir char directory to unzip to, and read shapefile from
 #' @param out_ind char indicator file to represent output
 zipped_shp_to_rds <- function(zip_ind, out_ind) {
+
+  zip <- scipiper::as_data_file(zip_ind)
   extract_dir <- file.path(tempdir(),
                            tools::file_path_sans_ext(basename(zip)))
   unzip(sc_retrieve(zip_ind, 'getters.yml'), exdir = extract_dir)
@@ -32,7 +34,7 @@ filter_dams_reservoirs_by_boundary <- function(dams_shp_ind, reservoirs_shp_ind,
     filter(GRAND_ID %in% dams_shp$GRAND_ID)
 
   subset_dams <- st_intersection(dams_shp, boundary)
-  subset_res <- st_intersection(res_shp, boundary)
+  subset_res <- st_intersection(st_make_valid(res_shp), boundary)
   output <- list(dams = subset_dams, reservoirs = subset_res)
   saveRDS(output, file = as_data_file(out_ind))
   gd_put(out_ind)
@@ -53,17 +55,17 @@ intersect_network_with_reservoirs <- function(stream_network_ind, dams_reservoir
   network_vertices_tibble <- as_tibble(stream_network$vertices)
   network_vertices_tibble_separated <- network_vertices_tibble %>%
     tidyr::separate_rows(ends_subseg, sep = ";")
-  dams_tibble <- as_tibble(dams_reservoirs$dams)
-  reservoirs_tibble <- as_tibble(dams_reservoirs$reservoirs)
+  dams_tibble <- as_tibble(dams_reservoirs$dams) %>%
+    rename(dam_geometry = geometry)
+  reservoirs_tibble <- as_tibble(dams_reservoirs$reservoirs) %>%
+    rename(reservoir_geometry = geometry)
 
   network_res_intersection <- st_intersection(stream_network$edges, dams_reservoirs$reservoirs) %>%
     mutate(intersected_subseg_length = st_length(geometry),
            frac_res_overlap = intersected_subseg_length/subseg_length) %>%
     rename(intersected_geometry = geometry) %>%
     left_join(reservoirs_tibble) %>%
-    rename(reservoir_geometry = geometry) %>%
     left_join(dams_tibble) %>%
-    rename(dam_geometry = geometry) %>%
     #join on inlet and outlet vertices
     left_join(network_vertices_tibble, by = c(subseg_id = "starts_subseg")) %>%
     select(everything(), inlet_point_geom = geometry, -point_ids, -ends_subseg, -XY) %>%

@@ -1,10 +1,10 @@
 version: 0.3.0
 name: 9_collaborator_data/umn/distance_matrix.rds.ind
 type: file
-hash: 2bb5658f7fe6f4f22a8033787c620aae
-time: 2020-06-13 19:28:27 UTC
+hash: 96fb63c8045e86f1478323235039f5d8
+time: 2020-08-11 20:32:23 UTC
 depends:
-  9_collaborator_data/umn/sntemp_segs.rds: 5db2961d18d7f6f8dce5ff19b3cc21d7
+  9_collaborator_data/umn/sntemp_segs.rds: fc050b80e4c08536ead678a65dead27f
   1_network/out/subseg_distance_matrix.rds.ind: 1f6a91bc85dc25c92674f8c19ed5827c
 fixed: daefc9eef4de200db041afbdb32e5b3e
 code:
