@@ -30,8 +30,13 @@ subset_train_dat <- readr::write_csv(subset_train, path = '8_visualize/in/subset
 season_train_mod_dat <- readr::read_csv('8_visualize/in/season_train_dat.csv') %>%  pivot_longer(c(-model), names_to = c('train_season', 'stat'), values_to = c('value'), names_pattern = "(.*)_([[:alpha:]]+$)")  %>%
    pivot_wider(names_from='stat', values_from='value')
 
-season_train_mod_dat$model <- factor(season_train_mod_dat$model, levels = c('space_awareness', 'pretraining', 'time_awareness','plain_neural_network'))
-season_train_mod_dat$train_season <- factor(season_train_mod_dat$train_season, levels = c('Train_non_summer', 'Train_all_seasons'))
+season_train_mod_dat$model <- factor(season_train_mod_dat$model,
+                                     levels = c( 'plain_neural_network',
+                                                 'time_awareness', 'pretraining',
+                                                 'space_awareness'))
+season_train_mod_dat$train_season <- factor(season_train_mod_dat$train_season,
+                                            levels = c( 'Train_all_seasons',
+                                                        'Train_non_summer'))
 
 
 subset_mod_dat <- readr::read_csv('8_visualize/in/subset_train_dat.csv') %>%
@@ -110,8 +115,8 @@ ggplot(data = season_train_mod_dat, aes(x = train_season,
                                     '+ time awareness',
                                  'plain_neural_network' =
                                     'Plain neural network'),
-                      values = plot_color) +
-   scale_x_discrete(label = c("Train non summer" ,"Train all seasons")) +
+                      values = rev(plot_color)) +
+   scale_x_discrete(label = c("Train all seasons", "Train non-summer" )) +
    theme_bw() +
    theme_minimal() +
    cowplot::theme_cowplot(font_size = 14) +
