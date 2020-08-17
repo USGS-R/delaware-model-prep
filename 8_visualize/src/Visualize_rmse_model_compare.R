@@ -19,15 +19,30 @@ colnames(season_train)[5] = 'Train_all_seasons_ci'
 season_train_dat <-readr::write_csv(season_train, path = '8_visualize/in/season_train_dat.csv')
 
 # less need of data: rmse on test periods table.
-subset_train <- data.frame(matrix(c('Uncalibrated_process_model', 'plain_neural_network', 'time_awareness', 'pretraining', 'space_awareness', 3.7, 1.6, 1.5, 1.44, 1.40, 3.7, 1.8, 1.7, 1.5, 1.43, 3.7, 2.2, 1.9, 1.8, 1.6), nrow = 5, ncol = 4))
+subset_train <- data.frame(matrix(c('Uncalibrated_process_model', 'plain_neural_network', 'time_awareness', 'pretraining', 'space_awareness', 3.661, 1.575, 1.546, 1.444, 1.402,
+                                    0, 0.035, 0.045, 0.039, 0.034,
+                                    3.661, 1.769, 1.706, 1.533,
+                                    1.434, 0, 0.047, 0.049, 0.044,
+                                    0.054, 3.661, 2.159, 1.908,
+                                    1.810, 1.636, 0, 0.059, 0.048,
+                                    0.057, 0.056, 3.661, 3.706,
+                                    3.234, 2.818, 2.464, 0, 0.114,
+                                    0.057, 0.059, 0.105),
+                                  nrow = 5, ncol = 9))
 colnames(subset_train)[1] = 'model'
-colnames(subset_train)[2] = '100'
-colnames(subset_train)[3] = '10'
-colnames(subset_train)[4] = '2'
+colnames(subset_train)[2] = 'rmse_100'
+colnames(subset_train)[3] = 'ci_100'
+colnames(subset_train)[4] = 'rmse_10'
+colnames(subset_train)[5] = 'ci_10'
+colnames(subset_train)[6] = 'rmse_2'
+colnames(subset_train)[7] = 'ci_2'
+colnames(subset_train)[8] = 'rmse_1'
+colnames(subset_train)[9] = 'ci_1'
 subset_train_dat <- readr::write_csv(subset_train, path = '8_visualize/in/subset_train_dat.csv')
 
 #reading the data csv files and using pivot_long to change the data from wide to long.
-season_train_mod_dat <- readr::read_csv('8_visualize/in/season_train_dat.csv') %>%  pivot_longer(c(-model), names_to = c('train_season', 'stat'), values_to = c('value'), names_pattern = "(.*)_([[:alpha:]]+$)")  %>%
+season_train_mod_dat <- readr::read_csv('8_visualize/in/season_train_dat.csv') %>%
+   pivot_longer(c(-model), names_to = c('train_season', 'stat'), values_to = c('value'), names_pattern = "(.*)_([[:alpha:]]+$)")  %>%
    pivot_wider(names_from='stat', values_from='value')
 
 season_train_mod_dat$model <- factor(season_train_mod_dat$model,
@@ -41,21 +56,27 @@ season_train_mod_dat$train_season <- factor(season_train_mod_dat$train_season,
 
 subset_mod_dat <- readr::read_csv('8_visualize/in/subset_train_dat.csv') %>%
   filter(!model %in%  'Uncalibrated_process_model') %>%
-  pivot_longer(c(-model), names_to = 'dat_availability', values_to = 'rmse')
-subset_mod_dat$dat_availability <- factor(subset_mod_dat$dat_availability, levels = c('2', '10', '100'))
+   pivot_longer(c(-model), names_to = c('stat', 'dat_availability'), values_to = c('value'), names_pattern = "(.*)_(.+$)" ) %>%
+   pivot_wider(names_from='stat', values_from='value')
+
+
+subset_mod_dat$dat_availability <- factor(subset_mod_dat$dat_availability, levels = c('1', '2', '10', '100'))
 subset_mod_dat$model <- factor(subset_mod_dat$model, levels = c('space_awareness', 'pretraining', 'time_awareness','plain_neural_network'))
 
 
 #  line plot for `non-summer_mod_dat` with the 1, 10, 100% on the x, model metric on the y, and each model getting their own line.
 plot_color <- c('#47437e', '#7570b3', '#b3b0d5', '#d95f02')
-plot_shape <- c(2, 20, 3, 0)
+plot_shape <- c(24, 22, 23, 22)
 dat_availability_plot <-
    ggplot(data = subset_mod_dat, aes(x = dat_availability,
                                     y = rmse,
                                     group = model,
                                     colour = model)) +
-     geom_line() +
-     geom_point(aes(shape = model))  +
+     geom_line(linetype = 2) +
+     geom_errorbar(aes(ymin = rmse - ci, ymax = rmse + ci),
+                 width = .2) +
+     geom_point(aes(shape = model), fill = 'white', size = 4)  +
+
      scale_shape_manual(labels = c('space_awareness' =
                                      '+ space awareness',
                                   'pretraining' =
@@ -77,7 +98,7 @@ dat_availability_plot <-
                                       'Plain neural network'),
                         values = plot_color) +
          # to add x-axis labels
-     scale_x_discrete(label = c("2%", "10%", "100%")) +
+     scale_x_discrete(label = c("1%", "2%", "10%", "100%")) +
      scale_y_continuous(trans = "reverse") +
      theme_bw()+
      theme_minimal()+
