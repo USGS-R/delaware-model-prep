@@ -24,6 +24,28 @@ plot_metric_map <- function(out_file, network_ind, metric_file, metric_col, plot
     filter(model %in% plot_model)
   #combine the metrics measurement with the network
   metric_network <- left_join(network, model_dat)
+  # need to filter the extreme negative nse values
+  if (metric_col == 'nse') {
+      #&& .data[[metric_col]] == "nse") {
+    #creating a subset of the data where nse > -1
+    subset_nse <- metric_network %>%
+      filter(nse < -1) %>%
+      mutate(nse = ifelse(nse < -1, NA, nse))
+    p <- ggplot(metric_network) +
+      geom_sf(aes(color = .data[[metric_col]]), size = 1.2) +
+      #geom_sf(data = subset_nse, color = 'blue', fill = NA) +
+      scale_color_viridis_c(direction = -1, option = 'inferno', na.value = 'lightgray') +
+      theme_bw() +
+      map_theme +
+      labs(color = legend_text)
+    p <- p +
+      geom_sf(data = subset_nse, color = 'blue', fill = NA)
+      #ggsave(out_file, p, height = 7.5, width = 8)
+
+  }
+
+
+
   # plotting the metric associated with the full models.
   #browser()
   p <- ggplot(metric_network) +
