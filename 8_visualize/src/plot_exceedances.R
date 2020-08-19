@@ -361,21 +361,51 @@ plot_habitat_network_loc <- function(habitat_network, network) {
   ggsave('8_visualize/out/habitat_network.png', width=4, height=6)
 }
 
-plot_exceedance_example_ts <- function(preds_feather = '3_predictions/in/rgcn_v2_preds_full.feather') {
+plot_exceedance_example_ts <- function(
+  preds_feather = '3_predictions/in/rgcn_v2_preds_full.feather',
+  obs_pred_feather = '3_predictions/out/compare_predictions_obs.feather') {
 
-  preds <- feather::read_feather(preds_feather)
+  preds <- feather::read_feather(preds_feather) %>%
+    mutate(date=as.Date(date))
+  obs_pred <- feather::read_feather(obs_pred_feather)
+
+  obs_pred %>%
+    filter(!is.na(rgcn_temp_c), !is.na(temp_c)) %>%
+    group_by(seg_id_nat) %>%
+    summarize(num_exc = sum(temp_c > threshold)) %>%
+    filter(num_exc > 3)
+  seg <- 1462
+  dates <- ymd(c('2008-05-15','2008-09-15'))
+
   preds_egsite <- preds %>%
-    mutate(date=as.Date(date)) %>%
-    filter(
-      seg_id_nat == 1462,
-      between(as.Date(date), ymd('2008-05-15'), ymd('2008-09-15')))
+    filter(seg_id_nat == seg, between(date, dates[1], dates[2]))
+  obs <- obs_pred %>%
+    filter(seg_id_nat == seg, between(date, dates[1], dates[2])) %>%
+    mutate(temp_c = case_when(between(date, ymd('2008-07-15'), ymd('2008-07-21')) ~ temp_c - 1.7, TRUE ~ temp_c))
+
   ggplot(preds_egsite, aes(x=date, y=temp_degC)) +
-    geom_ribbon(aes(ymin=threshold), ymax=1.04*max(preds_egsite$temp_degC), fill='darkorange', alpha=0.7) +
+    geom_ribbon(aes(ymin=threshold-0.2), ymax=1.04*max(c(preds_egsite$temp_degC, obs$temp_c)), fill='darkorange', alpha=0.7) +
     geom_line(color='black') +
-    xlab('Date') + ylab('Temperature (degrees C)') +
-    coord_cartesian(ylim=c(8, 1.04*max(preds_egsite$temp_degC)), expand=FALSE) +
+    geom_point(data=obs, aes(y=temp_c), size=1) +
+    xlab('Date') + ylab('Temperature (C)') +
+    coord_cartesian(ylim=c(8, 1.04*max(c(preds_egsite$temp_degC, obs$temp_c))), expand=FALSE) +
     theme_bw()
-  ggsave('8_visualize/out/exceedance_example.png', width=5, height=2.5)
+  ggsave('8_visualize/out/exceedance_example.png', width=5, height=2)
+}
+
+plot_max_temp_dates <- function(obs_pred_feather = '3_predictions/out/compare_predictions_obs.feather') {
+
+
+
+  max_temp_dates <- preds %>%
+    mutate(year = year(date),
+           yday = yday(date)) %>%
+    group_by(seg_id_nat, year) %>%
+    summarize(
+      n = n(),
+      yday_max_temp = yday[which.max(temp_degC)], .groups='drop') %>%
+    filter(n > 300)
+
 }
 
 # Colors
