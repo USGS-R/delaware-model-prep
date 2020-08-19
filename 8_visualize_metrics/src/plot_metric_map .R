@@ -25,11 +25,8 @@ plot_metric_map <- function(out_file, network_ind, metric_file, metric_col, plot
   # finding the median for the multiple values of temperature timing and magnitude. One reach could have many completely observed summers so we will find the median for these max values to reduce them to one value per reach.
   if (grepl('error_max_temp', metric_col)){
     model_dat <- model_dat %>%
-browser()
-      #group_by('seg_id_nat') %>%
-      group_by(seg_id_nat)
-      #dplyr::group_by(.data[[seg_id_nat]]) %>%
-      summarize(metric_col = median(abs(.data[[metric_col]])))
+      group_by(seg_id_nat) %>%
+      summarize("{metric_col}" := median(abs(.data[[metric_col]])))
   }
 
 
