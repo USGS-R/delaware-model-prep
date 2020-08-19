@@ -1,5 +1,5 @@
-library(lubridate)
 library(tidyverse)
+library(lubridate)
 
 locate_habitat_reaches <- function(network_rds='1_network/out/network.rds', dist_rds='1_network/out/subseg_distance_matrix.rds') {
   # we're most interested in those reaches being managed for trout and/or dwarf wedgemussel
@@ -47,7 +47,12 @@ locate_habitat_reaches <- function(network_rds='1_network/out/network.rds', dist
     rename(outlet_seg_id_nat=seg_id_nat, outlet_subseg=subseg_id) %>%
     left_join(dist_dat, by=c('outlet_seg_id_nat', 'outlet_subseg'))
 
-  # select the
+  # Define various subnetworks
+  # These are the reaches specifically called out in the Coldwater Ecosystem
+  # Protection Level map at
+  # https://webapps.usgs.gov/odrm/ffmp/FFMP2017_Appendix_A.pdf
+  priority_network <- network$edges %>%
+    filter(subseg_id %in% c(callicoon_subnet, oakland_subnet))
   callicoon_subnet <- filter(basins, location=='callicoon')$trib_subseg %>%
     setdiff(filter(basins, location=='pepacton')$trib_subseg) %>%
     setdiff(filter(basins, location=='cannonsville')$trib_subseg) %>%
@@ -56,25 +61,24 @@ locate_habitat_reaches <- function(network_rds='1_network/out/network.rds', dist
     setdiff(filter(basins, location=='east branch')$trib_subseg)
   oakland_subnet <- filter(basins, location=='oakland valley dr')$trib_subseg %>%
     setdiff(filter(basins, location=='neversink')$trib_subseg)
-  # these are the reaches we think are worth presenting
-  habitat_network <- network$edges %>%
-    filter(subseg_id %in% c(
-      filter(basins, location=='callicoon')$trib_subseg,
-      filter(basins, location=='oakland valley dr')$trib_subseg))
-  # these are the reaches specifically called out in the Coldwater Ecosystem
-  # Protection Level map at
-  # https://webapps.usgs.gov/odrm/ffmp/FFMP2017_Appendix_A.pdf
-  priority_network <- network$edges %>%
-    filter(subseg_id %in% c(callicoon_subnet, oakland_subnet))
+  # These are reaches excluded by the CEPL map
   almost_network <- network$edges %>%
     filter(subseg_id %in% c(
       filter(basins, location=='deposit')$trib_subseg,
       filter(basins, location=='s lordville')$trib_subseg,
       filter(basins, location=='east branch')$trib_subseg))
+  # These are the reaches we think are trout-relevant and therefore worth
+  # presenting (include reaches above the reservoirs and not directly affected
+  # by the reservoirs)
+  habitat_network <- network$edges %>%
+    filter(subseg_id %in% c(
+      filter(basins, location=='callicoon')$trib_subseg,
+      filter(basins, location=='oakland valley dr')$trib_subseg))
+  # Here's the whole upper DRB, upstream of Port Jervis
   upper_delaware <- network$edges %>%
     filter(subseg_id %in% filter(basins, location=='port jervis')$trib_subseg)
 
-  # visualize the zooming in on the upper ~third of the DRB
+  # visualize the zooming in on the upper DRB
   plot(network$edges['subseg_id'], col='lightgray', reset=FALSE)
   plot(upper_delaware['subseg_id'], col='gray', add=TRUE)
 
@@ -89,8 +93,12 @@ locate_habitat_reaches <- function(network_rds='1_network/out/network.rds', dist
   return(habitat_network)
 }
 
-habitat_network <- locate_habitat_reaches()
+habitat_network <- locate_habitat_reaches(
+  network_rds='1_network/out/network.rds',
+  dist_rds='1_network/out/subseg_distance_matrix.rds')
 
+# Determine the median ratio of max to mean daily temperatures using data from a
+# single NWIS site (01427207 is the most-observed Lordville gage)
 get_max_mean_ratio <- function(nwis_id = '01427207') {
 
   # Lordville is 1574 (slightly upstream) or 1573 (slightly downstream of town)...but all the data are for 1573
@@ -106,12 +114,12 @@ get_max_mean_ratio <- function(nwis_id = '01427207') {
     dataRetrieval::renameNWISColumns()
   nwis_data <- full_join(nwis_means, nwis_maxes, by=c('agency_cd','site_no','Date')) %>% as_tibble()
 
-  library(lubridate)
   nwis_summers <- nwis_data %>%
     filter(between(yday(Date), yday(ymd('2020-06-21')), yday(ymd('2020-09-21')))) %>%
     mutate(max_mean_ratio = Wtemp_Max/Wtemp) %>%
     filter(!is.na(max_mean_ratio))
 
+  # exploratory plots
   # nwis_summers %>%
   #   tidyr::pivot_longer(cols=c('Wtemp', 'Wtemp_Max'), names_to='stat', values_to='temp_c') %>%
   #   ggplot(aes(x=Date, y=temp_c, group=year(Date))) + geom_line(aes(color=stat))
@@ -129,8 +137,8 @@ get_max_mean_ratio <- function(nwis_id = '01427207') {
   median(nwis_summers$max_mean_ratio)
 }
 
-max_mean_ratio <- get_max_mean_ratio() # 1.064516; involves NWIS queries
-# convert from a max temp threshold to a mean one. i think we shoudl choose
+max_mean_ratio <- get_max_mean_ratio(nwis_id = '01427207') # max_mean_ratio=1.064516; involves NWIS queries
+# convert from a max temp threshold to a mean one. i think we should choose
 # either 75 or 72 F as the max to start from
 # (https://www.fudr.org/2019/07/12/upper-delaware-river-decision-makers-gather-in-hancock-ny/)
 threshold <- (75-32)*5/9 / max_mean_ratio
@@ -312,7 +320,7 @@ plot_exceedance_habitat <- function(preds_feather = '3_predictions/in/rgcn_v2_pr
     filter(!is.na(exceedance_bin))
   enet <- sf::st_set_crs(exceedance_network, 102039)
 
-  library(colorspace)
+  # library(colorspace) I think I ended up not using this?
   g <- ggplot(enet) +
     geom_sf(aes(color=exceedance_bin), size=1.2) +
     theme_minimal() +
@@ -391,21 +399,6 @@ plot_exceedance_example_ts <- function(
     coord_cartesian(ylim=c(8, 1.04*max(c(preds_egsite$temp_degC, obs$temp_c))), expand=FALSE) +
     theme_bw()
   ggsave('8_visualize/out/exceedance_example.png', width=5, height=2)
-}
-
-plot_max_temp_dates <- function(obs_pred_feather = '3_predictions/out/compare_predictions_obs.feather') {
-
-
-
-  max_temp_dates <- preds %>%
-    mutate(year = year(date),
-           yday = yday(date)) %>%
-    group_by(seg_id_nat, year) %>%
-    summarize(
-      n = n(),
-      yday_max_temp = yday[which.max(temp_degC)], .groups='drop') %>%
-    filter(n > 300)
-
 }
 
 # Colors
