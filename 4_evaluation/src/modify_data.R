@@ -12,7 +12,7 @@ modify_data <- function(in_ind){
   # finding the max/latest start and min/earliest date
   start <- max(dates$start)
   end <- min(dates$end)
-  ## filtering the date the and creating a subset with "rgcn_temp_c" model to select distinct seg_id_nat.
+  ## filtering the data and creating a subset with "rgcn_temp_c" model to select distinct seg_id_nat.
   segs <- filter(dat_mod, model %in% 'rgcn_temp_c') %>%
     select(seg_id_nat) %>% distinct() %>% pull(seg_id_nat)
 
