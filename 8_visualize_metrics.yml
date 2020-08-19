@@ -187,7 +187,7 @@ targets:
     command: plot_metric_map(out_file = target_name,
                 network_ind = '1_network/out/network.rds.ind',
                 metric_file = '4_evaluation/out/max_metrics_by_seg_year.csv',
-                metric_col = I('error_obs_pred'),
+                metric_col = I('error_max_temp'),
                 plot_model = I('rgcn2_full_full'),
                 legend_text = I('Max Temp Error (deg C)'))
 
@@ -196,7 +196,7 @@ targets:
     command: plot_metric_map(out_file = target_name,
                 network_ind = '1_network/out/network.rds.ind',
                 metric_file = '4_evaluation/out/max_metrics_by_seg_year.csv',
-                metric_col = I('error_obs_pred'),
+                metric_col = I('error_max_temp'),
                 plot_model = I('sntemp_full'),
                 legend_text = I('Max Temp Error (deg C)'))
 
@@ -205,7 +205,7 @@ targets:
     command: plot_metric_map(out_file = target_name,
                 network_ind = '1_network/out/network.rds.ind',
                 metric_file = '4_evaluation/out/max_metrics_by_seg_year.csv',
-                metric_col = I('error_max_timing'),
+                metric_col = I('error_max_temp_timing'),
                 plot_model = I('rgcn2_full_full'),
                 legend_text = I('Max Temp Timing Error (days)'))
 
@@ -213,7 +213,7 @@ targets:
     command: plot_metric_map(out_file = target_name,
                 network_ind = '1_network/out/network.rds.ind',
                 metric_file = '4_evaluation/out/max_metrics_by_seg_year.csv',
-                metric_col = I('error_max_timing'),
+                metric_col = I('error_max_temp_timing'),
                 plot_model = I('sntemp_full'),
                 legend_text = I('Max Temp Timing Error (days)'))
 

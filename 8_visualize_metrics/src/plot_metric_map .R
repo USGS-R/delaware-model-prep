@@ -22,8 +22,35 @@ plot_metric_map <- function(out_file, network_ind, metric_file, metric_col, plot
   # filtering to select the full models.
   model_dat <- dat %>%
     filter(model %in% plot_model)
+  # finding the median for the multiple values of temperature timing and magnitude. One reach could have many completely observed summers so we will find the median for these max values to reduce them to one value per reach.
+  if (grepl('error_max_temp', metric_col)){
+    model_dat <- model_dat %>%
+      group_by(seg_id_nat) %>%
+      summarize("{metric_col}" := median(abs(.data[[metric_col]])))
+  }
+
+
   #combine the metrics measurement with the network
   metric_network <- left_join(network, model_dat)
+  # need to filter the extreme negative nse values
+  if (metric_col == 'nse') {
+    subset_nse <- metric_network %>%
+      filter(nse < -1)
+    # changing the extreme negative values to NA so they can plot gray scale.
+    metric_network <- metric_network %>%
+      mutate(nse = ifelse(nse < -1, NA, nse))
+    p <- ggplot(metric_network) +
+      geom_sf(aes(color = .data[[metric_col]]), size = 1.2) +
+      #plotting the a layer of the extreme values subset over full data set.
+      geom_sf(data = subset_nse, color = 'blue', fill = NA) +
+      scale_color_viridis_c(direction = -1, option = 'inferno', na.value = 'lightgray') +
+      theme_bw() +
+      map_theme +
+      labs(color = legend_text)
+  }
+
+
+
   # plotting the metric associated with the full models.
   #browser()
   p <- ggplot(metric_network) +
