@@ -1,5 +1,6 @@
 # Functions to calculate metrics for model evaluation.
 #library(docstring) ## needed to call the function that are not in a package.
+
 # Mean Absolute Error (MAE) metric
 calc_mae <- function(observe_data, predict_data, n_digits = 2) {
   #' Mean Absolute Error (MAE)
@@ -59,8 +60,8 @@ calc_tim_temp_max <- function(data_in, observe_col, predict_col, date_col,  date
               max_timing_mod = lubridate::yday(date[which.max({{predict_col}})]),
               summer_complete = all(date_range %in% lubridate::yday(date))) %>%
     filter(summer_complete) %>%
-    mutate(error_obs_pred = round(abs(max_obs - max_mod), digits = n_digits),
-           error_max_timing = abs(max_timing_obs - max_timing_mod))
+    mutate(error_max_temp = round((max_obs - max_mod), digits = n_digits),
+           error_max_temp_timing = (max_timing_obs - max_timing_mod))
   return(max_fun_out)
 }
 
