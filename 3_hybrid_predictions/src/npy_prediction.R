@@ -8,6 +8,7 @@ munge_npy_dat <- function(in_file, model_name, seg_vector) {
   # create date column: assign desired dates (adding a date column in the data).
   dat_in$date <- seq.Date(from = as.Date('2004-10-01'), to = as.Date('2016-09-30'), by = 1)
   # make the data into a long formate.
+  browser()
   dat_mod <- tidyr::gather(dat_in, key = 'seg_id_nat', value = predicted_temp_c , -date)
   # creating a model column.
   dat_mod$model <- model_name
@@ -27,7 +28,6 @@ combine_preds_obs <- function(obs_ind, ann_npy, rnn_npy, rgnc_npy, rgnc_ptrn_npy
                      '2048', '4182')
   # 1) plain neural network model.
   ANN <- munge_npy_dat(in_file = ann_npy, model_name = 'ANN', seg_vector = segs) # %>%
-    #mutate(seg_id_nat = as.character(seg_id_nat), date = as.Date(date))
 
   # 2) + time mdoel.
   RNN <- munge_npy_dat(in_file = rnn_npy, model_name = 'RNN', seg_vector = segs) #%>%
