@@ -20,7 +20,8 @@ munge_npy_dat <- function(in_file, model_name, seg_vector) {
 }
 
 
-combine_preds_obs <- function(obs_ind, ann_npy, rnn_npy, rgnc_npy, rgnc_ptrn_npy, out_file){
+combine_preds_obs <- function(obs_ind, rnn_npy, rgnc_npy, rgnc_ptrn_npy, out_file){
+  # Add to the function arguemnt: ann_npy,
 
     # Create segment ID vector.
   segs <- c('2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012',
@@ -30,7 +31,7 @@ combine_preds_obs <- function(obs_ind, ann_npy, rnn_npy, rgnc_npy, rgnc_ptrn_npy
                      '2038', '2039', '2040', '2041', '2044', '2045', '2046', '2047',
                      '2048', '4182')
   # 1) plain neural network model.
-  ANN <- munge_npy_dat(in_file = ann_npy, model_name = 'PGRNN', seg_vector = segs) # %>%
+  #ANN <- munge_npy_dat(in_file = ann_npy, model_name = 'ANN', seg_vector = segs) # %>%
 
   # 2) + time mdoel.
   RNN <- munge_npy_dat(in_file = rnn_npy, model_name = 'RNN', seg_vector = segs) #%>%
@@ -39,10 +40,10 @@ combine_preds_obs <- function(obs_ind, ann_npy, rnn_npy, rgnc_npy, rgnc_ptrn_npy
   RGNC <- munge_npy_dat(in_file = rgnc_npy, model_name = 'RGNC', seg_vector = segs) #%>%
 
   # 4) + pre_training model
-  RGNC_ptrn <- munge_npy_dat(in_file = rgnc_ptrn_npy, model_name = 'RGCN_ptrn', seg_vector = segs)# %>%
-
-  preds <- bind_rows(ANN, RNN) %>%
-          bind_rows(RGNC) %>%
+  RGNC_ptrn <- munge_npy_dat(in_file = rgnc_ptrn_npy, model_name = 'RGCN_ptrn', seg_vector = segs)#
+###############     make sure line 45 when we get the correct ANN data-file   ##############
+  preds <- #bind_rows(ANN, RNN) %>%
+          bind_rows(RNN, RGNC) %>%
           bind_rows(RGNC_ptrn)
   #bring in observations
   obs_temp_c <- readRDS(sc_retrieve(obs_ind, 'getters.yml')) %>%
