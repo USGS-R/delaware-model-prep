@@ -2,13 +2,16 @@
 
 munge_npy_dat <- function(in_file, model_name, seg_vector) {
   # to read npy data files from XJ's predictions (3_hyprid_prediction/in).
+
   dat_in <- npyLoad(in_file)
    #assign seg_id, we delcared the segs_id in combine_preds_obs funcion.
+  dat_in <- as.data.frame(t(dat_in))
+  #naming the columns seg_id names.
   names(dat_in) <- seg_vector
   # create date column: assign desired dates (adding a date column in the data).
   dat_in$date <- seq.Date(from = as.Date('2004-10-01'), to = as.Date('2016-09-30'), by = 1)
   # make the data into a long formate.
-  browser()
+
   dat_mod <- tidyr::gather(dat_in, key = 'seg_id_nat', value = predicted_temp_c , -date)
   # creating a model column.
   dat_mod$model <- model_name
@@ -27,7 +30,7 @@ combine_preds_obs <- function(obs_ind, ann_npy, rnn_npy, rgnc_npy, rgnc_ptrn_npy
                      '2038', '2039', '2040', '2041', '2044', '2045', '2046', '2047',
                      '2048', '4182')
   # 1) plain neural network model.
-  ANN <- munge_npy_dat(in_file = ann_npy, model_name = 'ANN', seg_vector = segs) # %>%
+  ANN <- munge_npy_dat(in_file = ann_npy, model_name = 'PGRNN', seg_vector = segs) # %>%
 
   # 2) + time mdoel.
   RNN <- munge_npy_dat(in_file = rnn_npy, model_name = 'RNN', seg_vector = segs) #%>%
@@ -48,7 +51,6 @@ combine_preds_obs <- function(obs_ind, ann_npy, rnn_npy, rgnc_npy, rgnc_ptrn_npy
   pred_obs <- left_join(preds, select(obs_temp_c, -subseg_id))
   out <- readr:: write_csv(pred_obs, path = out_file)
 
-    return(out)
 }
 
 
