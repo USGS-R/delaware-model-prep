@@ -1,0 +1,28 @@
+target_default: 3_hybrid_predictions
+
+packages:
+  - RcppCNPy
+  - dplyr
+  - feather
+  - lubridate
+  - readr
+
+sources:
+  - 3_hybrid_predictions/src/npy_prediction.R
+
+targets:
+  3_hybrid_predictions:
+    depends:
+     - 3_hybrid_predictions/out/compare_predictions_obs.csv
+
+
+  # combine the prediction from 4 models: ANN (plain neural network),
+  #RNN (+ time), RGCN (+ space), RGCN_ptrn (+ pretraining) with obsereved data.
+  3_hybrid_predictions/out/compare_predictions_obs.csv:
+    command: combine_preds_obs(obs_ind = '2_observations/out/obs_temp_drb.rds.ind',
+                                           ann_npy = '3_hybrid_predictions/in/PGRNN_0716.npy',
+                                           rnn_npy = '3_hybrid_predictions/in/RNN_0518.npy',
+                                           rgnc_npy = '3_hybrid_predictions/in/RGCN_0518_woptr.npy',
+                                           rgnc_ptrn_npy = '3_hybrid_predictions/in/RGCN_0518_wctr.npy',
+                                           out_file = target_name)
+
