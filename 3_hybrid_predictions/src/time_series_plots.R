@@ -16,6 +16,7 @@ dat <- combine_preds_obs(obs_ind = '2_observations/out/obs_temp_drb.rds.ind',
                          rgnc_npy = '3_hybrid_predictions/in/RGCN_0518_woptr.npy',
                          rgnc_ptrn_npy = '3_hybrid_predictions/in/RGCN_0518_wctr.npy',
                          out_file = '3_hybrid_predictions/out/combine_test.csv')
+dat$model <- factor(dat$model, levels = c('RNN', 'RGNC', 'RGCN_ptrn'))
 
 
 # to select the year with the most observation.
@@ -36,7 +37,8 @@ test_temp_dat <- filter(dat_2014, seg_id_nat %in% temp_seg) %>%
 # to get the max number of observation and find the year associated with it.
 year_max_obs <- max(subset_dat)
 
-dat_2014 <- filter(dat, lubridate::year(date) %in% 2014)
+dat_2014 <- filter(dat, lubridate::year(date) %in% 2014) %>%
+  mutate(date = as.Date(date))
 segs <- unique(dat_2014$seg_id_nat)
 # to add the models name list 'ANN' = 'plain_neural_network'
 # model names
@@ -57,14 +59,14 @@ for (temp_seg in segs) {
   p <- ggplot(data = temp_dat, aes(x = date, y = predicted_temp_c,
                               group = model, colour = model)) +
     geom_line(size = 1)+
-    geom_point(data = temp_dat, aes(x = date, y = temp_c), colour = "black")+
-    facet_wrap(~ model, strip.position = "top", ncol = 1)+#, labeller = model_lab) +
+    geom_point(data = temp_dat, aes(x = date, y = temp_c),
+               alpha = 0.35, colour = "black", size = 1) +
+    facet_wrap(~ model, strip.position = "top", ncol = 1) +#, labeller = model_lab) +
     theme_bw() +
     cowplot::theme_cowplot() +
-    #theme(legend.position = "none") +
     scale_y_continuous("Temperature") +
-    scale_x_discrete(breaks = pretty(dat_2014$date)) +
-    labs(x = "Date (Year = 2014)") +
+    #scale_x_continuous("Date (Year = 2014)") +
+    #labs(x = "Date (Year = 2014)") +
     ggtitle(paste0("Timeseries Temperature for Segment Id: ", temp_seg)) +
     theme(plot.title = element_text(hjust = 0.5), legend.position = "none")
 
