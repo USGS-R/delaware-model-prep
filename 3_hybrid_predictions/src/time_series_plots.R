@@ -27,15 +27,52 @@ subset_dat <-  dat %>%
   group_by(year) %>%
   summarize(n_obs = n())
 
+test_temp_dat <- filter(dat_2014, seg_id_nat %in% temp_seg) %>%
+  #filter(!is.na(temp_c)) %>%
+  #filter(!is.na(predicted_temp_c)) %>%
+  group_by(seg_id_nat) %>%
+  summarize(n_obs = n())
+
 # to get the max number of observation and find the year associated with it.
 year_max_obs <- max(subset_dat)
 
-segs <- unique(dat$seg_id_nat)
+dat_2014 <- filter(dat, lubridate::year(date) %in% 2014)
+segs <- unique(dat_2014$seg_id_nat)
+# to add the models name list 'ANN' = 'plain_neural_network'
+# model names
+model_names <- list('RNN' = '+ time_awareness',
+                    'RGNC' = '+ pretraining',
+                    'RGCN_ptrn' = '+ space_awareness')
+# creating a function to loop trhough model names.
+model_lab <- function(abbreviation, name) {
+  return(model_names[abbreviation])
+}
+#new_2014 <- filter(dat_2014, seg_id_nat %in% segs)
+#to loop through the segs vector similar to using for (i in ...) without having to index in the rest of the loop.
+for (temp_seg in segs) {
+  temp_dat <- dat_2014 %>%
+    filter(seg_id_nat %in% temp_seg)
+  #print(paste0('This is seg ID ', temp_seg))
+#}
+  p <- ggplot(data = temp_dat, aes(x = date, y = predicted_temp_c,
+                              group = model, colour = model)) +
+    geom_line(size = 1)+
+    geom_point(data = temp_dat, aes(x = date, y = temp_c), colour = "black")+
+    facet_wrap(~ model, strip.position = "top", ncol = 1)+#, labeller = model_lab) +
+    theme_bw() +
+    cowplot::theme_cowplot() +
+    #theme(legend.position = "none") +
+    scale_y_continuous("Temperature") +
+    scale_x_discrete(breaks = pretty(dat_2014$date)) +
+    labs(x = "Date (Year = 2014)") +
+    ggtitle(paste0("Timeseries Temperature for Segment Id: ", temp_seg)) +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "none")
 
-dat_2014 <- filter(dat, lubridate::year(date)) %in% 2014
-segs <- unique(dat_2014$)
-                   segs <- unique(dat_2014$seg_id_nat)
-                   for (temp_seg in segs) {
-                     temp_dat <- filter(dat_2000, seg_id_nat %in% temp_seg)
-                     ggplot(temp_dat)...
-                   }
+    # to title each plot with a unique title that deals with segs-id and not write over plots
+    temp_filename <- paste0('timeseries_predicted_temp_seg_', temp_seg, '.png')
+ print(p)
+
+ #ggsave(temp_filename, p, height = 7.5, width = 8)
+}
+
+
