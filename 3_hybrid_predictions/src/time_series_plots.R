@@ -16,6 +16,8 @@ dat <- combine_preds_obs(obs_ind = '2_observations/out/obs_temp_drb.rds.ind',
                          rgnc_npy = '3_hybrid_predictions/in/RGCN_0518_woptr.npy',
                          rgnc_ptrn_npy = '3_hybrid_predictions/in/RGCN_0518_wctr.npy',
                          out_file = '3_hybrid_predictions/out/combine_test.csv')
+
+# changing the order of the models by declaring a factor.
 dat$model <- factor(dat$model, levels = c('RNN', 'RGNC', 'RGCN_ptrn'))
 
 # to select the year with the most observation.
