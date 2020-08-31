@@ -1,9 +1,9 @@
 ## creating a function that read data (npy files), process, and combine the data.
 
-munge_npy_dat <- function(in_file, model_name, seg_vector) {
+munge_npy_dat <- function(in_ind, model_name, seg_vector) {
   # to read npy data files from XJ's predictions (3_hyprid_prediction/in).
 
-  dat_in <- npyLoad(in_file)
+  dat_in <- npyLoad(sc_retrieve(in_ind))
    #assign seg_id, we delcared the segs_id in combine_preds_obs funcion.
   dat_in <- as.data.frame(t(dat_in))
   #naming the columns seg_id names.
@@ -33,13 +33,13 @@ combine_models_obs <- function(obs_ind, rnn_ind, rgnc_ind, rgnc_ptrn_ind, out_fi
   #ANN <- munge_npy_dat(in_file = ann_npy, model_name = 'ANN', seg_vector = segs) # %>%
 
   # 2) + time mdoel.
-  RNN <- munge_npy_dat(in_file = rnn_npy, model_name = 'RNN', seg_vector = segs) #%>%
+  RNN <- munge_npy_dat(in_ind= rnn_ind, model_name = 'RNN', seg_vector = segs) #%>%
 
   # 3) + space model
-  RGNC <- munge_npy_dat(in_file = rgnc_npy, model_name = 'RGNC', seg_vector = segs) #%>%
+  RGNC <- munge_npy_dat(in_ind = rgnc_ind, model_name = 'RGNC', seg_vector = segs) #%>%
 
   # 4) + pre_training model
-  RGNC_ptrn <- munge_npy_dat(in_file = rgnc_ptrn_npy, model_name = 'RGCN_ptrn', seg_vector = segs)#
+  RGNC_ptrn <- munge_npy_dat(in_ind = rgnc_ptrn_ind, model_name = 'RGCN_ptrn', seg_vector = segs)#
 ###############     make sure line 45 when we get the correct ANN data-file   ##############
   preds <- #bind_rows(ANN, RNN) %>%
           bind_rows(RNN, RGNC) %>%
