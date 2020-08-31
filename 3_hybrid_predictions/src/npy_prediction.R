@@ -49,7 +49,7 @@ combine_models_obs <- function(obs_ind, rnn_ind, rgnc_ind, rgnc_ptrn_ind, out_fi
     mutate(seg_id_nat = as.character(seg_id_nat))
 
   pred_obs <- left_join(preds, select(obs_temp_c, -subseg_id))
-  out <- readr:: write_csv(pred_obs, path = out_file)
+  out <- saveRDS(pred_obs, file = out_file)
 
 }
 
