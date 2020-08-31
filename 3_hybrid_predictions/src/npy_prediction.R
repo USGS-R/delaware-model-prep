@@ -19,7 +19,7 @@ munge_npy_dat <- function(in_file, model_name, seg_vector) {
   return(dat_mod)
 }
 
-combine_preds_obs <- function(obs_ind, rnn_npy, rgnc_npy, rgnc_ptrn_npy, out_file){
+combine_models_obs <- function(obs_ind, rnn_npy, rgnc_npy, rgnc_ptrn_npy, out_file){
   # Add to the function arguemnt: ann_npy,
 
     # Create segment ID vector.
