@@ -66,7 +66,7 @@ targets:
   2_observations/out/obs_flow_drb.rds:
     command: gd_get('2_observations/out/obs_flow_drb.rds.ind')
 
-  #### 3_observations ####
+  #### 3_predictions ####
   # segment-level drivers, intermediate model variables, and stream temperature predictions using uncalibrated PRMS-SNTemp
   #  from https://github.com/jzwart/delaware-water-temp/blob/626d6d159daccfcf52c5e7fddf88d24031f35e6d/4_model_for_PGDL.yml#L42-L46
   3_predictions/in/uncal_sntemp_input_output.feather:
@@ -89,6 +89,19 @@ targets:
     command: gd_get('3_predictions/in/rgcn_v2_preds_full.feather.ind')
   3_predictions/out/compare_predictions_obs.feather:
     command: gd_get('3_predictions/out/compare_predictions_obs.feather.ind')
+
+  ### 3_hybrid_predictions ###
+  # these files were uploaded to GD to the appropriate place,
+  # then used gd_confirm_posted to check and create indicator file
+
+  3_hybrid_predictions/in/RNN_0518.npy:
+    command: gd_get('3_hybrid_predictions/in/RNN_0518.npy.ind')
+
+  3_hybrid_predictions/in/RGCN_0518_woptr.npy:
+    command: gd_get('3_hybrid_predictions/in/RGCN_0518_woptr.npy.ind')
+
+  3_hybrid_predictions/in/RGCN_0518_wctr.npy:
+    command: gd_get('3_hybrid_predictions/in/RGCN_0518_wctr.npy')
 
   #### 9_collaborator_data ####
   ## Makerspace ##
