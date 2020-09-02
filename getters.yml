@@ -101,7 +101,20 @@ targets:
     command: gd_get('3_hybrid_predictions/in/RGCN_0518_woptr.npy.ind')
 
   3_hybrid_predictions/in/RGCN_0518_wctr.npy:
-    command: gd_get('3_hybrid_predictions/in/RGCN_0518_wctr.npy')
+    command: gd_get('3_hybrid_predictions/in/RGCN_0518_wctr.npy.ind')
+
+  3_hybrid_predictions/in/RGCN_0518.npy:
+    command: gd_get('3_hybrid_predictions/in/RGCN_0518.npy.ind')
+
+  3_hybrid_predictions/in/ANN_0831.npy:
+    command: gd_get('3_hybrid_predictions/in/ANN_0831.npy.ind')
+
+  3_hybrid_predictions/in/PGRNN_0716.npy:
+    command: gd_get('3_hybrid_predictions/in/PGRNN_0716.npy.ind')
+
+  3_hybrid_predictions/out/compare_predictions_obs.rds:
+    command: gd_get('3_hybrid_predictions/out/compare_predictions_obs.rds.ind')
+
 
   #### 9_collaborator_data ####
   ## Makerspace ##

@@ -3,7 +3,7 @@
 munge_npy_dat <- function(in_ind, model_name, seg_vector) {
   # to read npy data files from XJ's predictions (3_hyprid_prediction/in).
 
-  dat_in <- npyLoad(sc_retrieve(in_ind))
+  dat_in <- npyLoad(sc_retrieve(in_ind, 'getters.yml'))
    #assign seg_id, we delcared the segs_id in combine_preds_obs funcion.
   dat_in <- as.data.frame(t(dat_in))
   #naming the columns seg_id names.
@@ -19,7 +19,8 @@ munge_npy_dat <- function(in_ind, model_name, seg_vector) {
   return(dat_mod)
 }
 
-combine_models_obs <- function(obs_ind, rnn_ind, rgnc_ind, rgnc_ptrn_ind, out_file){
+combine_models_obs <- function(obs_ind, ann_ind, rnn_ind, rnn_ptr_ind, rgcn_ind,
+                               rgcn_ptrn_ind, rgcn_ptrn_ctr_ind, out_ind){
   # Add to the function arguemnt: ann_npy,
 
     # Create segment ID vector.
@@ -30,26 +31,31 @@ combine_models_obs <- function(obs_ind, rnn_ind, rgnc_ind, rgnc_ptrn_ind, out_fi
                      '2038', '2039', '2040', '2041', '2044', '2045', '2046', '2047',
                      '2048', '4182')
   # 1) plain neural network model.
-  #ANN <- munge_npy_dat(in_file = ann_npy, model_name = 'ANN', seg_vector = segs) # %>%
+  ANN <- munge_npy_dat(in_ind = ann_ind, model_name = 'ANN', seg_vector = segs)
 
   # 2) + time mdoel.
-  RNN <- munge_npy_dat(in_ind= rnn_ind, model_name = 'RNN', seg_vector = segs) #%>%
+  RNN <- munge_npy_dat(in_ind= rnn_ind, model_name = 'RNN', seg_vector = segs)
 
-  # 3) + space model
-  RGNC <- munge_npy_dat(in_ind = rgnc_ind, model_name = 'RGNC', seg_vector = segs) #%>%
+  # 3) + time + pretraining
+  RNN_ptr <- munge_npy_dat(in_ind= rnn_ptr_ind, model_name = 'RNN_ptrn', seg_vector = segs)
 
-  # 4) + pre_training model
-  RGNC_ptrn <- munge_npy_dat(in_ind = rgnc_ptrn_ind, model_name = 'RGCN_ptrn', seg_vector = segs)#
-###############     make sure line 45 when we get the correct ANN data-file   ##############
-  preds <- #bind_rows(ANN, RNN) %>%
-          bind_rows(RNN, RGNC) %>%
-          bind_rows(RGNC_ptrn)
+  # 4) + time + space model
+  RGCN <- munge_npy_dat(in_ind = rgcn_ind, model_name = 'RGCN', seg_vector = segs)
+
+  # 5) + time + space + pre_training model
+  RGCN_ptrn <- munge_npy_dat(in_ind = rgcn_ptrn_ind, model_name = 'RGCN_ptrn', seg_vector = segs)
+
+  # 6) + time + space + pre_training + contrastive loss odel
+  RGCN_ptrn_ctr <- munge_npy_dat(in_ind = rgcn_ptrn_ctr_ind, model_name = 'RGCN_ptrn_ctr', seg_vector = segs)
+
+  preds <- bind_rows(ANN, RNN, RNN_ptr, RGCN, RGCN_ptrn, RGCN_ptrn_ctr)
   #bring in observations
   obs_temp_c <- readRDS(sc_retrieve(obs_ind, 'getters.yml')) %>%
     mutate(seg_id_nat = as.character(seg_id_nat))
 
   pred_obs <- left_join(preds, select(obs_temp_c, -subseg_id))
-  out <- saveRDS(pred_obs, file = out_file)
+  out <- saveRDS(pred_obs, file = as_data_file(out_ind))
+  gd_put(out_ind)
 
 }
 
