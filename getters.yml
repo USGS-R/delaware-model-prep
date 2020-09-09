@@ -26,6 +26,8 @@ targets:
     command: gd_get('1_network/out/global_reservoirs.rds.ind')
   1_network/out/network.rds:
     command: gd_get('1_network/out/network.rds.ind')
+  1_network/out/network.json:
+    command: gd_get('1_network/out/network.json.ind')
   1_network/out/boundary.rds:
     command: gd_get('1_network/out/boundary.rds.ind')
   1_network/out/subseg_distance_matrix.rds:
