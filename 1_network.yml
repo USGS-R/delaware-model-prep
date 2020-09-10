@@ -8,6 +8,7 @@ packages:
   - igraph
   - purrr
   - scipiper
+  - geojsonio
 
 sources:
   - 1_network/src/geo_fabric_functions.R
@@ -51,7 +52,11 @@ targets:
       subset_network = I('1_network/in/delaware_stream_temp_by_segment/delaware_segments/delaware_segments.shp'),
       national_network = I('1_network/in/GeospatialFabric_National.gdb'))
 
-  # create a DRB boundary polygon
+  1_network/out/network.json.ind:
+    command: save_network_as_geojson(
+      out_ind = target_name,
+      network_ind = I('1_network/out/network.rds.ind'))
+
   1_network/out/boundary.rds.ind:
     command: create_boundary(
       out_ind = target_name,

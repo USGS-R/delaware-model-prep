@@ -241,6 +241,12 @@ revise_raw_network <- function(subset_network, national_network, out_ind) {
   gd_put(out_ind)
 }
 
+save_network_as_geojson <- function(network_ind, out_ind){
+  network <- readRDS(sc_retrieve(network_ind))
+  geojson_write(network$edges, file = as_data_file(out_ind))
+  gd_put(out_ind, as_data_file(out_ind))
+}
+
 create_boundary <- function(subset_network, national_network, out_ind) {
 
   # Read in the Delaware PRMS-stream_temp stream network and the GF
