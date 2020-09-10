@@ -13,17 +13,19 @@ sources:
 targets:
   3_hybrid_predictions:
     depends:
-     - 3_hybrid_predictions/out/compare_predictions_obs.csv
+     - 3_hybrid_predictions/out/compare_predictions_obs.rds.ind
 
 
   # combine the prediction from 4 models: ANN (plain neural network),
   #RNN (+ time), RGCN (+ space), RGCN_ptrn (+ pretraining) with obsereved data.
 
-  #ann_npy = '3_hybrid_predictions/in/PGRNN_0716.npy',
-  3_hybrid_predictions/out/compare_predictions_obs.csv:
-    command: combine_preds_obs(obs_ind = '2_observations/out/obs_temp_drb.rds.ind',
-                                           rnn_npy = '3_hybrid_predictions/in/RNN_0518.npy',
-                                           rgnc_npy = '3_hybrid_predictions/in/RGCN_0518_woptr.npy',
-                                           rgnc_ptrn_npy = '3_hybrid_predictions/in/RGCN_0518_wctr.npy',
-                                           out_file = target_name)
+  3_hybrid_predictions/out/compare_predictions_obs.rds.ind:
+    command: combine_models_obs(obs_ind = '2_observations/out/obs_temp_drb.rds.ind',
+                                           ann_ind = '3_hybrid_predictions/in/ANN_0831.npy.ind',
+                                           rnn_ind = '3_hybrid_predictions/in/RNN_0518.npy.ind',
+                                           rnn_ptr_ind = '3_hybrid_predictions/in/PGRNN_0716.npy.ind',
+                                           rgcn_ind = '3_hybrid_predictions/in/RGCN_0518_woptr.npy.ind',
+                                           rgcn_ptrn_ind = '3_hybrid_predictions/in/RGCN_0518.npy.ind',
+                                           rgcn_ptrn_ctr_ind = '3_hybrid_predictions/in/RGCN_0518_wctr.npy.ind',
+                                           out_ind = target_name)
 

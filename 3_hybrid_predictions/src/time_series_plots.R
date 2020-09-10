@@ -10,30 +10,29 @@ library(lubridate)
 library(dplyr)
 
 
-dat <- combine_preds_obs(obs_ind = '2_observations/out/obs_temp_drb.rds.ind',
-                         #ann_npy = '3_hybrid_predictions/in/PGRNN_0716.npy',
-                         rnn_npy = '3_hybrid_predictions/in/RNN_0518.npy',
-                         rgnc_npy = '3_hybrid_predictions/in/RGCN_0518_woptr.npy',
-                         rgnc_ptrn_npy = '3_hybrid_predictions/in/RGCN_0518_wctr.npy',
-                         out_file = '3_hybrid_predictions/out/combine_test.csv')
+dat <- readRDS(sc_retrieve('3_hybrid_predictions/out/compare_predictions_obs.rds.ind', 'getters.yml'))
 
 # changing the order of the models by declaring a factor.
-dat$model <- factor(dat$model, levels = c('RNN', 'RGNC', 'RGCN_ptrn'))
+dat$model <- factor(dat$model, levels = c('ANN', 'RNN', 'RNN_ptrn', 'RGCN', 'RGCN_ptrn', 'RGCN_ptrn_ctr'))
 
 # to select the year with the most observation.
 # 1) remove NA   2) group by year  3) summarize to get number of observation.
-subset_dat <-  dat %>%
+yearly_nobs <-  dat %>%
   mutate(year = lubridate::year(date)) %>% #should always be right after we read the data.
   filter(!is.na(predicted_temp_c)) %>%
   filter(!is.na(temp_c)) %>%
+  select(seg_id_nat, year, date, temp_c) %>%
+  distinct() %>%
   group_by(year) %>%
   summarize(n_obs = n())
 
 # to get the max number of observation and find the year associated with it.
-year_max_obs <- max(subset_dat)
+year_max_obs <- yearly_nobs$year[which.max(yearly_nobs$n_obs)]
+dat_2014 <- dat %>%
+  mutate(year = lubridate::year(date)) %>%
+  filter(year %in% 2012:2014)
 
-dat_2014 <- filter(dat, lubridate::year(date) %in% 2014) %>%
-  mutate(date = as.Date(date))
+# find all the segs
 segs <- unique(dat_2014$seg_id_nat)
 
 # getting the number of obs for the data with selected year.
@@ -43,9 +42,12 @@ test_temp_dat <- filter(dat_2014, seg_id_nat %in% temp_seg) %>%
 
 # to add the models name list 'ANN' = 'plain_neural_network'
 # model names
-model_names <- c("RNN" = "+ time_awareness",
-                    "RGNC" = "+ pretraining",
-                    "RGCN_ptrn" = "+ space_awareness")
+model_names <- c("ANN" = 'ANN',
+                 "RNN" = "+ time",
+                 "RNN_ptrn" = " + time, prtrn",
+                 "RGCN" = "+ time, space",
+                 "RGCN_ptrn" = "+ time, space, prtrn",
+                 "RGCN_ptrn_ctr" = "+ time, space, prtrn, ctr loss")
 
 # to loop through the segs vector similar to using for (i in ...) without having to index in the rest of the loop.
 for (temp_seg in segs) {
@@ -63,14 +65,15 @@ for (temp_seg in segs) {
     cowplot::theme_cowplot() +
     labs(x = "Date",
          y = "Temperature") +
-    ggtitle(paste0("Timeseries Temperature for Segment Id: ", temp_seg)) +
+    ggtitle(paste0("Segment ", temp_seg)) +
     theme(plot.title = element_text(hjust = 0.5), legend.position = "none",
-          strip.background = element_rect(fill = "gray96",
-                                          color = "black"))
+          strip.background = element_blank())
 
     # to title each plot with a unique title that deals with segs-id and not write over plots
     #temp_filename <- paste0('timeseries_predicted_temp_seg_', temp_seg, '.png')
  #print(p)
   temp_out <- paste0("8_visualize/out/", 'timeseries_predicted_temp_seg_', temp_seg, '.png')
- ggsave(temp_out, p, height = 7.5)
+ ggsave(temp_out, p, height = 10, width = 10)
 }
+
+
