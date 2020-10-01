@@ -2,10 +2,10 @@ version: 0.3.0
 name: 9_collaborator_data/umn/network_subset.rds.ind
 type: file
 hash: debae3d8be0d8644477fe48f200dc816
-time: 2020-08-11 20:20:46 UTC
+time: 2020-09-30 23:14:20 UTC
 depends:
   1_network/out/network.rds.ind: 67bc625285a9a5e2430b5b8adee07a95
-  1_network/out/subseg_distance_matrix.rds.ind: 1f6a91bc85dc25c92674f8c19ed5827c
+  1_network/out/subseg_distance_matrix.rds.ind: a36f397ec7b5868a865f684f2c98bf40
   9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind: b0e921fa940a199845fac1c09fb40105
 fixed: ac1d8d10469d92512f36810395e38ac1
 code:
