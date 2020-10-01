@@ -22,6 +22,7 @@ targets:
     depends:
      - 1_network/out/boundary.rds.ind
      - 1_network/out/network.rds.ind
+     - 1_network/out/network.json.ind
      - 1_network/out/subseg_distance_matrix.rds.ind
      - 1_network/out/subseg_reservoir_mapping.rds.ind
 
@@ -55,7 +56,7 @@ targets:
   1_network/out/network.json.ind:
     command: save_network_as_geojson(
       out_ind = target_name,
-      network_ind = I('1_network/out/network.rds.ind'))
+      network_ind = '1_network/out/network.rds.ind')
 
   1_network/out/boundary.rds.ind:
     command: create_boundary(

@@ -1,7 +1,5 @@
 retrieve_ngwos <- function(out_ind, sites_ind) {
   # get latest NGWOS data
-
-
   ngwos_meta <- readxl::read_xlsx(
     sc_retrieve(sites_ind, 'getters.yml'), sheet=1, na=c('','NA'),
     col_types=replace(rep('text', 20), 13:17, 'numeric'))
@@ -13,26 +11,26 @@ retrieve_ngwos <- function(out_ind, sites_ind) {
   # pull out just the numbers w/o quotes
   temp_sites$site_id <- gsub('([[:punct:]]*)(\\d*)([[:punct:]]*)', '\\2', temp_sites$ID, perl = TRUE)
 
-  # add leading zeros to those that are only 7 characters long
-  temp_sites$site_id[nchar(temp_sites$site_id) == 7] <- paste0('0', temp_sites$site_id[nchar(temp_sites$site_id) == 7])
-
   # fix one long site number that got turned into sci notation in Excel
-  temp_sites$site_id[nchar(temp_sites$site_id)==15] <- '403447075331801'
+  temp_sites$site_id[temp_sites$site_id == '403447E14'] <- '403447075331801'
 
   # remove duplicates
   temp_sites <- select(temp_sites, site_id) %>% distinct()
 
+  # set internal access before requesting the site metadata and data from NWIS
+  dataRetrieval::setAccess('internal')
+
   # retrieve site metadata from NWIS
   nwis_sites <- dataRetrieval::readNWISsite(temp_sites$site_id)
 
+  # did any sites fail to be recognized by NWIS? Yes
+  nwis_fail <- setdiff(temp_sites$site_id, nwis_sites$site_no)
+  if(length(nwis_fail) == 0) {
+    stop(sprintf("These NGWOS sites were not recognized by NWIS: %s", paste(nwis_fail, collapse=', ')))
+  }
+
   # keep only stream sites - drops 3 lakes, 1 estuary, 1 spring
   stream_sites <- filter(nwis_sites, grepl('ST', site_tp_cd))
-
-  # did any sites fail to be recognized by NWIS? Nope.
-  nwis_fail <- temp_sites$site_id[!temp_sites$site_id %in% nwis_sites$site_no]
-
-  # dv or uv?
-  dataRetrieval::setAccess('internal')
 
   # first find data in DV
   new_ngwos_dat <- dataRetrieval::readNWISdv(siteNumbers = stream_sites$site_no, parameterCd = '00010')
@@ -152,8 +150,6 @@ explore_ngwos <- function() {
   # were any of these sites being monitored prior to NGWOS
   test <- filter(ngwos_dat, date > as.Date('2013-10-01'))
 
-
-
   # sites with considerable pre-NGWOS data
   date_summary <- test %>%
     group_by(site_id) %>%
@@ -165,7 +161,6 @@ explore_ngwos <- function() {
     summarize(n_pre_NGWOS = length(date[date < as.Date('2017-10-01') & date > as.Date('2013-10-01')]),
               n_pre_all = length(date[date < as.Date('2017-10-01')]),
               n_post_NGWOS = length(date[date >= as.Date('2017-10-01')]))
-
 
   test_prengwos <- filter(test, site_id %in% date_summary$site_id[date_summary$n_pre_NGWOS > 0])
 
@@ -184,7 +179,3 @@ explore_ngwos <- function() {
   all_sites <- readRDS('2_observations/out/crosswalk_site_reach.rds')
   summary(ngwos_sites %in% gsub('USGS-', '', unique(all_sites$site_id)))
 }
-
-
-
-

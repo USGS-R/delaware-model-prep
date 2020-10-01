@@ -8,6 +8,7 @@ packages:
   - geojsonio
   - geojsonsf
   - ggplot2
+  - reticulate
 
 sources:
   - 1_network/src/calc_distance_functions.R

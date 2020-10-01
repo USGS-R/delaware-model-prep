@@ -1,12 +1,12 @@
 version: 0.3.0
 name: 2_observations/out/NGWOS_sites_data.rds.ind
 type: file
-hash: e0d4845ca9bd60de33ab757d261fa7d8
-time: 2020-08-06 19:20:16 UTC
+hash: 444892dee7c09c320191381342ad87e4
+time: 2020-09-30 20:56:17 UTC
 depends:
-  2_observations/in/NGWOS_site_metadata.xlsx.ind: d3bc5ef156fb5a5acc32d3967f3e903c
+  2_observations/in/NGWOS_site_metadata.xlsx.ind: 94a9d581f124e17020a5f2b51b0ea9c6
 fixed: 657892ea64c8e098ed9ae0a2b1c4f62b
 code:
   functions:
-    retrieve_ngwos: c15574d6839abff5694ba0bebaaac9e7
+    retrieve_ngwos: 7d627c93d4c4acdfc90685d98b5831d6
 

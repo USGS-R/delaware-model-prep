@@ -2,10 +2,10 @@ version: 0.3.0
 name: 2_observations/out/crosswalk_site_reach.rds.ind
 type: file
 hash: f6c6f75805df93cc4c6572bda41508ba
-time: 2020-08-11 16:35:20 UTC
+time: 2020-09-30 22:35:10 UTC
 depends:
   2_observations/in/all_sites.rds.ind: 40fc18d99de8d11de21cf8efabc03443
-  ngwos_sites: e35e0bf81727a77175a684aa701c729c
+  ngwos_sites: 1c8d7a70a82af267c03787ae60a04ba3
   1_network/out/boundary.rds.ind: 0a1bc6cd40a17b76b33bf32dc407a909
   1_network/out/network.rds.ind: 67bc625285a9a5e2430b5b8adee07a95
 fixed: 8c7c06704515b69a18aaf879f7581f05

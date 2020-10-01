@@ -8,7 +8,7 @@ include:
   - 4_evaluation.yml
   - 9_collaborator_data.yml
   - 8_visualize.yml
-
+  - 8_visualize_metrics.yml
 
 targets:
   everything:
@@ -20,4 +20,4 @@ targets:
       - 4_evaluation
       - 9_collaborator_data
       - 8_visualize
-
+      - 8_visualize_metrics
