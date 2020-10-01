@@ -44,7 +44,8 @@ plot_dists <- function(from_reach, dist_mat_ind, direction, labels=c('subseg_id'
 
   labels <- match.arg(labels)
 
-  dists_from_start <- dist_mat[as.character(from_reach),]/1000
+  from_seg_id_nat <- network$edges %>% filter(subseg_id == as.character(from_reach)) %>% pull(seg_id_nat)
+  dists_from_start <- dist_mat[as.character(from_seg_id_nat),]/1000
 
 
   pt_dist_reaches <- network$edges %>%

@@ -1,47 +1,51 @@
 
 
-plot_pred_vs_obs <- function(site,
-                             start_date,
-                             end_date,
-                             dat_ind,
-                             pred_ind, out_file) {
+plot_pred_vs_obs <- function(
+  site,
+  start_date,
+  end_date,
+  dat_ind,
+  pred_ind,
+  out_file) {
+
   drb_observations <- readRDS(sc_retrieve(dat_ind, 'getters.yml')) %>% ungroup() %>%
     mutate(seg_id_nat = as.character(seg_id_nat))
 
-  drb_predictions <- read.csv(pred_ind, stringsAsFactors = FALSE) %>%
-    tidyr::gather(key = 'seg_id_nat', value = 'pred_temp_degC', -Date) %>%
-    mutate(seg_id_nat = gsub('X', '', seg_id_nat),
-           date = as.Date(Date))
+  drb_predictions <- read_csv(
+    sc_retrieve(pred_ind, 'getters.yml'),
+    col_names = c('row', 'seg_id_nat', 'date', 'pred_temp_c'), skip=1,
+    col_types='icDd')
 
   compare <- filter(drb_predictions, seg_id_nat %in% site) %>%
     left_join(filter(drb_observations, seg_id_nat %in% site),
               by = c('seg_id_nat', 'date'))
 
-  if (!is.null(start_date)) {
-    compare <- filter(compare, date >= as.Date(start_date) & date <= as.Date(end_date))
+  if (!missing(start_date) && !is.null(start_date)) {
+    compare <- filter(compare, date >= ymd(start_date) & date <= ymd(end_date))
   }
 
   # calculate RMSE
   rmse_dat <- filter(compare, !is.na(temp_c)) %>%
-    mutate(squared_error = (pred_temp_degC - temp_c)^2)
+    mutate(squared_error = (pred_temp_c - temp_c)^2)
 
-  rmse = round(sqrt(mean(rmse_dat$squared_error)), 1)
-  wrapper <- function(x, ...)
+  rmse <- sqrt(mean(rmse_dat$squared_error))
+  line_wrapper <- function(x, ...)
   {
     paste(strwrap(x, ...), collapse = "\n")
   }
-  g <- ggplot(compare, aes(x = date, y = pred_temp_degC)) +
+  g <- ggplot(compare, aes(x = date, y = pred_temp_c)) +
     geom_line() +
     geom_point(data = compare, aes(x = date, y = temp_c), color = 'red', size = 0.5) +
     labs(x = '', y = 'Temperature [deg C]',
-         subtitle = wrapper(sprintf('Predicted (black) versus observed (red) temperature at site %s in the Delaware River Basin. The RMSE during this time period was %.1f.',
-                                    site, rmse), width = 80))
+         subtitle = line_wrapper(sprintf(
+           'Predicted (black) versus observed (red) temperature at site %s in the Delaware River Basin. The RMSE during this time period was %.1f.',
+           site, rmse), width = 80))
 
   ggsave(out_file, g, height = 4, width = 6)
 }
 
 # script to generate RMSEs for each site, and plot by upstream size
-for_now <- function(){
+for_now <- function() {
 
   # some dat duplicated on national reaches
   obs_collapsed <- drb_observations %>% ungroup() %>%
