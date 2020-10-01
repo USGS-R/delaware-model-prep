@@ -9,7 +9,7 @@ packages:
   - purrr
 
 sources:
-  - 8_visualize_metrics/src/plot_metric_map .R
+  - 8_visualize_metrics/src/plot_metric_map.R
 
 targets:
   8_visualize_metrics:
