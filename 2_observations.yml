@@ -20,6 +20,8 @@ targets:
     depends:
      - 2_observations/out/obs_temp_drb.rds.ind
      - 2_observations/out/obs_flow_drb.rds.ind
+     - 2_observations/out/drb_temp_summary.csv
+     - ngwos_reaches
 
   2_observations/out/NGWOS_sites_data.rds.ind:
     command: retrieve_ngwos(
