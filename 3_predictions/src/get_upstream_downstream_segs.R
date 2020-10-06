@@ -1,6 +1,6 @@
 
 
-create_graph = function(model_run_loc = '4_model/tmp',
+create_graph = function(model_run_loc,
                         param_file = 'input/myparam.param',
                         model_fabric_file = 'GIS/Segments_subset.shp',
                         n_segments = 456){
@@ -37,7 +37,7 @@ create_graph = function(model_run_loc = '4_model/tmp',
 #' @param seg_id_nat segments of the network for which you want upstream segments
 #'
 get_upstream_segs = function(seg_id_nat,
-                             model_run_loc = '4_model/tmp',
+                             model_run_loc,
                              param_file = 'input/myparam.param',
                              model_fabric_file = 'GIS/Segments_subset.shp',
                              n_segments = 456){
@@ -66,7 +66,7 @@ get_upstream_segs = function(seg_id_nat,
 #' @param seg_id_nat segments of the network for which you want upstream segments
 #'
 get_direct_upstream_segs = function(seg_id_nat,
-                                    model_run_loc = '4_model/tmp',
+                                    model_run_loc,
                                     param_file = 'input/myparam.param',
                                     model_fabric_file = 'GIS/Segments_subset.shp',
                                     n_segments = 456){
@@ -95,7 +95,7 @@ get_direct_upstream_segs = function(seg_id_nat,
 #' @param seg_id_nat segments of the network for which you want upstream segments
 #'
 get_direct_downstream_segs = function(seg_id_nat,
-                                      model_run_loc = '4_model/tmp',
+                                      model_run_loc,
                                       param_file = 'input/myparam.param',
                                       model_fabric_file = 'GIS/Segments_subset.shp',
                                       n_segments = 456){
@@ -124,7 +124,7 @@ get_direct_downstream_segs = function(seg_id_nat,
 #' @param seg_id_nat segments of the network for which you want upstream segments
 #'
 get_downstream_segs = function(seg_id_nat,
-                               model_run_loc = '4_model/tmp',
+                               model_run_loc,
                                param_file = 'input/myparam.param',
                                model_fabric_file = 'GIS/Segments_subset.shp',
                                n_segments = 456){
@@ -155,7 +155,7 @@ get_downstream_segs = function(seg_id_nat,
 #'
 is_b_downstream_of_a <- function(seg_id_nat_a,
                                  seg_id_nat_b,
-                                 model_run_loc = '4_model/tmp',
+                                 model_run_loc,
                                  param_file = 'input/myparam.param',
                                  model_fabric_file = 'GIS/Segments_subset.shp',
                                  n_segments = 456){
@@ -177,7 +177,7 @@ is_b_downstream_of_a <- function(seg_id_nat_a,
 #'
 is_b_upstream_of_a <- function(seg_id_nat_a,
                                seg_id_nat_b,
-                               model_run_loc = '4_model/tmp',
+                               model_run_loc,
                                param_file = 'input/myparam.param',
                                model_fabric_file = 'GIS/Segments_subset.shp',
                                n_segments = 456){
@@ -198,7 +198,7 @@ is_b_upstream_of_a <- function(seg_id_nat_a,
 
 
 create_subbasin = function(subbasin_seg_id_nat,
-                           model_run_loc = '4_model/tmp',
+                           model_run_loc,
                            model_fabric_file = 'GIS/Segments_subset.shp'){
 
   subbasin_model_fabric = sf::read_sf(file.path(model_run_loc, model_fabric_file)) %>%

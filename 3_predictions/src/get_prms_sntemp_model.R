@@ -7,7 +7,7 @@ get_prms_sntemp_model = function(gd_zip_ind_file,
                                  model_run_loc,
                                  gd_config = 'lib/cfg/gd_config.yml'){
 
-  gd_get(gd_zip_ind_file, config_file = gd_config)
+  sc_retrieve(gd_zip_ind_file, 'getters.yml')
 
   unzip(zipfile = scipiper::as_data_file(gd_zip_ind_file),
         exdir = unzip_loc)

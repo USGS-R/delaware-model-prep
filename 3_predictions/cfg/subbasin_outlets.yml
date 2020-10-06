@@ -1,0 +1,4 @@
+# seg_id_nat of the subbasin outlets for the DRB - mostly used for calibration purposes. 4182 is seg_id_nat of Xiaowei's subbasin
+subbasin_outlets: ['4182', '2323', '2339', '4205', '1781', '1718', '1488', '1681',
+'1660', '1682' ,'1592', '1463', '1563', '1477' , '1482', '1776', '3574',
+'2697', '2699', '2690', '2689', '1658', '1487', '1816']
