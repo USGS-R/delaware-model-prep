@@ -50,7 +50,8 @@ targets:
   get_prms_sntemp:
     command: get_prms_sntemp_model(
       gd_zip_ind_file = '3_predictions/in/prms_sntemp/20191002_Delaware_streamtemp.zip.ind',
-      unzip_loc = orig_model_loc,
+      unzip_loc = I('prms_sntemp'),
+      orig_model_loc = orig_model_loc,
       model_run_loc = uncal_model_run_loc)
 
   set_sntemp_output_vars:

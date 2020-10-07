@@ -69,12 +69,12 @@ gather_sntemp_output_subbasin = function(ind_file,
   subbasins = readRDS(sc_retrieve(subbasin_ind_file, 'getters.yml'))
 
   cur_subbasin = subbasins[subbasin_outlet_id][[subbasin_outlet_id]]
-  cur_model_idxs = as.character(cur_subbasin$model_idx)
+  cur_seg_id_nats = as.character(cur_subbasin$seg_id_nat)
 
   # subset network for PGDL
 
   stream_temp_intermediates_wide_sub = stream_temp_intermediates_wide %>%
-    dplyr::filter(seg_id_nat %in% cur_model_idxs)
+    dplyr::filter(seg_id_nat %in% cur_seg_id_nats)
 
   out_file = as_data_file(ind_file)
   feather::write_feather(x = stream_temp_intermediates_wide_sub, path = out_file)

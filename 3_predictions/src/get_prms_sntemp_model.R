@@ -4,16 +4,18 @@
 #' @param gd_config google drive configuration
 get_prms_sntemp_model = function(gd_zip_ind_file,
                                  unzip_loc,
+                                 orig_model_loc,
                                  model_run_loc,
                                  gd_config = 'lib/cfg/gd_config.yml'){
 
   sc_retrieve(gd_zip_ind_file, 'getters.yml')
 
   unzip(zipfile = scipiper::as_data_file(gd_zip_ind_file),
+        overwrite = T,
         exdir = unzip_loc)
 
   copy_model_to_run_dir(model_run_loc = model_run_loc,
-                        orig_model_loc = unzip_loc)
+                        orig_model_loc = orig_model_loc)
 }
 
 #' @param model_run_loc directory location where the model will be run

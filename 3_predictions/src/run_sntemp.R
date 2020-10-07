@@ -12,11 +12,12 @@ run_sntemp = function(start,
                       spinup = F,
                       spinup_days = 730,
                       restart = F,
-                      model_run_loc = '4_model/tmp/',
+                      model_run_loc,
                       control_file = 'delaware.control',
                       precip_file = './input/prcp.cbh',
                       tmax_file = './input/tmax.cbh',
                       tmin_file = './input/tmin.cbh',
+                      sf_data_file = './input/sf_data',
                       var_init_file = 'prms_ic.txt',
                       var_save_file = 'prms_ic.txt'){
 
@@ -29,6 +30,7 @@ run_sntemp = function(start,
                       precip_file = precip_file,
                       tmax_file = tmax_file,
                       tmin_file = tmin_file,
+                      sf_data_file = sf_data_file,
                       var_init_file = var_init_file,
                       var_save_file = var_save_file)
   }
@@ -43,9 +45,11 @@ run_sntemp = function(start,
     precip_file_loc = grep('precip_day', ctrl) + 3
     tmax_file_loc = grep('tmax_day', ctrl) + 3
     tmin_file_loc = grep('tmin_day', ctrl) + 3
+    sf_data_file_loc = grep('data_file', ctrl) + 3
     ctrl[precip_file_loc] = precip_file
     ctrl[tmax_file_loc] = tmax_file
     ctrl[tmin_file_loc] = tmin_file
+    ctrl[sf_data_file_loc] = sf_data_file
 
     var_init_file_loc = grep('var_init_file', ctrl) + 3
     var_save_file_loc = grep('var_save_file', ctrl) + 3
@@ -64,9 +68,11 @@ run_sntemp = function(start,
     precip_file_loc = grep('precip_day', ctrl) + 3
     tmax_file_loc = grep('tmax_day', ctrl) + 3
     tmin_file_loc = grep('tmin_day', ctrl) + 3
+    sf_data_file_loc = grep('data_file', ctrl) + 3
     ctrl[precip_file_loc] = precip_file
     ctrl[tmax_file_loc] = tmax_file
     ctrl[tmin_file_loc] = tmin_file
+    ctrl[sf_data_file_loc] = sf_data_file
 
     var_init_file_loc = grep('var_init_file', ctrl) + 3
     var_save_file_loc = grep('var_save_file', ctrl) + 3
@@ -92,6 +98,7 @@ run_sntemp_spinup = function(spinup_days, start,
                              precip_file,
                              tmax_file,
                              tmin_file,
+                             sf_data_file,
                              var_init_file,
                              var_save_file){
 
@@ -128,9 +135,11 @@ run_sntemp_spinup = function(spinup_days, start,
   precip_file_loc = grep('precip_day', ctrl) + 3
   tmax_file_loc = grep('tmax_day', ctrl) + 3
   tmin_file_loc = grep('tmin_day', ctrl) + 3
+  sf_data_file_loc = grep('data_file', ctrl) + 3
   ctrl[precip_file_loc] = precip_file
   ctrl[tmax_file_loc] = tmax_file
   ctrl[tmin_file_loc] = tmin_file
+  ctrl[sf_data_file_loc] = sf_data_file
 
   var_init_file_loc = grep('var_init_file', ctrl) + 3
   var_save_file_loc = grep('var_save_file', ctrl) + 3
