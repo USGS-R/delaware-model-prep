@@ -33,6 +33,9 @@ set_sntemp_output = function(output_names,
   }
 
   writeLines(new_ctrl, file.path(model_run_loc, 'control', control_file))
+  # gd_put(remote_ind = out_ind,
+  #        local_source = file.path(model_run_loc, 'control', control_file),
+  #        dry_put = T)
 }
 
 

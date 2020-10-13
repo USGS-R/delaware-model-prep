@@ -7,7 +7,8 @@
 #'@param spinup_days number of days of the spinup period. The spinup period will be from the start date - spinup_days to start date - 1
 #'@param restart T/F for whether or not to initialize SNTemp based on end of previous run
 #'@param control_file name of the control file to set variables
-run_sntemp = function(start,
+run_sntemp = function(out_ind = NULL,
+                      start,
                       stop,
                       spinup = F,
                       spinup_days = 730,
@@ -90,6 +91,11 @@ run_sntemp = function(start,
   shell('delaware.bat') # run batch file
 
   setwd(current.wd) # set wd back to root of project
+
+  if(!is.null(out_ind)){ # write .ind file if supplied
+    gd_put(remote_ind = out_ind,
+           dry_put = T)
+  }
 }
 
 run_sntemp_spinup = function(spinup_days, start,

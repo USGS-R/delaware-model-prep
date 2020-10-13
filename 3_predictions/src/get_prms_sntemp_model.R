@@ -2,7 +2,8 @@
 #' @param gd_zip_ind_file ind file
 #' @param unzip_loc location of where model with be unzipped
 #' @param gd_config google drive configuration
-get_prms_sntemp_model = function(gd_zip_ind_file,
+get_prms_sntemp_model = function(out_ind,
+                                 gd_zip_ind_file,
                                  unzip_loc,
                                  orig_model_loc,
                                  model_run_loc,
@@ -16,6 +17,9 @@ get_prms_sntemp_model = function(gd_zip_ind_file,
 
   copy_model_to_run_dir(model_run_loc = model_run_loc,
                         orig_model_loc = orig_model_loc)
+
+  gd_put(remote_ind = out_ind,
+         dry_put = T) # pretend to push to GD
 }
 
 #' @param model_run_loc directory location where the model will be run

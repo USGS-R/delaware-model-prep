@@ -47,8 +47,9 @@ targets:
   #  local machine; this is on GD if not on local machine
   # within this function, moving model to temporary run location so that we can change parameters, etc.. while keeping
   #  original model preserved
-  get_prms_sntemp:
+  3_predictions/tmp/control/delaware.control.ind:
     command: get_prms_sntemp_model(
+      out_ind = target_name,
       gd_zip_ind_file = '3_predictions/in/prms_sntemp/20191002_Delaware_streamtemp.zip.ind',
       unzip_loc = I('prms_sntemp'),
       orig_model_loc = orig_model_loc,
@@ -58,10 +59,11 @@ targets:
     command: set_sntemp_output(
       output_names = sntemp_output_vars,
       model_run_loc = uncal_model_run_loc)
-    depends: get_prms_sntemp
+    depends: '3_predictions/tmp/control/delaware.control.ind'
 
-  uncal_sntemp_run:
+  3_predictions/tmp/output/stream_temp.out.nsegment.ind:
     command: run_sntemp(
+      out_ind = target_name,
       start = uncal_start,
       stop = uncal_stop,
       spinup = I('F'),
@@ -77,7 +79,7 @@ targets:
       model_output_file = I('output/stream_temp.out.nsegment'),
       model_fabric_file = I('GIS/Segments_subset.shp'),
       sntemp_vars = sntemp_output_vars)
-    depends: uncal_sntemp_run
+    depends: '3_predictions/tmp/output/stream_temp.out.nsegment.ind'
 
   # subbasins in the DRB
   3_predictions/out/drb_subbasins.rds.ind:
