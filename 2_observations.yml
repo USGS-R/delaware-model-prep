@@ -8,6 +8,8 @@ packages:
   - igraph
   - purrr
   - dataRetrieval
+  - readr
+  - readxl
 
 sources:
   - 2_observations/src/crosswalk_functions.R
@@ -79,3 +81,10 @@ targets:
 
   2_observations/out/drb_temp_summary.csv:
     command: summarize_temp(in_ind = '2_observations/out/obs_temp_drb.rds.ind', out_file = target_name)
+
+  # reservoir release data
+  2_observations/out/reservoir_releases.csv.ind:
+    command: clean_release_dat(
+      in_ind = '2_observations/in/PCN_Spill_Release.xlsx.ind',
+      out_ind = target_name,
+      mgd_to_cfs = I(1.54723))

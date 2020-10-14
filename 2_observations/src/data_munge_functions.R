@@ -137,3 +137,24 @@ summarize_temp <- function(in_ind, out_file) {
 
   write.csv(summary_total, out_file, row.names = FALSE)
 }
+
+# clean reservoir release data
+clean_release_dat <- function(in_ind, out_ind, mgd_to_cfs) {
+
+  dat <- readxl::read_xlsx(sc_retrieve(in_ind, 'getters.yml'), sheet = 'Sheet1', trim_ws = TRUE,)
+
+  grand_ids <- tibble(reservoir = c('Neversink', 'Pepacton', 'Cannonsville'),
+                      GRAND_ID = c(2200, 2192, 1550))
+  dat_out <- dat %>%
+    tidyr::pivot_longer(cols = -Date, names_to = 'release_type', values_to = 'release_volume') %>%
+    mutate(reservoir = gsub('_.*', '', release_type),
+           release_type = gsub('.*_', '', release_type)) %>%
+    mutate(release_volume_cfs = release_volume*mgd_to_cfs,
+           date = as.Date(Date)) %>%
+    select(date, reservoir, release_type, release_volume_cfs) %>%
+    left_join(grand_ids)
+
+  readr::write_csv(x = dat_out, path = as_data_file(out_ind))
+  gd_put(out_ind)
+
+}

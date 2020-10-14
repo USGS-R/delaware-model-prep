@@ -51,6 +51,13 @@ targets:
   2_observations/in/daily_flow.rds:
     command: gd_get('2_observations/in/daily_temperatures.rds.ind')
 
+  # reservoir release data, from Jeff, via Kendra request from NYC employee
+  2_observations/in/PCN_Spill_Release.xlsx:
+    command: gd_get('2_observations/in/PCN_Spill_Release.xlsx.ind')
+  2_observations/out/reservoir_releases.csv:
+    command: gd_get('2_observations/out/reservoir_releases.csv.ind')
+
+
   # list of NGWOS sites from Brian Pellerin, receieved 2020-04-18
   2_observations/in/NGWOS_site_metadata.xlsx:
     command: gd_get('2_observations/in/NGWOS_site_metadata.xlsx.ind')
