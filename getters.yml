@@ -49,7 +49,11 @@ targets:
     command: gd_get('2_observations/in/daily_temperatures.rds.ind')
 
   2_observations/in/daily_flow.rds:
-    command: gd_get('2_observations/in/daily_temperatures.rds.ind')
+    command: gd_get('2_observations/in/daily_flow.rds.ind')
+
+  2_observations/out/extra_flow_sites.rds:
+    command: gd_get('2_observations/out/extra_flow_sites.rds.ind')
+
 
   # reservoir release data, from Jeff, via Kendra request from NYC employee
   2_observations/in/PCN_Spill_Release.xlsx:
