@@ -15,6 +15,7 @@ sources:
   - 1_network/src/get_national_gf.R
   - 1_network/src/calc_distance_functions.R
   - 1_network/src/network_dam_res_reaches.R
+  - 1_network/src/reach_classification.R
 
 
 targets:
@@ -78,3 +79,10 @@ targets:
     command: intersect_network_with_reservoirs(out_ind = target_name,
       stream_network_ind = '1_network/out/network.rds.ind',
       dams_reservoirs_ind = '1_network/out/filtered_dams_reservoirs.rds.ind')
+
+  # ID segments that are up/down from a reservoir
+  1_network/out/segments_relative_to_reservoirs.rds.ind:
+    command: classify_segments(
+      out_ind = target_name,
+      network_ind = '1_network/out/network.rds.ind',
+      reservoir_ind = '1_network/out/subseg_reservoir_mapping.rds.ind')

@@ -36,6 +36,9 @@ targets:
     command: gd_get('1_network/out/filtered_dams_reservoirs.rds.ind')
   1_network/out/subseg_reservoir_mapping.rds:
     command: gd_get('1_network/out/subseg_reservoir_mapping.rds.ind')
+  1_network/out/segments_relative_to_reservoirs.rds:
+    command: gd_get('1_network/out/segments_relative_to_reservoirs.rds.ind')
+
 
   #### 2_observations ####
   # temperature sites (placed on drive from/by ____)
