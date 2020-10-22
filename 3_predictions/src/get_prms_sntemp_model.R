@@ -18,8 +18,7 @@ get_prms_sntemp_model = function(out_ind,
   copy_model_to_run_dir(model_run_loc = model_run_loc,
                         orig_model_loc = orig_model_loc)
 
-  gd_put(remote_ind = out_ind,
-         dry_put = T) # pretend to push to GD
+  sc_indicate(ind_file = out_ind)
 }
 
 #' @param model_run_loc directory location where the model will be run

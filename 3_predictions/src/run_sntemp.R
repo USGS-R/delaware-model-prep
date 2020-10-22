@@ -93,8 +93,7 @@ run_sntemp = function(out_ind = NULL,
   setwd(current.wd) # set wd back to root of project
 
   if(!is.null(out_ind)){ # write .ind file if supplied
-    gd_put(remote_ind = out_ind,
-           dry_put = T)
+    sc_indicate(ind_file = out_ind)
   }
 }
 

@@ -54,7 +54,7 @@ gather_sntemp_output = function(ind_file,
 
   out_file = as_data_file(ind_file)
   feather::write_feather(x = stream_temp_intermediates_wide, path = out_file)
-  gd_put(remote_ind = ind_file, local_source = out_file, config_file = gd_config)
+  gd_put(ind_file)
 }
 
 # gather output by subbasin
@@ -78,7 +78,7 @@ gather_sntemp_output_subbasin = function(ind_file,
 
   out_file = as_data_file(ind_file)
   feather::write_feather(x = stream_temp_intermediates_wide_sub, path = out_file)
-  gd_put(remote_ind = ind_file, local_source = out_file, config_file = gd_config)
+  gd_put(ind_file)
 }
 
 
