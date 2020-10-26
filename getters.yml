@@ -157,6 +157,8 @@ targets:
     command: gd_get('9_collaborator_data/umn/obs_flow_full.csv.ind')
   9_collaborator_data/umn/obs_flow_subset.csv:
     command: gd_get('9_collaborator_data/umn/obs_flow_subset.csv.ind')
+  9_collaborator_data/umn/reservoir_features.csv:
+    command: gd_get('9_collaborator_data/umn/reservoir_features.csv.ind')
   ## Penn State ##
   9_collaborator_data/psu/highly_observed_sites.csv:
     command: gd_get('9_collaborator_data/psu/highly_observed_sites.csv.ind')

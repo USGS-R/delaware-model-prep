@@ -126,6 +126,10 @@ targets:
       subnet_ind = '9_collaborator_data/umn/network_subset.rds.ind',
       out_ind = target_name)
 
+  # reservoir metadata
+  9_collaborator_data/umn/reservoir_features.csv.ind:
+    command: get_res_features(dat_ind = '1_network/out/subseg_reservoir_mapping.rds.ind', out_ind = target_name)
+
   #### Penn State ####
   9_collaborator_data/psu/highly_observed_sites.rds:
     command: filter_sites(
