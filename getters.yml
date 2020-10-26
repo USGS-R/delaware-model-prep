@@ -69,6 +69,16 @@ targets:
     command: gd_get('2_observations/out/obs_flow_drb.rds.ind')
 
   #### 3_predictions ####
+  # prms-sntemp model zip file
+  3_predictions/in/prms_sntemp/20191002_Delaware_streamtemp.zip:
+    command: gd_get('3_predictions/in/prms_sntemp/20191002_Delaware_streamtemp.zip.ind')
+  #
+  3_predictions/out/uncal_sntemp_input_output.feather:
+    command: gd_get('3_predictions/out/uncal_sntemp_input_output.feather.ind')
+  3_predictions/out/drb_subbasins.rds:
+    command: gd_get(ind_file = '3_predictions/out/drb_subbasins.rds.ind')
+  3_predictions/out/uncal_sntemp_input_output_subbasin_4182.feather:
+    command: gd_get(ind_file = '3_predictions/out/uncal_sntemp_input_output_subbasin_4182.feather.ind')
   # segment-level drivers, intermediate model variables, and stream temperature predictions using uncalibrated PRMS-SNTemp
   #  from https://github.com/jzwart/delaware-water-temp/blob/626d6d159daccfcf52c5e7fddf88d24031f35e6d/4_model_for_PGDL.yml#L42-L46
   3_predictions/in/uncal_sntemp_input_output.feather:

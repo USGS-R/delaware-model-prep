@@ -1,0 +1,200 @@
+Description of variables and units. 2019-09-30
+
+#############################################################################
+# -- The following variables are used as drivers for the PRMS-SNTemp model --
+# -------  They are in sntemp_input_output.feather --------
+#############################################################################
+
+Name: seg_rain
+Module: stream_temp
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: float
+Desc: Area-weighted average rainfall for each segment from HRUs contributing flow to the segment
+Units: meters
+
+Name: seg_tave_air
+Module: stream_temp
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: float
+Desc: Area-weighted average air temperature for each segment from HRUs contributing flow to the segment
+Units: degrees Celsius
+
+##########################################################################
+# -- The following are intermediate variables calculated by PRMS-SNTemp --
+# ------- They are in sntemp_input_output.feather ---------
+##########################################################################
+
+Name: seg_humid
+Module: stream_temp
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: float
+Desc: Area-weighted average relative humidity for each segment from HRUs contributing flow to the segment
+Units: decimal fraction
+
+Name: seg_outflow
+Module: muskingum
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: double
+Desc: Streamflow leaving a segment
+Units: m^3 sec^-1
+
+Name: seg_upstream_inflow
+Module: muskingum
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: double
+Desc: Sum of inflow from upstream segments
+Units: m^3 sec^-1
+
+Name: seg_width
+Module: stream_temp
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: float
+Desc: Width of each segment
+Units: meters
+
+Name: seginc_gwflow
+Module: routing
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: double
+Desc: Area-weighted average groundwater discharge for each segment from HRUs contributing flow to the segment
+Units: m^3 sec^-1
+
+Name: seginc_potet
+Module: routing
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: double
+Desc: Area-weighted average potential ET for each segment from HRUs contributing flow to the segment
+Units: meters
+
+Name: seginc_sroff
+Module: routing
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: double
+Desc: Area-weighted average surface runoff for each segment from HRUs contributing flow to the segment
+Units: m^3 sec^-1
+
+Name: seginc_ssflow
+Module: routing
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: double
+Desc: Area-weighted average interflow for each segment from HRUs contributing flow to the segment
+Units: m^3 sec^-1
+
+Name: seginc_swrad
+Module: routing
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: double
+Desc: Area-weighted average solar radiation for each segment from HRUs contributing flow to the segment
+Units: W m^-2
+
+Name: seg_length
+Module: stream_temp
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: double
+Desc: Length of stream segment
+Units: meters
+
+Name: seg_slope
+Module: stream_temp
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: double
+Desc: Stream segment slope
+Units: dimensionless
+
+Name: seg_elev
+Module: stream_temp
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: double
+Desc: Stream segment average elevation above mean sea level
+Units: meters
+
+Name: seg_shade
+Module: stream_temp
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: float
+Desc: Area-weighted average shade fraction for each segment
+Units: decimal fraction
+
+Name: seg_ccov
+Module: stream_temp
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: float
+Desc: Area-weighted average cloud cover fraction for each segment from HRUs contributing flow to the segment
+Units: decimal fraction
+
+Name: seg_tave_gw
+Module: stream_temp
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: float
+Desc: groundwater temperature
+Units: degrees Celsius
+
+Name: seg_tave_sroff
+Module: stream_temp
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: float
+Desc: surface runoff temperature
+Units: degrees Celsius
+
+Name: seg_tave_ss
+Module: stream_temp
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: float
+Desc: subsurface temperature
+Units: degrees Celsius
+
+Name: seg_tave_upstream
+Module: stream_temp
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: float
+Desc: Temperature of streamflow entering each segment
+Units: degrees Celsius
+
+Name: seg_tave_water
+Module: stream_temp
+Ndimen: 1
+Dimensions: nsegment - 456
+Size: 456
+Type: float
+Desc: Computed daily mean stream temperature for each segment
+Units: degrees Celsius

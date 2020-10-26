@@ -1,0 +1,15 @@
+version: 0.3.0
+name: 3_predictions/out/uncal_sntemp_input_output.feather.ind
+type: file
+hash: 425dfe6657ee041b8940d51a58501209
+time: 2020-10-22 16:08:34 UTC
+depends:
+  uncal_model_run_loc: 1d89097318dc6fdeebc0a09839c92cf4
+  sntemp_output_vars: 16a828e5877f31de4c7725fd591febe1
+  3_predictions/tmp/output/stream_temp.out.nsegment.ind: a91b83c2e7607e3f9acfd3124889894c
+fixed: e4bd245f0b92161d7000fff79b36db6e
+code:
+  functions:
+    gather_sntemp_output: 28b1160fe556f5423cb8e1f93f0b2461
+    get_sntemp_intermediates: 2d622b247dd327f769f188cc5d45af2b
+

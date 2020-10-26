@@ -1,0 +1,14 @@
+version: 0.3.0
+name: 3_predictions/in/prms_sntemp/20191002_Delaware_streamtemp.zip.ind
+type: file
+hash: 24fb5162bd7a0ad4d1755723d5a59458
+time: 2020-10-02 16:06:15 UTC
+depends:
+  orig_model_loc: 58e8a69975925a6e44d5e483d4e46a47
+  uncal_model_run_loc: 1d89097318dc6fdeebc0a09839c92cf4
+fixed: f69c72b7b36fa17ce17cd82d4b4c5e77
+code:
+  functions:
+    copy_model_to_run_dir: c22a5f34472b2fcba69ab3beaff99311
+    get_prms_sntemp_model: 1523ffb443a00aff172c82764c4873ba
+

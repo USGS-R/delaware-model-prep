@@ -1,0 +1,15 @@
+
+
+start: '1980-01-01'
+stop: '2020-07-31'
+
+#  see 3_predictions/notes/model_variable_description.txt for output variable details
+sntemp_output: ['seg_rain', 'seg_tave_air', 'seg_tave_water', 'seg_outflow', 'seg_tave_gw',
+'seg_tave_sroff', 'seg_tave_ss', 'seg_tave_upstream', 'seg_upstream_inflow', 'seginc_gwflow',
+'seginc_potet', 'seginc_sroff', 'seginc_ssflow', 'seginc_swrad', 'seg_humid', 'seg_shade', 'seg_ccov', 'seg_width']
+
+
+orig_model_loc: 'prms_sntemp/20191002_Delaware_streamtemp'
+
+uncal_model_run_loc: '3_predictions/tmp'
+
