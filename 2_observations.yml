@@ -37,12 +37,14 @@ targets:
   ngwos_sites:
     command: filter_ngwos(ngwos_ind = '2_observations/out/NGWOS_sites_data.rds.ind')
 
+  # flow data comes from a national NWIS pull here: https://github.com/USGS-R/national-flow-observations
   2_observations/out/extra_flow_sites.rds.ind:
     command: get_flow_sites(
       flow_ind = '2_observations/in/daily_flow.rds.ind',
       temp_sites_ind = '2_observations/in/all_sites.rds.ind',
       out_ind = target_name)
 
+  # temperature data and sites info comes from the national NWIS temperature pull: https://github.com/USGS-R/2wp-temp-observations
   2_observations/out/crosswalk_site_reach.rds.ind:
     command: crosswalk_sites_to_reaches(
       out_ind = target_name,

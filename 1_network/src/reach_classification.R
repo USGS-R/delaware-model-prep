@@ -7,12 +7,6 @@ classify_segments <- function(out_ind, network_ind, reservoir_ind) {
   each_res <- ungroup(res) %>%
     filter(!is.na(GRAND_ID))
 
-  # classify reaches by in reservor
-  # for each reservoir:
-  # find unique IDs
-  test <- filter(each_res, GRAND_ID %in% unique(each_res$GRAND_ID)[4])
-  touching_reservoir <- unique(test$subseg_seg)
-
   # first find segments that are touching reservoir
   # and classify in relation to dam/reservoir
   segs <- each_res %>%
@@ -111,7 +105,7 @@ classify_segments <- function(out_ind, network_ind, reservoir_ind) {
 
   # now use above info to classify reaches
   # data frame
-  reach_class = select(network$edges, seg_id_nat, subseg_seg) %>%
+  reach_class <- select(network$edges, seg_id_nat, subseg_seg) %>%
     left_join(distinct(select(segs_single, seg_id_nat, type, GRAND_ID, frac_overlap))) %>%
     mutate(type_res = case_when(
       !is.na(type) ~ type,

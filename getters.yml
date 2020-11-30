@@ -75,10 +75,6 @@ targets:
     command: gd_get('2_observations/out/all_drb_temp_obs.rds.ind')
   2_observations/out/obs_temp_drb.rds:
     command: gd_get('2_observations/out/obs_temp_drb.rds.ind')
-  # discharge data: currently a file that was uploaded to gd (originally from Jeff)
-  # down the road should point to NWIS
-  2_observations/out/drb_discharge_daily_dv.csv:
-    command: gd_get('2_observations/out/drb_discharge_daily_dv.csv.ind')
   2_observations/out/obs_flow_drb.rds:
     command: gd_get('2_observations/out/obs_flow_drb.rds.ind')
 
@@ -159,6 +155,15 @@ targets:
     command: gd_get('9_collaborator_data/umn/obs_flow_subset.csv.ind')
   9_collaborator_data/umn/reservoir_features.csv:
     command: gd_get('9_collaborator_data/umn/reservoir_features.csv.ind')
+  9_collaborator_data/umn/network_subset_lordville.rds:
+    command: gd_get('9_collaborator_data/umn/network_subset_lordville.rds.ind')
+  9_collaborator_data/umn/distance_matrix_lordville.rds:
+    command: gd_get('9_collaborator_data/umn/distance_matrix_lordville.rds.ind')
+  9_collaborator_data/umn/obs_temp_subset_lordville.csv:
+    command: gd_get('9_collaborator_data/umn/obs_temp_subset_lordville.csv.ind')
+  9_collaborator_data/umn/obs_flow_subset_lordville.csv:
+    command: gd_get('9_collaborator_data/umn/obs_flow_subset_lordville.csv.ind')
+
   ## Penn State ##
   9_collaborator_data/psu/highly_observed_sites.csv:
     command: gd_get('9_collaborator_data/psu/highly_observed_sites.csv.ind')
