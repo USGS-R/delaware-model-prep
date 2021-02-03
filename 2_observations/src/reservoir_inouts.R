@@ -43,18 +43,27 @@ get_reservoir_inouts <- function(
   # downstream while 000 is right at the outlet; 500 started earlier and has
   # more temperature data; 000 has the only flow data in the 1970s
   flow_dat %>% select(datetime, all_of(res_outflow_ids$Pepacton)) %>% pivot_longer(-datetime) %>% filter(datetime > as.Date('1935-01-01')) %>% ggplot(aes(x=datetime, y=value, color=name)) + geom_line() + facet_grid(name ~ .) + scale_color_discrete(guide=FALSE) + theme_bw() + ggtitle('Pepacton outflow discharges')
-  ggsave('2_observations/tmp/pep_out_flow.png')
+  ggsave('2_observations/tmp/pep_out_flow.png', height=4)
   flow_dat %>% select(datetime, all_of(res_outflow_ids$Pepacton)) %>% ggplot(aes(x=`01417000`, y=`01417500`)) + geom_abline() + geom_point() + theme_bw() + ggtitle('Pepacton outflow discharge relationship')
-  ggsave('2_observations/tmp/pep_out_flow_paired.png')
+  ggsave('2_observations/tmp/pep_out_flow_paired.png', width=5, height=5)
   temp_dat %>% filter(site_id %in% sprintf('USGS-%s', res_outflow_ids$Pepacton)) %>% ggplot(aes(x=date, y=temp_degC, color=site_id)) + geom_line() + facet_grid(site_id ~ .) + scale_color_discrete(guide=FALSE) + theme_bw() + ggtitle("Pepacton outflow temperatures")
-  ggsave('2_observations/tmp/pep_out_temp.png')
+  ggsave('2_observations/tmp/pep_out_temp.png', height=4)
   # pepacton inflows
   flow_dat %>% select(datetime, all_of(res_inflow_ids$Pepacton)) %>% pivot_longer(-datetime) %>% filter(datetime > as.Date('1935-01-01')) %>% ggplot(aes(x=datetime, y=value, color=name)) + geom_line() + facet_grid(name ~ .) + scale_color_discrete(guide=FALSE) + theme_bw() + ggtitle('Pepacton inflow discharges')
-  ggsave('2_observations/tmp/pep_in_flow.png')
+  ggsave('2_observations/tmp/pep_in_flow.png', height=7)
   temp_dat %>% filter(site_id %in% sprintf('USGS-%s', c(res_outflow_ids$Pepacton), res_inflow_ids$Pepacton)) %>% ggplot(aes(x=date, y=temp_degC, color=site_id)) + geom_point(size=0.1) + facet_grid(site_id ~ .) + scale_color_discrete(guide=FALSE) + theme_bw() + ggtitle('Pepacton inflow temperatures')
-  ggsave('2_observations/tmp/pep_in_temp.png')
+  ggsave('2_observations/tmp/pep_in_temp.png', height=4)
 
-  flow_dat %>%
-    select(datetime, all_of(unname(res_outflow_ids))) %>%
-    filter(!is.na(.[2]) | !is.na(.[3]))
+  # cannonsville outflows
+  flow_dat %>% select(datetime, all_of(res_outflow_ids$Cannonsville)) %>% pivot_longer(-datetime) %>% filter(datetime > as.Date('1935-01-01')) %>% ggplot(aes(x=datetime, y=value, color=name)) + geom_line() + facet_grid(name ~ .) + scale_color_discrete(guide=FALSE) + theme_bw() + ggtitle('Cannonsville outflow discharges')
+  ggsave('2_observations/tmp/can_out_flow.png', height=2.5)
+  temp_dat %>% filter(site_id %in% sprintf('USGS-%s', res_outflow_ids$Cannonsville)) %>% ggplot(aes(x=date, y=temp_degC, color=site_id)) + geom_line() + facet_grid(site_id ~ .) + scale_color_discrete(guide=FALSE) + theme_bw() + ggtitle("Cannonsville outflow temperatures")
+  ggsave('2_observations/tmp/can_out_temp.png', height=2.5)
+  # inflows
+  flow_dat %>% select(datetime, all_of(res_inflow_ids$Cannonsville)) %>% pivot_longer(-datetime) %>% filter(datetime > as.Date('1935-01-01')) %>% ggplot(aes(x=datetime, y=value, color=name)) + geom_line() + facet_grid(name ~ .) + scale_color_discrete(guide=FALSE) + theme_bw() + ggtitle('Cannonsville inflow discharges')
+  ggsave('2_observations/tmp/can_in_flow.png', height=4)
+  temp_dat %>% filter(site_id %in% sprintf('USGS-%s', c(res_outflow_ids$Cannonsville), res_inflow_ids$Pepacton)) %>% ggplot(aes(x=date, y=temp_degC, color=site_id)) + geom_point(size=0.1) + facet_grid(site_id ~ .) + scale_color_discrete(guide=FALSE) + theme_bw() + ggtitle('Cannonsville inflow temperatures')
+  ggsave('2_observations/tmp/can_in_temp.png', height=2.5)
+
+
 }
