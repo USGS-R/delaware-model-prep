@@ -17,8 +17,11 @@ retrieve_ngwos <- function(out_ind, sites_ind) {
   # remove duplicates
   temp_sites <- select(temp_sites, site_id) %>% distinct()
 
-  # set internal access before requesting the site metadata and data from NWIS
-  dataRetrieval::setAccess('internal')
+
+  # filter all data to NGWOS sites
+  all_dat <- readRDS(sc_retrieve('2_observations/out/all_drb_temp_obs.rds.ind', 'getters.yml'))
+  ngwos_dat <- filter(all_dat, gsub('USGS-', '', site_id) %in% temp_sites$site_id) %>%
+    filter(source %in% c('nwis_uv', 'nwis_dv'))
 
   # retrieve site metadata from NWIS
   nwis_sites <- dataRetrieval::readNWISsite(temp_sites$site_id)
@@ -32,67 +35,19 @@ retrieve_ngwos <- function(out_ind, sites_ind) {
   # keep only stream sites - drops 3 lakes, 1 estuary, 1 spring
   stream_sites <- filter(nwis_sites, grepl('ST', site_tp_cd))
 
-  # first find data in DV
-  new_ngwos_dat <- dataRetrieval::readNWISdv(siteNumbers = stream_sites$site_no, parameterCd = '00010')
+  ngwos_dat <- filter(ngwos_dat, gsub('USGS-', '', site_id) %in% stream_sites$site_no)
 
-  dv_dat <- new_ngwos_dat %>%
-    mutate(temp_c = X_00010_00003) %>%
-    mutate(temp_c = ifelse(is.na(temp_c), `X_..2.._00010_00003`, temp_c)) %>%
-    mutate(temp_c = ifelse(is.na(temp_c), `X_.NGWOS._00010_00003`, temp_c)) %>%
-    mutate(source = 'nwis_dv',
-           n_obs = 1) %>%
-    filter(!is.na(temp_c)) %>%
-    select(site_id = site_no, date = Date, temp_c, n_obs, source)
-
-  sites_date <- dv_dat %>%
+  sites_date <- ngwos_dat %>%
     group_by(site_id) %>%
     summarize(min_year = min(lubridate::year(date)),
               max_year = max(lubridate::year(date)),
               n_overall = n(),
-              n_after_ngwos = length(date[date > as.Date('2017-10-01')]))
+              n_after_ngwos = length(date[date > as.Date('2017-10-01')])) %>%
+    mutate(site_id = gsub('USGS-', '', site_id))
 
   # any sites that were found but missing NGWOS data?
+  # just two, and those are outside of the DRB
   sites_no_ngwos <- filter(sites_date, n_after_ngwos == 0) %>% pull(site_id)
-
-  # find sites we still do not have NGWOS data for, pass to UV
-  missing_sites <- c(stream_sites$site_no[!stream_sites$site_no %in% sites_date$site_id], sites_no_ngwos)
-
-  # retrieve remaining sites from NWISuv
-  new_ngwos_uv <- dataRetrieval::readNWISuv(siteNumbers = missing_sites, parameterCd = '00010')
-
-  uv_long <- select(new_ngwos_uv, site_no, dateTime, ends_with('00010_00000')) %>%
-    tidyr::gather(key = 'temp_column', value = 'temp_c', - site_no, -dateTime)
-
-  uv_site_col <- filter(uv_long, !is.na(temp_c)) %>%
-    group_by(site_no, temp_column) %>%
-    summarize(n_vals = n(),
-              n_dates = length(unique(as.Date(dateTime)))) %>%
-    filter(!grepl('piezometer', temp_column, ignore.case = TRUE))
-
-  # always choose the standard temp column. In cases where that is missing, choose the one on that day
-  # with the most data
-  # first take day-temp type means
-  uv_long_dailies <- filter(uv_long, !is.na(temp_c)) %>%
-    filter(!grepl('piezometer', temp_column, ignore.case = TRUE)) %>%
-    group_by(site_no, date = as.Date(dateTime), temp_column) %>%
-    summarize(temp_c = mean(temp_c),
-              n_obs = n()) %>%
-    left_join(select(uv_site_col, site_no, temp_column, n_dates))
-
-  # find the temperature for each site-day
-  # first choose standard temp column, then choose one with most data when available
-  uv_dat <- uv_long_dailies %>%
-    group_by(site_no, date) %>%
-    summarize(temp_c = ifelse(grepl('X_00010_00000', paste0(temp_column, collapse = ', ')),
-                              temp_c[which(temp_column %in% 'X_00010_00000')], temp_c[which.max(n_dates)]),
-              temp_column = ifelse(grepl('X_00010_00000', paste0(temp_column, collapse = ', ')),
-                                   'X_00010_00000', temp_column[which.max(n_dates)]),
-              n_obs = ifelse(grepl('X_00010_00000', paste0(temp_column, collapse = ', ')),
-                             n_obs[which(temp_column %in% 'X_00010_00000')], n_obs[which.max(n_dates)])) %>%
-    mutate(source = 'nwis_uv') %>%
-    select(site_id = site_no, date, temp_c, n_obs, source)
-
-  ngwos_dat <- bind_rows(dv_dat, uv_dat)
 
   ## return NGWOS data
   saveRDS(ngwos_dat, as_data_file(out_ind))
