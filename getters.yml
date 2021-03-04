@@ -124,9 +124,45 @@ targets:
   3_hybrid_predictions/in/PGRNN_0716.npy:
     command: gd_get('3_hybrid_predictions/in/PGRNN_0716.npy.ind')
 
+  # model runs with 2% and 0.1% of training data
+  3_hybrid_predictions/in/RNN_0507_d001.npy:
+    command: gd_get('3_hybrid_predictions/in/RNN_0507_d001.npy.ind')
+  3_hybrid_predictions/in/RNN_0507_d02.npy:
+    command: gd_get('3_hybrid_predictions/in/RNN_0507_d02.npy.ind')
+
+  3_hybrid_predictions/in/RGCN_woptr_0507_d001.npy:
+    command: gd_get('3_hybrid_predictions/in/RGCN_woptr_0507_d001.npy.ind')
+  3_hybrid_predictions/in/RGCN_woptr_0507_d02.npy:
+    command: gd_get('3_hybrid_predictions/in/RGCN_woptr_0507_d02.npy.ind')
+
+  3_hybrid_predictions/in/RGCN_0507_wctr_d001.npy:
+    command: gd_get('3_hybrid_predictions/in/RGCN_0507_wctr_d001.npy.ind')
+  3_hybrid_predictions/in/RGCN_0507_wctr_d02.npy:
+    command: gd_get('3_hybrid_predictions/in/RGCN_0507_wctr_d02.npy.ind')
+
+  3_hybrid_predictions/in/RGCN_0507_d001.npy:
+    command: gd_get('3_hybrid_predictions/in/RGCN_0507_d001.npy.ind')
+  3_hybrid_predictions/in/RGCN_0507_d02.npy:
+    command: gd_get('3_hybrid_predictions/in/RGCN_0507_d02.npy.ind')
+
+  3_hybrid_predictions/in/ANN_0507_d001.npy:
+    command: gd_get('3_hybrid_predictions/in/ANN_0507_d001.npy.ind')
+  3_hybrid_predictions/in/ANN_0507_d02.npy:
+    command: gd_get('3_hybrid_predictions/in/ANN_0507_d02.npy.ind')
+
+  3_hybrid_predictions/in/PGRNN_0507_d001.npy:
+    command: gd_get('3_hybrid_predictions/in/PGRNN_0507_d001.npy.ind')
+  3_hybrid_predictions/in/PGRNN_0507_d02.npy:
+    command: gd_get('3_hybrid_predictions/in/PGRNN_0507_d02.npy.ind')
+
+  3_hybrid_predictions/out/compare_predictions_obs_d100.rds:
+    command: gd_get('3_hybrid_predictions/out/compare_predictions_obs_d100.rds.ind')
+  3_hybrid_predictions/out/compare_predictions_obs_d001.rds:
+    command: gd_get('3_hybrid_predictions/out/compare_predictions_obs_d001.rds.ind')
+  3_hybrid_predictions/out/compare_predictions_obs_d02.rds:
+    command: gd_get('3_hybrid_predictions/out/compare_predictions_obs_d02.rds.ind')
   3_hybrid_predictions/out/compare_predictions_obs.rds:
     command: gd_get('3_hybrid_predictions/out/compare_predictions_obs.rds.ind')
-
 
   #### 9_collaborator_data ####
   ## Makerspace ##
