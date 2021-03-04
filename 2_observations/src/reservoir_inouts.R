@@ -111,7 +111,7 @@ merge_res_inouts <- function(out_file, tibbles) {
 # run the functions defined above
 can_io <- get_inout_obs_cannonsville()
 pep_io <- get_inout_obs_pepacton()
-merge_res_inouts(out_file = '2_observations/tmp/res_io_obs.feather', list(can_io, pep_io))
+merge_res_inouts(out_file = '9_collaborator_data/res/res_io_obs.feather', list(can_io, pep_io))
 
 #### SNTemp Predictions ####
 
