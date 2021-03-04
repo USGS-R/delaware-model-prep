@@ -1,13 +1,13 @@
 version: 0.3.0
 name: 2_observations/out/obs_flow_drb.rds.ind
 type: file
-hash: 5d37351b3a135d5c7a04dea7780ed83a
-time: 2020-09-30 22:40:35 UTC
+hash: da36ff642826b2075bcab5cfa8dbcec2
+time: 2020-10-14 21:09:00 UTC
 depends:
-  2_observations/out/drb_discharge_daily_dv.csv.ind: dc21b400454e7cec923bea4e831caf3b
-  2_observations/out/drb_filtered_sites.rds.ind: d02c947771e61be707adcea113624c91
+  2_observations/in/daily_flow.rds.ind: 321ba00b14ed1d6c0aaaec7f30bb7390
+  2_observations/out/drb_filtered_sites.rds.ind: 65afecfcc9c889258828d70f3bccd60a
 fixed: 676a81c3405922c452521e3b90119aad
 code:
   functions:
-    munge_flow: 6e53cceee6e394609c4c2a967c704bf1
+    munge_flow: 47e426b465bcb9c23cd33b0edd6bf28a
 

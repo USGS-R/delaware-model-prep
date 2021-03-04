@@ -36,6 +36,9 @@ targets:
     command: gd_get('1_network/out/filtered_dams_reservoirs.rds.ind')
   1_network/out/subseg_reservoir_mapping.rds:
     command: gd_get('1_network/out/subseg_reservoir_mapping.rds.ind')
+  1_network/out/segments_relative_to_reservoirs.rds:
+    command: gd_get('1_network/out/segments_relative_to_reservoirs.rds.ind')
+
 
   #### 2_observations ####
   # temperature sites (placed on drive from/by ____)
@@ -46,7 +49,18 @@ targets:
     command: gd_get('2_observations/in/daily_temperatures.rds.ind')
 
   2_observations/in/daily_flow.rds:
-    command: gd_get('2_observations/in/daily_temperatures.rds.ind')
+    command: gd_get('2_observations/in/daily_flow.rds.ind')
+
+  2_observations/out/extra_flow_sites.rds:
+    command: gd_get('2_observations/out/extra_flow_sites.rds.ind')
+
+
+  # reservoir release data, from Jeff, via Kendra request from NYC employee
+  2_observations/in/PCN_Spill_Release.xlsx:
+    command: gd_get('2_observations/in/PCN_Spill_Release.xlsx.ind')
+  2_observations/out/reservoir_releases.csv:
+    command: gd_get('2_observations/out/reservoir_releases.csv.ind')
+
 
   # list of NGWOS sites from Brian Pellerin, receieved 2020-04-18
   2_observations/in/NGWOS_site_metadata.xlsx:
@@ -61,10 +75,6 @@ targets:
     command: gd_get('2_observations/out/all_drb_temp_obs.rds.ind')
   2_observations/out/obs_temp_drb.rds:
     command: gd_get('2_observations/out/obs_temp_drb.rds.ind')
-  # discharge data: currently a file that was uploaded to gd (originally from Jeff)
-  # down the road should point to NWIS
-  2_observations/out/drb_discharge_daily_dv.csv:
-    command: gd_get('2_observations/out/drb_discharge_daily_dv.csv.ind')
   2_observations/out/obs_flow_drb.rds:
     command: gd_get('2_observations/out/obs_flow_drb.rds.ind')
 
@@ -124,9 +134,45 @@ targets:
   3_hybrid_predictions/in/PGRNN_0716.npy:
     command: gd_get('3_hybrid_predictions/in/PGRNN_0716.npy.ind')
 
+  # model runs with 2% and 0.1% of training data
+  3_hybrid_predictions/in/RNN_0507_d001.npy:
+    command: gd_get('3_hybrid_predictions/in/RNN_0507_d001.npy.ind')
+  3_hybrid_predictions/in/RNN_0507_d02.npy:
+    command: gd_get('3_hybrid_predictions/in/RNN_0507_d02.npy.ind')
+
+  3_hybrid_predictions/in/RGCN_woptr_0507_d001.npy:
+    command: gd_get('3_hybrid_predictions/in/RGCN_woptr_0507_d001.npy.ind')
+  3_hybrid_predictions/in/RGCN_woptr_0507_d02.npy:
+    command: gd_get('3_hybrid_predictions/in/RGCN_woptr_0507_d02.npy.ind')
+
+  3_hybrid_predictions/in/RGCN_0507_wctr_d001.npy:
+    command: gd_get('3_hybrid_predictions/in/RGCN_0507_wctr_d001.npy.ind')
+  3_hybrid_predictions/in/RGCN_0507_wctr_d02.npy:
+    command: gd_get('3_hybrid_predictions/in/RGCN_0507_wctr_d02.npy.ind')
+
+  3_hybrid_predictions/in/RGCN_0507_d001.npy:
+    command: gd_get('3_hybrid_predictions/in/RGCN_0507_d001.npy.ind')
+  3_hybrid_predictions/in/RGCN_0507_d02.npy:
+    command: gd_get('3_hybrid_predictions/in/RGCN_0507_d02.npy.ind')
+
+  3_hybrid_predictions/in/ANN_0507_d001.npy:
+    command: gd_get('3_hybrid_predictions/in/ANN_0507_d001.npy.ind')
+  3_hybrid_predictions/in/ANN_0507_d02.npy:
+    command: gd_get('3_hybrid_predictions/in/ANN_0507_d02.npy.ind')
+
+  3_hybrid_predictions/in/PGRNN_0507_d001.npy:
+    command: gd_get('3_hybrid_predictions/in/PGRNN_0507_d001.npy.ind')
+  3_hybrid_predictions/in/PGRNN_0507_d02.npy:
+    command: gd_get('3_hybrid_predictions/in/PGRNN_0507_d02.npy.ind')
+
+  3_hybrid_predictions/out/compare_predictions_obs_d100.rds:
+    command: gd_get('3_hybrid_predictions/out/compare_predictions_obs_d100.rds.ind')
+  3_hybrid_predictions/out/compare_predictions_obs_d001.rds:
+    command: gd_get('3_hybrid_predictions/out/compare_predictions_obs_d001.rds.ind')
+  3_hybrid_predictions/out/compare_predictions_obs_d02.rds:
+    command: gd_get('3_hybrid_predictions/out/compare_predictions_obs_d02.rds.ind')
   3_hybrid_predictions/out/compare_predictions_obs.rds:
     command: gd_get('3_hybrid_predictions/out/compare_predictions_obs.rds.ind')
-
 
   #### 9_collaborator_data ####
   ## Makerspace ##
@@ -153,6 +199,17 @@ targets:
     command: gd_get('9_collaborator_data/umn/obs_flow_full.csv.ind')
   9_collaborator_data/umn/obs_flow_subset.csv:
     command: gd_get('9_collaborator_data/umn/obs_flow_subset.csv.ind')
+  9_collaborator_data/umn/reservoir_features.csv:
+    command: gd_get('9_collaborator_data/umn/reservoir_features.csv.ind')
+  9_collaborator_data/umn/network_subset_lordville.rds:
+    command: gd_get('9_collaborator_data/umn/network_subset_lordville.rds.ind')
+  9_collaborator_data/umn/distance_matrix_lordville.rds:
+    command: gd_get('9_collaborator_data/umn/distance_matrix_lordville.rds.ind')
+  9_collaborator_data/umn/obs_temp_subset_lordville.csv:
+    command: gd_get('9_collaborator_data/umn/obs_temp_subset_lordville.csv.ind')
+  9_collaborator_data/umn/obs_flow_subset_lordville.csv:
+    command: gd_get('9_collaborator_data/umn/obs_flow_subset_lordville.csv.ind')
+
   ## Penn State ##
   9_collaborator_data/psu/highly_observed_sites.csv:
     command: gd_get('9_collaborator_data/psu/highly_observed_sites.csv.ind')

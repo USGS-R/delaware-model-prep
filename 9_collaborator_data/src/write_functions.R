@@ -14,6 +14,15 @@ filter_subset <- function(dat_ind, subnet_ind, out_ind) {
   gd_put(out_ind)
 }
 
+get_res_features <- function(dat_ind, out_ind) {
+  res <- readRDS(sc_retrieve(dat_ind, 'getters.yml')) %>%
+    select(GRAND_ID, AREA_SKM, RES_NAME, DAM_NAME, ALT_NAME, RIVER, ALT_RIVER, YEAR, DAM_HGT_M, DAM_LEN_M, DEPTH_M, ELEV_MASL, CATCH_SKM) %>%
+    distinct()
+
+  readr::write_csv(res, as_data_file(out_ind))
+  gd_put(out_ind)
+}
+
 # save distance matrices in numpy format
 save_dist_matrices <- function(dist_mat_ind, out_ind) {
   np <- reticulate::import('numpy')
