@@ -31,13 +31,13 @@ targets:
      - 9_collaborator_data/umn/obs_temp_subset.csv.ind
      - 9_collaborator_data/umn/obs_flow_full.csv.ind
      - 9_collaborator_data/umn/obs_flow_subset.csv.ind
-     - 9_collaborator_data/psu/highly_observed_sites.csv.ind
-     - 9_collaborator_data/psu/highly_observed_map.png
-     - 9_collaborator_data/psu/highly_obs_distance_matrix.csv.ind
-     - 9_collaborator_data/psu/highly_obs_distance_heatmap.png
-     - 9_collaborator_data/psu/sntemp_preds_aggregated.feather.ind
-     - 9_collaborator_data/psu/temp_obs_high_obs_sites.csv.ind
-     - 9_collaborator_data/psu/flow_obs_high_obs_sites.csv.ind
+     #- 9_collaborator_data/psu/highly_observed_sites.csv.ind
+     #- 9_collaborator_data/psu/highly_observed_map.png
+     #- 9_collaborator_data/psu/highly_obs_distance_matrix.csv.ind
+     #- 9_collaborator_data/psu/highly_obs_distance_heatmap.png
+     #- 9_collaborator_data/psu/sntemp_preds_aggregated.feather.ind
+     #- 9_collaborator_data/psu/temp_obs_high_obs_sites.csv.ind
+     #- 9_collaborator_data/psu/flow_obs_high_obs_sites.csv.ind
 
 
   ##### Makerspace #####
