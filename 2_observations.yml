@@ -100,4 +100,4 @@ targets:
     command: clean_release_dat(
       in_ind = '2_observations/in/PCN_Spill_Release.xlsx.ind',
       out_ind = target_name,
-      mgd_to_cfs = I(1.54723))
+      mgd_to_cms = I(0.0438125))
