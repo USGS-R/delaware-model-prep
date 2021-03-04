@@ -59,4 +59,21 @@ combine_models_obs <- function(obs_ind, ann_ind, rnn_ind, rnn_ptr_ind, rgcn_ind,
 
 }
 
+combine_experiments <- function(d100_ind, d02_ind, d001_ind, out_ind) {
+  d100 <- readRDS(sc_retrieve(d100_ind, 'getters.yml')) %>%
+    mutate(experiment = 'd100')
+
+  d02 <- readRDS(sc_retrieve(d02_ind, 'getters.yml')) %>%
+    mutate(experiment = 'd02')
+
+  d001 <- readRDS(sc_retrieve(d001_ind, 'getters.yml')) %>%
+    mutate(experiment = 'd001')
+
+  out <- bind_rows(d100, d02, d001)
+
+  saveRDS(out, file = as_data_file(out_ind))
+  gd_put(out_ind)
+
+}
+
 

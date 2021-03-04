@@ -1,25 +1,19 @@
 
-crosswalk_sites_to_reaches <- function(network_ind, boundary_ind, sites_ind, ngwos_sites, out_ind) {
+crosswalk_sites_to_reaches <- function(network_ind, boundary_ind, temp_sites_ind, flow_sites_ind, out_ind) {
 
   # read in network and boundary files
   drb_net <- readRDS(sc_retrieve(network_ind, 'getters.yml'))
   #st_crs(drb_net$vertices) <- 4326
   drb_boundary <- readRDS(sc_retrieve(boundary_ind, 'getters.yml'))
 
+  # bring in flow sites that were not represented in temperature data
+  flow_sites <-  readRDS(sc_retrieve(flow_sites_ind, 'getters.yml')) %>%
+    mutate(site_id = paste0('USGS-', site_no), source = 'nwis') %>%
+    select(site_id, site_type = site_tp_cd, latitude = dec_lat_va, longitude = dec_long_va, source)
   # read in sites from WQP, nwisdv, nwisuv
-  sites <- readRDS(sc_retrieve(sites_ind, 'getters.yml')) %>%
+  sites <- readRDS(sc_retrieve(temp_sites_ind, 'getters.yml')) %>%
+    bind_rows(flow_sites) %>%
     filter(site_type %in% c('ST', 'Stream', 'ST-TS'))
-
-  # check if NGWOS sites are in site metadata, if not, retrieve
-  missing <- ngwos_sites[!ngwos_sites %in% gsub('USGS-', '', unique(sites$site_id))]
-
-  # go get metadata for missing sites
-  meta_missing <- dataRetrieval::readNWISsite(missing) %>%
-    mutate(site_id = paste0('USGS-', site_no), source = 'nwis_dv') %>%
-    select(site_id, site_type = site_tp_cd, latitude = dec_lat_va, longitude = dec_long_va)
-
-  # add NGWOS sites to sites list
-  sites <- bind_rows(sites, meta_missing)
 
   # Convert to sfc
   obs_site_points <- purrr::map2(sites$longitude, sites$latitude, function(lat, lon) {

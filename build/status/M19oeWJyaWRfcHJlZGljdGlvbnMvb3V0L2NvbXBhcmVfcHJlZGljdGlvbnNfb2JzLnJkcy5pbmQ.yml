@@ -1,19 +1,14 @@
 version: 0.3.0
 name: 3_hybrid_predictions/out/compare_predictions_obs.rds.ind
 type: file
-hash: 6ad50db60fca078d5ae2db6dccc1070a
-time: 2020-09-30 23:05:22 UTC
+hash: c892941e42fd474c07ca3b75d60fb397
+time: 2020-11-30 17:56:51 UTC
 depends:
-  2_observations/out/obs_temp_drb.rds.ind: 8725a9f9ad28d239ea1ce8319cb36798
-  3_hybrid_predictions/in/ANN_0831.npy.ind: c8bd332e2bed4500bd44624509926909
-  3_hybrid_predictions/in/RNN_0518.npy.ind: 9455640080489bbf899c660c88d091b0
-  3_hybrid_predictions/in/PGRNN_0716.npy.ind: f69c8cb1f75a4b556abffc36fd2cf9e6
-  3_hybrid_predictions/in/RGCN_0518_woptr.npy.ind: 28af48aa8a49bcb57fcd0f6f21d6aa9b
-  3_hybrid_predictions/in/RGCN_0518.npy.ind: 79ab5a3e4dec8bfcc8dcc1cfcc55cbcf
-  3_hybrid_predictions/in/RGCN_0518_wctr.npy.ind: 7c61adbefbb8c3481a1d5b942810e5a7
+  3_hybrid_predictions/out/compare_predictions_obs_d100.rds.ind: 6ad50db60fca078d5ae2db6dccc1070a
+  3_hybrid_predictions/out/compare_predictions_obs_d02.rds.ind: 29630dd14a31bf8f66af465eae97cee0
+  3_hybrid_predictions/out/compare_predictions_obs_d001.rds.ind: 1579d45364e63fce52e431b2cd717aef
 fixed: 1a6c4c2e1d1013ea75e61b535846af6f
 code:
   functions:
-    combine_models_obs: 29bc2aad79f1977a4c3d7a7170864f3a
-    munge_npy_dat: b994f5e2a478373a62261b9f1b3f8343
+    combine_experiments: 56e391c77d042dd2791462e73d3c4585
 

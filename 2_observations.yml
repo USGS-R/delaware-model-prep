@@ -8,12 +8,17 @@ packages:
   - igraph
   - purrr
   - dataRetrieval
+  - readr
+  - readxl
+  - lubridate
 
 sources:
   - 2_observations/src/crosswalk_functions.R
   - 2_observations/src/data_munge_functions.R
   - 2_observations/src/subset_closest.R
   - 2_observations/src/pull_ngwos_dat.R
+  - 2_observations/src/munge_flow_dat.R
+
 
 targets:
   2_observations:
@@ -32,11 +37,19 @@ targets:
   ngwos_sites:
     command: filter_ngwos(ngwos_ind = '2_observations/out/NGWOS_sites_data.rds.ind')
 
+  # flow data comes from a national NWIS pull here: https://github.com/USGS-R/national-flow-observations
+  2_observations/out/extra_flow_sites.rds.ind:
+    command: get_flow_sites(
+      flow_ind = '2_observations/in/daily_flow.rds.ind',
+      temp_sites_ind = '2_observations/in/all_sites.rds.ind',
+      out_ind = target_name)
+
+  # temperature data and sites info comes from the national NWIS temperature pull: https://github.com/USGS-R/2wp-temp-observations
   2_observations/out/crosswalk_site_reach.rds.ind:
     command: crosswalk_sites_to_reaches(
       out_ind = target_name,
-      sites_ind = '2_observations/in/all_sites.rds.ind',
-      ngwos_sites = ngwos_sites,
+      temp_sites_ind = '2_observations/in/all_sites.rds.ind',
+      flow_sites_ind = '2_observations/out/extra_flow_sites.rds.ind',
       boundary_ind = '1_network/out/boundary.rds.ind',
       network_ind = '1_network/out/network.rds.ind')
 
@@ -54,7 +67,6 @@ targets:
   2_observations/out/all_drb_temp_obs.rds.ind:
     command: filter_temp_data(
       dat_ind = '2_observations/in/daily_temperatures.rds.ind',
-      ngwos_ind = '2_observations/out/NGWOS_sites_data.rds.ind',
       cross_ind = '2_observations/out/crosswalk_site_reach.rds.ind',
       out_ind = target_name)
 
@@ -74,8 +86,18 @@ targets:
   2_observations/out/obs_flow_drb.rds.ind:
     command: munge_flow(
       out_ind = target_name,
-      dat_ind = '2_observations/out/drb_discharge_daily_dv.csv.ind',
+      dat_ind = '2_observations/in/daily_flow.rds.ind',
       sites_ind = '2_observations/out/drb_filtered_sites.rds.ind')
 
   2_observations/out/drb_temp_summary.csv:
-    command: summarize_temp(in_ind = '2_observations/out/obs_temp_drb.rds.ind', out_file = target_name)
+    command: summarize_dat(in_ind = '2_observations/out/obs_temp_drb.rds.ind', out_file = target_name)
+
+  2_observations/out/drb_flow_summary.csv:
+    command: summarize_dat(in_ind = '2_observations/out/obs_flow_drb.rds.ind', out_file = target_name)
+
+  # reservoir release data
+  2_observations/out/reservoir_releases.csv.ind:
+    command: clean_release_dat(
+      in_ind = '2_observations/in/PCN_Spill_Release.xlsx.ind',
+      out_ind = target_name,
+      mgd_to_cms = I(0.0438125))

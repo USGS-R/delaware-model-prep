@@ -15,10 +15,11 @@ targets:
     depends:
      - 3_hybrid_predictions/out/compare_predictions_obs.rds.ind
 
+
   # combine the prediction from 4 models: ANN (plain neural network),
   # RNN (+ time), RGCN (+ space), RGCN_ptrn (+ pretraining) with observed data.
 
-  3_hybrid_predictions/out/compare_predictions_obs.rds.ind:
+  3_hybrid_predictions/out/compare_predictions_obs_d100.rds.ind:
     command: combine_models_obs(
       obs_ind = '2_observations/out/obs_temp_drb.rds.ind',
       ann_ind = '3_hybrid_predictions/in/ANN_0831.npy.ind',
@@ -27,4 +28,34 @@ targets:
       rgcn_ind = '3_hybrid_predictions/in/RGCN_0518_woptr.npy.ind',
       rgcn_ptrn_ind = '3_hybrid_predictions/in/RGCN_0518.npy.ind',
       rgcn_ptrn_ctr_ind = '3_hybrid_predictions/in/RGCN_0518_wctr.npy.ind',
+      out_ind = target_name)
+
+
+  3_hybrid_predictions/out/compare_predictions_obs_d001.rds.ind:
+    command: combine_models_obs(
+      obs_ind = '2_observations/out/obs_temp_drb.rds.ind',
+      ann_ind = '3_hybrid_predictions/in/ANN_0507_d001.npy.ind',
+      rnn_ind = '3_hybrid_predictions/in/RNN_0507_d001.npy.ind',
+      rnn_ptr_ind = '3_hybrid_predictions/in/PGRNN_0507_d001.npy.ind',
+      rgcn_ind = '3_hybrid_predictions/in/RGCN_woptr_0507_d001.npy.ind',
+      rgcn_ptrn_ind = '3_hybrid_predictions/in/RGCN_0507_d001.npy.ind',
+      rgcn_ptrn_ctr_ind = '3_hybrid_predictions/in/RGCN_0507_wctr_d001.npy.ind',
+      out_ind = target_name)
+
+  3_hybrid_predictions/out/compare_predictions_obs_d02.rds.ind:
+    command: combine_models_obs(
+      obs_ind = '2_observations/out/obs_temp_drb.rds.ind',
+      ann_ind = '3_hybrid_predictions/in/ANN_0507_d02.npy.ind',
+      rnn_ind = '3_hybrid_predictions/in/RNN_0507_d02.npy.ind',
+      rnn_ptr_ind = '3_hybrid_predictions/in/PGRNN_0507_d02.npy.ind',
+      rgcn_ind = '3_hybrid_predictions/in/RGCN_woptr_0507_d02.npy.ind',
+      rgcn_ptrn_ind = '3_hybrid_predictions/in/RGCN_0507_d02.npy.ind',
+      rgcn_ptrn_ctr_ind = '3_hybrid_predictions/in/RGCN_0507_wctr_d02.npy.ind',
+      out_ind = target_name)
+
+  3_hybrid_predictions/out/compare_predictions_obs.rds.ind:
+    command: combine_experiments(
+      d100_ind = '3_hybrid_predictions/out/compare_predictions_obs_d100.rds.ind',
+      d02_ind = '3_hybrid_predictions/out/compare_predictions_obs_d02.rds.ind',
+      d001_ind = '3_hybrid_predictions/out/compare_predictions_obs_d001.rds.ind',
       out_ind = target_name)

@@ -1,0 +1,13 @@
+version: 0.3.0
+name: 2_observations/out/extra_flow_sites.rds.ind
+type: file
+hash: b84238fee11f86ba96d2d8ef6a72ac34
+time: 2020-10-14 19:20:53 UTC
+depends:
+  2_observations/in/daily_flow.rds.ind: 321ba00b14ed1d6c0aaaec7f30bb7390
+  2_observations/in/all_sites.rds.ind: 40fc18d99de8d11de21cf8efabc03443
+fixed: 6b750993374b7f3c08d0094ff0b78818
+code:
+  functions:
+    get_flow_sites: f69aaf1ac1fdaa59d9a95a7b500a2ff2
+
