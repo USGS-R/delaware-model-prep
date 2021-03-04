@@ -5,9 +5,18 @@ packages:
   - dplyr
   - feather
   - lubridate
+  - yaml
 
 sources:
   - 3_predictions/src/munge_predictions.R
+  - 3_predictions/src/get_prms_sntemp_model.R
+  - 3_predictions/src/set_sntemp_output.R
+  - 3_predictions/src/update_sntemp.R
+  - 3_predictions/src/run_sntemp.R
+  - 3_predictions/src/get_sntemp_values.R
+  - 3_predictions/src/gather_sntemp_output.R
+  - 3_predictions/src/get_subbasins.R
+  - 3_predictions/src/get_upstream_downstream_segs.R
 
 targets:
   3_predictions:
@@ -15,11 +24,80 @@ targets:
      - 3_predictions/out/compare_predictions_obs.feather.ind
      - 3_predictions/out/model_evaluation.csv
 
-  # pull out predictions from SNTEMP in/out - updated in April 2020
-  # to use drivers that run through 2019
+  # getting some settings for running PRMS-SNTemp uncalibrated
+  uncal_settings:
+    command: read_yaml('3_predictions/cfg/uncal_settings.yml')
+
+  orig_model_loc:
+    command: uncal_settings[[I('orig_model_loc')]]
+
+  uncal_model_run_loc:
+    command: uncal_settings[[I('uncal_model_run_loc')]]
+
+  uncal_start:
+    command: uncal_settings[[I('start')]]
+
+  uncal_stop:
+    command: uncal_settings[[I('stop')]]
+
+  sntemp_output_vars:
+    command: uncal_settings[[I('sntemp_output')]]
+
+  # need to make sure that 20191002_Delaware_streamtemp folder is in project on
+  #  local machine; this is on GD if not on local machine
+  # within this function, moving model to temporary run location so that we can change parameters, etc.. while keeping
+  #  original model preserved
+  3_predictions/tmp/control/delaware.control.ind:
+    command: get_prms_sntemp_model(
+      out_ind = target_name,
+      gd_zip_ind_file = '3_predictions/in/prms_sntemp/20191002_Delaware_streamtemp.zip.ind',
+      unzip_loc = I('prms_sntemp'),
+      orig_model_loc = orig_model_loc,
+      model_run_loc = uncal_model_run_loc)
+
+  set_sntemp_output_vars:
+    command: set_sntemp_output(
+      output_names = sntemp_output_vars,
+      model_run_loc = uncal_model_run_loc)
+    depends: '3_predictions/tmp/control/delaware.control.ind'
+
+  3_predictions/tmp/output/stream_temp.out.nsegment.ind:
+    command: run_sntemp(
+      out_ind = target_name,
+      start = uncal_start,
+      stop = uncal_stop,
+      spinup = I('F'),
+      restart = I('F'),
+      model_run_loc = uncal_model_run_loc)
+    depends: set_sntemp_output_vars
+
+# includes output in 3_predictions/cfg/uncal_settings.yml
+  3_predictions/out/uncal_sntemp_input_output.feather.ind:
+    command: gather_sntemp_output(
+      ind_file = target_name,
+      model_run_loc = uncal_model_run_loc,
+      model_output_file = I('output/stream_temp.out.nsegment'),
+      model_fabric_file = I('GIS/Segments_subset.shp'),
+      sntemp_vars = sntemp_output_vars)
+    depends: '3_predictions/tmp/output/stream_temp.out.nsegment.ind'
+
+  # subbasins in the DRB
+  3_predictions/out/drb_subbasins.rds.ind:
+    command: get_subbasins(
+      ind_file = target_name,
+      subbasin_outlet_file = '3_predictions/cfg/subbasin_outlets.yml',
+      model_run_loc = uncal_model_run_loc)
+
+  3_predictions/out/uncal_sntemp_input_output_subbasin_4182.feather.ind:
+    command: gather_sntemp_output_subbasin(
+      ind_file = target_name,
+      subbasin_ind_file = '3_predictions/out/drb_subbasins.rds.ind',
+      full_data_ind_file = '3_predictions/out/uncal_sntemp_input_output.feather.ind',
+      subbasin_outlet_id = I('4182')) # outlet seg_id_nat of subbasin that Xiaowei uses
+
   3_predictions/out/uncal_sntemp_preds.csv.ind:
     command: pull_sntemp_preds(
-      sntemp_ind = '3_predictions/in/uncal_sntemp_input_output.feather.ind',
+      sntemp_ind = '3_predictions/out/uncal_sntemp_input_output.feather.ind',
       out_ind = target_name)
 
   3_predictions/out/rgcn_v1_preds.feather.ind:
@@ -37,4 +115,6 @@ targets:
 
   # write some model comparisons/stats and git commit for each comparison
   3_predictions/out/model_evaluation.csv:
-    command: calc_metrics(compare_ind = '3_predictions/out/compare_predictions_obs.feather.ind', out_file = target_name)
+    command: calc_metrics(
+      compare_ind = '3_predictions/out/compare_predictions_obs.feather.ind',
+      out_file = target_name)

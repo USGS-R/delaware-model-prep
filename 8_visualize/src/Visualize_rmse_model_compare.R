@@ -32,7 +32,7 @@ colnames(season_train)[3] = 'Train_non_summer_ci'
 colnames(season_train)[4] = 'Train_all_seasons_rmse'
 colnames(season_train)[5] = 'Train_all_seasons_ci'
 # writing the dataframe to csv file
-season_train_dat <-readr::write_csv(season_train, path = '8_visualize/in/season_train_dat.csv')
+season_train_dat <-readr::write_csv(season_train, file = '8_visualize/in/season_train_dat.csv')
 
 #reading the data csv files and using pivot_long to change the data from wide to long.
 season_train_mod_dat <- readr::read_csv('8_visualize/in/season_train_dat.csv') %>%
@@ -50,14 +50,16 @@ season_train_mod_dat$train_season <- factor(
 
 seasonal_test_plot <-
    ggplot(data = season_train_mod_dat, aes(x = train_season,
-                                           y = rmse , fill = model)) +
+                                           y = rmse , fill = model, color=model)) +
    # using position = 'dodge' will place the bars next to each other.
-   geom_col(position = 'dodge')  +
+   # geom_col(position = 'dodge')  +
+   geom_boxplot() +
    geom_errorbar(aes(ymin = rmse - ci, ymax = rmse + ci),
-                 width = .2, position = position_dodge(.9)) +
-   scale_fill_manual(labels = plot_models,
-                     values = plot_color) +
+                 width = .2, position = position_dodge(.75)) +
+   scale_fill_manual(labels = plot_models, values = plot_color) +
+   scale_color_manual(labels = plot_models, values = plot_color) +
    scale_x_discrete(label = c("Train all seasons", "Train non-summer" )) +
+   scale_y_reverse() +
    theme_bw() +
    theme_minimal() +
    cowplot::theme_cowplot(font_size = 14) +
@@ -96,7 +98,7 @@ colnames(subset_train)[6] = 'rmse_2'
 colnames(subset_train)[7] = 'ci_2'
 colnames(subset_train)[8] = 'rmse_0.1'
 colnames(subset_train)[9] = 'ci_0.1'
-subset_train_dat <- readr::write_csv(subset_train, path = '8_visualize/in/subset_train_dat.csv')
+subset_train_dat <- readr::write_csv(subset_train, file = '8_visualize/in/subset_train_dat.csv')
 
 subset_mod_dat <- readr::read_csv('8_visualize/in/subset_train_dat.csv') %>%
   filter(!model %in%  'Uncalibrated_process_model') %>%

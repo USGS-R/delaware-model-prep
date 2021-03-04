@@ -1,0 +1,15 @@
+version: 0.3.0
+name: 3_predictions/tmp/control/delaware.control.ind
+type: file
+hash: 1ed4af3a9d7807a10ce644ed52263e5b
+time: 2020-10-22 15:35:01 UTC
+depends:
+  3_predictions/in/prms_sntemp/20191002_Delaware_streamtemp.zip.ind: 1439dea411a11a8f2fa4be2388e7cb76
+  orig_model_loc: 58e8a69975925a6e44d5e483d4e46a47
+  uncal_model_run_loc: 1d89097318dc6fdeebc0a09839c92cf4
+fixed: 855541dfe7ce4f12ed68d3855ee6b094
+code:
+  functions:
+    copy_model_to_run_dir: c22a5f34472b2fcba69ab3beaff99311
+    get_prms_sntemp_model: 0d00a02094f544252eeb78efb1cfca04
+
