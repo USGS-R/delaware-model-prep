@@ -18,6 +18,7 @@ sources:
   - 9_collaborator_data/src/write_functions.R
   - 9_collaborator_data/src/psu_site_selection.R
   - 9_collaborator_data/src/subset_sntemp.R
+  - 9_collaborator_data/src/reservoir_inouts.R
 
 targets:
   9_collaborator_data:
@@ -252,4 +253,29 @@ targets:
       temp_ind = '2_observations/out/obs_temp_drb.rds.ind',
       network_ind = '1_network/out/network.rds.ind',
       out_file = target_name)
+
+  #### Reservoirs ####
+
+  res_outflow_ids:
+    command: list(
+      Cannonsville = I('01425000'),
+      Pepacton = I(c('01417000', '01417500')))
+
+  # Find sites with lots of flow and/or temp data on inflows to each reservoir.
+  # This algorithm uses NLDI and hence currently only locates NWIS sites, overlooking
+  # any other relevant sites in WQP
+  res_inflow_ids:
+    command: find_inout_obs_sites(
+      res_outflow_ids = res_outflow_ids,
+      flow_ind = '2_observations/in/daily_flow.rds.ind',
+      temp_ind = '2_observations/out/all_drb_temp_obs.rds.ind',
+      min_obs_flow = I(1000),
+      min_obs_temp = I(50),
+      max_dist_km = I(100))
+
+  9_collaborator_data/res/res_io_obs.feather:
+    command: get_inout_obs_all(target_name, res_inflow_ids, res_outflow_ids)
+
+  9_collaborator_data/res/res_io_sntemp.feather:
+    command: get_inout_sntemp_all(target_name)
 

@@ -30,8 +30,8 @@ find_inout_obs_sites <- function(
   # NLDI: http://usgs-r.github.io/dataRetrieval/reference/findNLDI.html.
   # As of 2/2/21, dataRetrieval access to NLDI requires
   # remotes::install_gitlab('water/dataRetrieval', host='code.usgs.gov', auth_token='your_code.usgs.gov_token')
-  res_inflow_ids <- purrr::map(setNames(nm=c('flow','temp')), function(variable) {
-    purrr::map(res_outflow_ids, function(outflow_ids) {
+  res_inflow_ids <- purrr::map(res_outflow_ids, function(outflow_ids) {
+    purrr::map(setNames(nm=c('flow','temp')), function(variable) {
 
       # find all reasonable candidate sites within the specified maximum river distance from the outlet
       upstream_ids <- purrr::map(outflow_ids, function(outflow_id) {
@@ -60,14 +60,7 @@ find_inout_obs_sites <- function(
   })
 }
 
-# inout_obs_sites <- list(
-#   flow = list(
-#     Cannonsville = c("01423500", "01423000", "01424500"),
-#     Pepacton = c("01413500", "01415000", "01416500", "01414000", "01414500")),
-#   temp = list(
-#     Cannonsville = "01423000",
-#     Pepacton = "01413088"))
-
+#' Read in the flow and temp data, subset to site_ids, and do a bit of munging
 get_inout_obs <- function(
   site_ids = c(),
   flow_ind = '2_observations/in/daily_flow.rds.ind', # '2_observations/out/drb_discharge_daily_dv.csv.ind',
@@ -94,7 +87,7 @@ get_inout_obs <- function(
   temps <- temp_raw %>%
     filter(site_id %in% paste0('USGS-', site_ids)) %>%
     mutate(site_id = gsub('USGS-', '', site_id))
-  site_dates <- crossing(
+  site_dates <- tidyr::crossing(
     site_id = site_ids,
     date = seq(
       min(min(flows$date), min(temps$date)),
@@ -108,107 +101,113 @@ get_inout_obs <- function(
   return(all_dat)
 }
 
-# TODO: read and subset the full flow and temp files just once, not once per reservoir, b/c it's slow
-
-get_inout_obs_cannonsville <- function() {
-  res_id <- 'nhdhr_120022743'
-  inflow_sites <- c('0142400103', '01423000')
-  # res_sites <- '01423910'
-  outflow_sites <- '01425000'
-
-  inouts_raw <- get_inout_obs(c(inflow_sites, outflow_sites))
+#' Subset `inouts_raw` for one reservoir, attach `location` column, write two figures to
+#' '9_collaborator_data/res/%s_io_%s.png', and return the subsetted data
+get_inout_obs_one <- function(inouts_raw, res_name, res_abbv, res_outflow_ids, res_inflow_ids) {
+  # subset the in/out data and label as inflow or outflow. Do this here rather
+  # than when creating inouts_raw just in case someday we have one reservoir
+  # flowing almost directly into another one, in which case a reach could be an
+  # outflow from one but inflow to another reservoir. Unlikely, I know, but I've
+  # already written it this way
+  res_io_ids <- unlist(c(res_inflow_ids, res_outflow_ids), recursive=TRUE)
   inouts <- inouts_raw %>%
+    filter(site_id %in% res_io_ids) %>%
     mutate(
       location = case_when(
-        site_id %in% inflow_sites ~ 'inflow',
-        TRUE ~ 'outflow'),
-      res_id = res_id)
+        site_id %in% res_outflow_ids ~ 'outflow',
+        TRUE ~ 'inflow'))
 
-  # visualize
-  ggplot(inouts, aes(x=date, y=flow_cms, color=location)) + geom_line() + facet_grid(site_id ~ .) + ggtitle('Cannonsville Discharge Data')
-  ggsave('2_observations/tmp/can_io_flow.png', height=3)
-  ggplot(inouts, aes(x=date, y=temp_degC, color=location)) + geom_point(size=0.2) + facet_grid(site_id ~ .) + ggtitle('Cannonsville Temperaturature Data')
-  ggsave('2_observations/tmp/can_io_temp.png', height=3)
-
-  # TODO: interpolate inflows at 014200103
-
-  # return
-  inouts
-}
-get_inout_obs_pepacton <- function() {
-  res_id <- 'nhdhr_151957878'
-  inflow_sites <- c('01415460', '01415000', '01414500', '01414000', '01413500') # no flow data and not much temp data in 01415460 though
-  # res_sites <- '01414750'
-  outflow_sites <- c('01417000', '01417500') # to merge
-
-  inouts_raw <- get_inout_obs(c(inflow_sites, outflow_sites))
-  inouts <- inouts_raw %>%
-    mutate(
-      location = case_when(
-        site_id %in% inflow_sites ~ 'inflow',
-        TRUE ~ 'outflow'),
-      res_id = res_id)
-
-  # visualize
-  ggplot(inouts, aes(x=date, y=flow_cms, color=location)) + geom_line() + facet_grid(site_id ~ .) + ggtitle('Pepacton Discharge Data')
-  ggsave('2_observations/tmp/pep_io_flow.png', height=7)
-  ggplot(inouts, aes(x=date, y=temp_degC, color=location)) + geom_point(size=0.2) + facet_grid(site_id ~ .) + ggtitle('Pepacton Temperaturature Data')
-  ggsave('2_observations/tmp/pep_io_temp.png', height=7)
-
-  # TODO: interpolate the inflows (esp. 01414500)
-  # (how much does GLM differ depending on whether you provide several individual
-  # inflows or one lumped inflow? i suspect this changes how much the river
-  # plunges, but maybe not)
-
-
-  # TODO: merge the two outflow datasets, but it seems that just 01417500 covers everything we need from 1980 on
-  inouts <- inouts %>%
-    filter(site_id != '01417000')
-
-  # temperature really isn't available as a timeseries at any site except the outflow
+  # visualize and save to figures
+  inouts %>%
+    filter(site_id %in% c(res_inflow_ids$flow, res_outflow_ids)) %>%
+    ggplot(aes(x=date, y=flow_cms, color=location)) + geom_line() + facet_grid(site_id ~ .) +
+    ggtitle(sprintf('%s Discharge Data', res_name))
+  ggsave(sprintf('9_collaborator_data/res/%s_io_flow.png', res_abbv), height=length(res_io_ids))
+  inouts %>%
+    filter(site_id %in% c(res_inflow_ids$temp, res_outflow_ids)) %>%
+    ggplot(aes(x=date, y=temp_degC, color=location)) + geom_point(size=0.2) + facet_grid(site_id ~ .) +
+    ggtitle(sprintf('%s Temperature Data', res_name))
+  ggsave(sprintf('9_collaborator_data/res/%s_io_temp.png', res_abbv), height=length(res_io_ids))
 
   # return
   inouts
 }
 
-merge_res_inouts <- function(out_file, tibbles) {
-  bind_rows(tibbles) %>%
+
+# Wrapper function for getting in/observations for all sites. This function
+# reads and subsets the full flow and temp files just once, not once per reservoir, b/c it's slow.
+# There's a unique function for each reservoir because they require some custom handling, and
+# could require more in the future, but then those outputs are recombined into a single feather file
+# to serve as a scipiper target.
+get_inout_obs_all <- function(out_file = '9_collaborator_data/res/res_io_obs.feather', res_inflow_ids, res_outflow_ids) {
+
+  # Read in, munge, and coarsely subset the inflow-outflow observations once for all reservoirs
+  res_all_site_ids <- sort(unique(unlist(c(res_inflow_ids, res_outflow_ids), recursive=TRUE)))
+  inouts_raw <- get_inout_obs(res_all_site_ids)
+
+  # Do reservoir-specific processing. (I separated these calls by reservoir
+  # because I thought there'd be more custom processing...not a whole lot right
+  # now, but could still become a need.)
+  can_io <- get_inout_obs_one(
+    inouts_raw,
+    res_name = 'Cannonsville',
+    res_abbv = 'can',
+    res_outflow_ids$Cannonsville,
+    res_inflow_ids$Cannonsville)
+  pep_io <- get_inout_obs_one(
+    inouts_raw,
+    res_name = 'Pepacton',
+    res_abbv = 'pep',
+    res_outflow_ids$Pepacton,
+    res_inflow_ids$Pepacton) %>%
+    filter(site_id != '01417000') # we started with two outflow sites, but after plotting in the function above, we don't need both any more
+
+  # Join all the reservoir data and write to file
+  bind_rows(
+    nhdhr_120022743 = can_io,
+    nhdhr_151957878 = pep_io,
+    .id = 'res_id') %>%
     arrow::write_feather(out_file)
 }
 
-# run the functions defined above
-can_io <- get_inout_obs_cannonsville()
-pep_io <- get_inout_obs_pepacton()
-merge_res_inouts(out_file = '9_collaborator_data/res/res_io_obs.feather', list(can_io, pep_io))
-
 #### SNTemp Predictions ####
 
-get_inout_sntemp <- function(res_id, inflow_segs, outflow_segs) {
-  # use raw-ish SNTemp output
-  preds <- arrow::read_feather('3_predictions/out/uncal_sntemp_input_output.feather') %>%
+get_inout_sntemp <- function(inouts_raw, inflow_segs, outflow_segs) {
+  inouts_raw %>%
     filter(seg_id_nat %in% c(inflow_segs, outflow_segs)) %>%
-    select(seg_id_nat, date, seg_outflow, seg_tave_water)
-
-  if(!dir.exists('9_collaborator_data/res')) dir.create('9_collaborator_data/res')
-  preds %>%
     mutate(
       direction = case_when(
-        seg_id_nat %in% inflow_segs ~ 'inflow',
-        TRUE ~ 'outflow'),
-      res_id = res_id) %>%
+        seg_id_nat %in% outflow_segs ~ 'outflow',
+        TRUE ~ 'inflow')) %>%
     return()
 }
-can_io_sntemp <- get_inout_sntemp( # cannonsville
-  res_id = 'nhdhr_120022743',
-  inflow_segs = c('1559','1557'),
-  # res_segs = c('1561','1560','1562'),
-  outflow_segs = '1566')
-pep_io_sntemp <- get_inout_sntemp( # pepacton
-  res_id = 'nhdhr_151957878',
-  inflow_segs = c('1440','1441','1443','1437'),
-  # res_segs = c('1449','1447','1448','1446','1445','1438'),
-  outflow_segs = '1444')
-merge_res_inouts(out_file = '9_collaborator_data/res/res_io_sntemp.feather', tibbles=list(can_io_sntemp, pep_io_sntemp))
+
+get_inout_sntemp_all <- function(out_file = '9_collaborator_data/res/res_io_sntemp.feather') {
+
+  # read in the raw-ish SNTemp output
+  preds <- arrow::read_feather('3_predictions/out/uncal_sntemp_input_output.feather') %>%
+    select(seg_id_nat, date, seg_outflow, seg_tave_water)
+
+  # do reservoir-specific processing. I used the DRB internal viz to identify
+  # the inflow and outflow segments for each reservoir
+  can_io <- get_inout_sntemp( # cannonsville
+    inouts_raw = preds,
+    inflow_segs = c('1559','1557'),
+    # res_segs = c('1561','1560','1562'),
+    outflow_segs = '1566')
+  pep_io <- get_inout_sntemp( # pepacton
+    inouts_raw = preds,
+    inflow_segs = c('1440','1441','1443','1437'),
+    # res_segs = c('1449','1447','1448','1446','1445','1438'),
+    outflow_segs = '1444')
+
+  # Combine and write the data to a single outfile
+  bind_rows(
+    nhdhr_120022743 = can_io,
+    nhdhr_151957878 = pep_io,
+    .id = 'res_id') %>%
+    arrow::write_feather(out_file)
+}
 
 #### Exploration ####
 
