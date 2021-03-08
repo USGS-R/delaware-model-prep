@@ -256,6 +256,14 @@ targets:
 
   #### Reservoirs ####
 
+  # Hand-code the IDs at the outflows of the reservoirs of interest.
+  # The two Pepacton sites are both along the same outflow route, but
+  # one site is really close to the reservoir (01417000), and the
+  # other is a little downstream (01417500). They differ in data
+  # availability (see 9_collaborator_data/res/pep_io_*.png, created
+  # as a side effect of building 9_collaborator_data/res/res_io_obs.feather),
+  # but those plots show that 01417000 is pretty good since 1980, so we
+  # actually just drop 01417500 and go with 01417000 in res_io_obs.feather.
   res_outflow_ids:
     command: list(
       Cannonsville = I('01425000'),

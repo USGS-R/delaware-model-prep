@@ -1,6 +1,3 @@
-library(scipiper)
-library(tidyverse)
-
 #### Observations ####
 
 #' @param res_outflow_ids named list where each element is a vector of 1 or more NWIS site IDs just downstream of the reservoir (above which any stream sites can be assumed to be tributaries)
