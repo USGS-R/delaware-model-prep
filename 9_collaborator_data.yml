@@ -39,6 +39,8 @@ targets:
      #- 9_collaborator_data/psu/sntemp_preds_aggregated.feather.ind
      #- 9_collaborator_data/psu/temp_obs_high_obs_sites.csv.ind
      #- 9_collaborator_data/psu/flow_obs_high_obs_sites.csv.ind
+     - 9_collaborator_data/res/res_io_obs.feather
+     - 9_collaborator_data/res/res_io_sntemp.feather
 
 
   ##### Makerspace #####
@@ -282,8 +284,14 @@ targets:
       max_dist_km = I(100))
 
   9_collaborator_data/res/res_io_obs.feather:
-    command: get_inout_obs_all(target_name, res_inflow_ids, res_outflow_ids)
+    command: get_inout_obs_all(
+      target_name,
+      res_inflow_ids,
+      res_outflow_ids,
+      flow_ind = '2_observations/in/daily_flow.rds.ind',
+      temp_ind = '2_observations/out/all_drb_temp_obs.rds.ind')
 
   9_collaborator_data/res/res_io_sntemp.feather:
-    command: get_inout_sntemp_all(target_name)
-
+    command: get_inout_sntemp_all(
+      target_name,
+      sntemp_ind = '3_predictions/out/uncal_sntemp_input_output.feather')

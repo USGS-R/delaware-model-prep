@@ -59,41 +59,29 @@ find_inout_obs_sites <- function(
 
 #' Read in the flow and temp data, subset to site_ids, and do a bit of munging
 get_inout_obs <- function(
-  site_ids = c(),
+  flow_sites, temp_sites,
   flow_ind = '2_observations/in/daily_flow.rds.ind', # '2_observations/out/drb_discharge_daily_dv.csv.ind',
   temp_ind = '2_observations/out/all_drb_temp_obs.rds.ind' # '2_observations/in/daily_temperatures.rds.ind',
 ) {
 
-  # read raw data
-  # flow_raw <- sc_retrieve('2_observations/out/drb_discharge_daily_dv.csv.ind', 'getters.yml') %>%
-  #   readr::read_csv(col_types=cols(datetime='D', .default='d'))
-  flow_raw <- sc_retrieve(flow_ind, 'getters.yml') %>% read_rds()
-  temp_raw <- sc_retrieve(temp_ind, 'getters.yml') %>% read_rds()
-
-  # filter and format data for these sites
-  # flows <- flow_raw %>%
-  #   select(datetime, any_of(site_ids)) %>%
-  #   # is it CFS? or CMS, or other?
-  #   pivot_longer(-datetime, names_to='site_id', values_to='flow_cms') %>%
-  #   select(site_id, date = datetime, flow_cms) %>%
-  #   filter(!is.na(flow_cms))
-  flows <- flow_raw %>%
-    filter(site_id %in% site_ids) %>%
-    mutate(flow_cms = flow_cfs / 35.314666) %>%
-    select(-flow_cfs)
-  temps <- temp_raw %>%
-    filter(site_id %in% paste0('USGS-', site_ids)) %>%
-    mutate(site_id = gsub('USGS-', '', site_id))
-  site_dates <- tidyr::crossing(
-    site_id = site_ids,
-    date = seq(
-      min(min(flows$date), min(temps$date)),
-      max(max(flows$date), max(temps$date)),
-      by=as.difftime(1, units='days')))
+  # read, filter, and format data for these sites
+  flows_raw <- sc_retrieve(flow_ind, 'getters.yml') %>%
+    read_rds() # 9.34 GB, takes >1.5 minutes to read
+  flows_smaller <- flows_raw %>%
+    select(-n_obs, -source) %>% # 5.61 GB
+    filter(site_id %in% flow_sites) # 3.6 MB
+  rm(flows_raw); gc() # was running out of memory over and over here
+  flows <- flows_smaller %>%
+    transmute(site_id = site_id, date = date, flow_cms = flow_cfs / 35.314666) # 3.6 MB
+  rm(flows_smaller); gc()
+  temps <- sc_retrieve(temp_ind, 'getters.yml') %>%
+    read_rds() %>% # 31.1 MB
+    select(-n_obs, -source) %>%
+    filter(site_id %in% paste0('USGS-', temp_sites)) %>% # 150 KB
+    mutate(site_id = gsub('USGS-', '', site_id)) # 150 KB
 
   # merge flows and temps, adding NAs for unobserved dates within a complete date sequence
-  all_dat <- full_join(flows, temps, by=c('site_id','date'), suffix=c('_flow','_temp')) %>%
-    full_join(site_dates, by=c('site_id','date'))
+  all_dat <- full_join(flows, temps, by=c('site_id','date'), suffix=c('_flow','_temp')) # 7.26 MB
 
   return(all_dat)
 }
@@ -122,7 +110,7 @@ get_inout_obs_one <- function(inouts_raw, res_name, res_abbv, res_outflow_ids, r
   ggsave(sprintf('9_collaborator_data/res/%s_io_flow.png', res_abbv), height=length(res_io_ids))
   inouts %>%
     filter(site_id %in% c(res_inflow_ids$temp, res_outflow_ids)) %>%
-    ggplot(aes(x=date, y=temp_degC, color=location)) + geom_point(size=0.2) + facet_grid(site_id ~ .) +
+    ggplot(aes(x=date, y=mean_temp_degC, color=location)) + geom_point(size=0.2) + facet_grid(site_id ~ .) +
     ggtitle(sprintf('%s Temperature Data', res_name))
   ggsave(sprintf('9_collaborator_data/res/%s_io_temp.png', res_abbv), height=length(res_io_ids))
 
@@ -136,11 +124,17 @@ get_inout_obs_one <- function(inouts_raw, res_name, res_abbv, res_outflow_ids, r
 # There's a unique function for each reservoir because they require some custom handling, and
 # could require more in the future, but then those outputs are recombined into a single feather file
 # to serve as a scipiper target.
-get_inout_obs_all <- function(out_file = '9_collaborator_data/res/res_io_obs.feather', res_inflow_ids, res_outflow_ids) {
+get_inout_obs_all <- function(
+  out_file = '9_collaborator_data/res/res_io_obs.feather',
+  res_inflow_ids,
+  res_outflow_ids,
+  flow_ind = '2_observations/in/daily_flow.rds.ind',
+  temp_ind = '2_observations/out/all_drb_temp_obs.rds.ind') {
 
   # Read in, munge, and coarsely subset the inflow-outflow observations once for all reservoirs
-  res_all_site_ids <- sort(unique(unlist(c(res_inflow_ids, res_outflow_ids), recursive=TRUE)))
-  inouts_raw <- get_inout_obs(res_all_site_ids)
+  flow_sites <- purrr::map(res_inflow_ids, 'flow') %>% c(res_outflow_ids) %>% unlist() %>% unique()
+  temp_sites <- purrr::map(res_inflow_ids, 'temp') %>% c(res_outflow_ids) %>% unlist() %>% unique()
+  inouts_raw <- get_inout_obs(flow_sites, temp_sites, flow_ind, temp_ind)
 
   # Do reservoir-specific processing. (I separated these calls by reservoir
   # because I thought there'd be more custom processing...not a whole lot right
@@ -179,10 +173,12 @@ get_inout_sntemp <- function(inouts_raw, inflow_segs, outflow_segs) {
     return()
 }
 
-get_inout_sntemp_all <- function(out_file = '9_collaborator_data/res/res_io_sntemp.feather') {
+get_inout_sntemp_all <- function(
+  out_file = '9_collaborator_data/res/res_io_sntemp.feather',
+  sntemp_ind = '3_predictions/out/uncal_sntemp_input_output.feather') {
 
   # read in the raw-ish SNTemp output
-  preds <- arrow::read_feather('3_predictions/out/uncal_sntemp_input_output.feather') %>%
+  preds <- arrow::read_feather(sntemp_ind) %>%
     select(seg_id_nat, date, seg_outflow, seg_tave_water)
 
   # do reservoir-specific processing. I used the DRB internal viz to identify
