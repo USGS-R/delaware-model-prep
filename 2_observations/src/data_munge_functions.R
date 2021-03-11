@@ -33,7 +33,7 @@ filter_temp_data <- function(cross_ind, dat_ind, out_ind) {
     mutate(source = gsub('nwiw', 'nwis', source))
 
   drb_dat <- filter(dat_all, site_id %in% unique(sites$site_id)) %>%
-    distinct(site_id, date, temp_degC, .keep_all = TRUE)
+    distinct(site_id, date, mean_temp_degC, .keep_all = TRUE)
 
   saveRDS(drb_dat, as_data_file(out_ind))
   gd_put(out_ind)
