@@ -1,0 +1,13 @@
+version: 0.3.0
+name: 2_observations/out/observed_daily_diversions.csv.ind
+type: file
+hash: a8b3e359f19522a0569c566030e4ca51
+time: 2021-03-23 02:50:19 UTC
+depends: {}
+fixed: e43d71e3e67a95f6dc5112c6950370c6
+code:
+  functions:
+    map_over_wy_files: 19e0954fff39500fe51a09a926827354
+    read_and_munge: 99cf90338d22777035c0e8d3ad039208
+    read_munge_dailies: c9384fbc63eb8d5bd9247bd1ccad9399
+

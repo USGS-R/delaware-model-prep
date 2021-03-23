@@ -78,6 +78,15 @@ targets:
   2_observations/out/obs_flow_drb.rds:
     command: gd_get('2_observations/out/obs_flow_drb.rds.ind')
 
+  # reservoir diversion data
+  2_observations/out/observed_daily_diversions.csv:
+    command: gd_get('2_observations/out/observed_daily_diversions.csv.ind')
+
+  2_observations/out/observed_monthly_diversions.csv:
+    command: gd_get('2_observations/out/observed_monthly_diversions.csv.ind')
+
+
+
   #### 3_predictions ####
   # prms-sntemp model zip file
   3_predictions/in/prms_sntemp/20191002_Delaware_streamtemp.zip:
