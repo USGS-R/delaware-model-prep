@@ -109,8 +109,7 @@ targets:
   # unzip downloaded folder to 2_observations/in
   # such that the structure becomes
   # 2_observations/in/reservoir_data
-      # WY2009 data
-      # WY2010 data
+      # WY2009 data/
       # ...
       # 01416900.WY2008.xls
       # ...
@@ -127,6 +126,7 @@ targets:
   # over month when monthly values vailable
   2_observations/out/interpolated_daily_diversions.csv.ind:
     command: interpolate_to_daily(
+      out_ind = target_name,
       daily_ind = '2_observations/out/observed_daily_diversions.csv.ind',
       monthly_ind = '2_observations/out/observed_monthly_diversions.csv.ind',
       mgd_to_cms = 0.0438, cfs_to_cms = 0.0283, mg_to_cm = 4404.88, ft_to_m = 0.3048)

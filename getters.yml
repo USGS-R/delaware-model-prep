@@ -85,6 +85,8 @@ targets:
   2_observations/out/observed_monthly_diversions.csv:
     command: gd_get('2_observations/out/observed_monthly_diversions.csv.ind')
 
+  2_observations/out/interpolated_daily_diversions.csv:
+    command: gd_get('2_observations/out/interpolated_daily_diversions.csv.ind')
 
 
   #### 3_predictions ####

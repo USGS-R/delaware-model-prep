@@ -130,7 +130,7 @@ read_munge_monthlies <- function(in_file, out_ind) {
   gd_put(out_ind)
 }
 
-interpolate_to_daily <- function(daily_ind, monthly_ind, mgd_to_cms, cfs_to_cms, mg_to_cm, ft_to_m) {
+interpolate_to_daily <- function(out_ind, daily_ind, monthly_ind, mgd_to_cms, cfs_to_cms, mg_to_cm, ft_to_m) {
   daily <- read_csv(sc_retrieve(daily_ind))
 
   monthly <- read_csv(sc_retrieve(monthly_ind)) %>%
@@ -173,15 +173,12 @@ interpolate_to_daily <- function(daily_ind, monthly_ind, mgd_to_cms, cfs_to_cms,
            total_runoff_cms = total_runoff_mgd*mgd_to_cms,
            storage_above_sill_m3 = stor_above_sill_mg*mg_to_cm) %>%
     arrange(reservoir, date) %>%
-    select(-year, -month, -contains('_mg')) %>%
+    select(-year, -month, -contains('_mg'), -res_level_ft) %>%
     select(reservoir, date, diversion_cms, everything()) %>%
     relocate(source_file, .after = last_col())
 
-  write_csv(all_dat, file = as.data_file(out_ind))
+  write_csv(all_dat, file = as_data_file(out_ind))
   gd_put(out_ind)
-
-
-
 }
 
 #########################################
