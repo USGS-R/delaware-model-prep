@@ -1,4 +1,4 @@
-read_munge_dailies <- function(out_ind) {
+read_munge_daily_diversions <- function(out_ind) {
 
   # check if data exists
   # if not, throw error indicating how to download
@@ -23,7 +23,7 @@ read_munge_dailies <- function(out_ind) {
 
   # map over water years to bind all daily data together
   res_dat <- sub_dirs %>%
-    map_df(~map_over_wy_files(sub_dirs = .x))
+    map_df(~map_over_wy_files(sub_dirs = .x, root_dir = root_dir))
 
   # clean up daily data
   cleaned_res_dat <- res_dat %>%
@@ -86,7 +86,7 @@ read_munge_dailies <- function(out_ind) {
   gd_put(out_ind)
 }
 
-read_munge_monthlies <- function(in_file, out_ind) {
+read_munge_monthly_diversions <- function(in_file, out_ind) {
   # function to read in and munge monthly files that were
   # either manually entered by the NY WSC
   # or by Sam
@@ -130,7 +130,7 @@ read_munge_monthlies <- function(in_file, out_ind) {
   gd_put(out_ind)
 }
 
-interpolate_to_daily <- function(out_ind, daily_ind, monthly_ind, mgd_to_cms, cfs_to_cms, mg_to_cm, ft_to_m) {
+interpolate_diversions_to_daily <- function(out_ind, daily_ind, monthly_ind, end_date, mgd_to_cms, cfs_to_cms, mg_to_cm, ft_to_m) {
   daily <- read_csv(sc_retrieve(daily_ind))
 
   monthly <- read_csv(sc_retrieve(monthly_ind)) %>%
@@ -140,7 +140,7 @@ interpolate_to_daily <- function(out_ind, daily_ind, monthly_ind, mgd_to_cms, cf
 
   # create a dataframe with all dates in timeseries for each reservoir
   all_dates <- data.frame(date = seq(from = as.Date('1979-10-01'),
-                                          to = as.Date('2020-12-31'), by = 1)) %>%
+                                          to = as.Date(end_date), by = 1)) %>%
     mutate(year = lubridate::year(date),
            month = lubridate::month(date, label = TRUE, abbr = FALSE))
 
@@ -189,7 +189,7 @@ interpolate_to_daily <- function(out_ind, daily_ind, monthly_ind, mgd_to_cms, cf
 # pulling out only Pepacton and Cannsonville, but more included in spreadsheeds
 # however, there were some inconsistencies in other Reservoirs, so wanted to
 # limit the edge cases I needed to handle now
-read_and_munge <- function(location, in_file) {
+read_and_munge_diversions <- function(location, in_file) {
   full_path <- file.path(location, in_file)
 
   # print message to give indication of what file we're on
@@ -214,7 +214,7 @@ read_and_munge <- function(location, in_file) {
 
 # go through each water year to read in and bind
 # each monthly file
-map_over_wy_files <- function(sub_dirs) {
+map_over_wy_files <- function(sub_dirs, root_dir) {
 
   # print message to give indication of what folder we're on
   message(paste('Importing data from', sub_dirs))
@@ -228,7 +228,7 @@ map_over_wy_files <- function(sub_dirs) {
   }
 
   dat2 <- wy_files %>%
-    map_df(~read_and_munge(location = wy_path, in_file = .x)) %>%
+    map_df(~read_and_munge_diversions(location = wy_path, in_file = .x)) %>%
     filter(dayofmonth %in% 1:31) %>%
     filter(!is.na(precip_in))
 

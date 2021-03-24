@@ -28,6 +28,7 @@ targets:
      - 2_observations/out/obs_flow_drb.rds.ind
      - 2_observations/out/drb_temp_summary.csv
      - ngwos_reaches
+     - 2_observations/out/interpolated_daily_diversions.csv.ind
 
   2_observations/out/NGWOS_sites_data.rds.ind:
     command: retrieve_ngwos(
@@ -114,10 +115,10 @@ targets:
       # 01416900.WY2008.xls
       # ...
   2_observations/out/observed_daily_diversions.csv.ind:
-    command: read_munge_dailies(out_ind = target_name)
+    command: read_munge_daily_diversions(out_ind = target_name)
 
   2_observations/out/observed_monthly_diversions.csv.ind:
-    command: read_munge_monthlies(
+    command: read_munge_monthly_diversions(
       in_file = '2_observations/in/reservoir data/manually_extracted_diversions.csv',
       out_ind = target_name)
 
@@ -125,9 +126,11 @@ targets:
   # use daily observed values when available, populate same diversion value
   # over month when monthly values vailable
   2_observations/out/interpolated_daily_diversions.csv.ind:
-    command: interpolate_to_daily(
+    command: interpolate_diversions_to_daily(
       out_ind = target_name,
       daily_ind = '2_observations/out/observed_daily_diversions.csv.ind',
       monthly_ind = '2_observations/out/observed_monthly_diversions.csv.ind',
-      mgd_to_cms = 0.0438, cfs_to_cms = 0.0283, mg_to_cm = 4404.88, ft_to_m = 0.3048)
+      end_date = I('2020-12-31'),
+      mgd_to_cms = 0.0438, cfs_to_cms = 0.0283,
+      mg_to_cm = 4404.88, ft_to_m = 0.3048)
 
