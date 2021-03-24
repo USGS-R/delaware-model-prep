@@ -18,6 +18,7 @@ sources:
   - 2_observations/src/subset_closest.R
   - 2_observations/src/pull_ngwos_dat.R
   - 2_observations/src/munge_flow_dat.R
+  - 2_observations/src/munge_diversion_data.R
 
 
 targets:
@@ -27,6 +28,7 @@ targets:
      - 2_observations/out/obs_flow_drb.rds.ind
      - 2_observations/out/drb_temp_summary.csv
      - ngwos_reaches
+     - 2_observations/out/interpolated_daily_diversions.csv.ind
 
   2_observations/out/NGWOS_sites_data.rds.ind:
     command: retrieve_ngwos(
@@ -96,8 +98,39 @@ targets:
     command: summarize_dat(in_ind = '2_observations/out/obs_flow_drb.rds.ind', out_file = target_name)
 
   # reservoir release data
+
   2_observations/out/reservoir_releases.csv.ind:
     command: clean_release_dat(
       in_ind = '2_observations/in/PCN_Spill_Release.xlsx.ind',
       out_ind = target_name,
       mgd_to_cms = I(0.0438125))
+
+  # reservoir diversion data
+  # you must download reservoir data from here: 'https://doimspp-my.sharepoint.com/:f:/g/personal/soliver_usgs_gov/EiawwIR59vdApLCkeyob4t0Bx86d2SoTic8ahCm6MH5wRA?e=KEk1zE'
+  # unzip downloaded folder to 2_observations/in
+  # such that the structure becomes
+  # 2_observations/in/reservoir_data
+      # WY2009 data/
+      # ...
+      # 01416900.WY2008.xls
+      # ...
+  2_observations/out/observed_daily_diversions.csv.ind:
+    command: read_munge_daily_diversions(out_ind = target_name)
+
+  2_observations/out/observed_monthly_diversions.csv.ind:
+    command: read_munge_monthly_diversions(
+      in_file = '2_observations/in/reservoir data/manually_extracted_diversions.csv',
+      out_ind = target_name)
+
+  # interpolate to daily values
+  # use daily observed values when available, populate same diversion value
+  # over month when monthly values vailable
+  2_observations/out/interpolated_daily_diversions.csv.ind:
+    command: interpolate_diversions_to_daily(
+      out_ind = target_name,
+      daily_ind = '2_observations/out/observed_daily_diversions.csv.ind',
+      monthly_ind = '2_observations/out/observed_monthly_diversions.csv.ind',
+      end_date = I('2020-12-31'),
+      mgd_to_cms = 0.0438, cfs_to_cms = 0.0283,
+      mg_to_cm = 4404.88, ft_to_m = 0.3048)
+
