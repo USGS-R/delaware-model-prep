@@ -9,12 +9,8 @@
 
 combine_reaLSAT_reservoir_data <- function(cannonsville_sf_in, pepacton_sf_in,
                                            out_file){
-  # getting directory for cannonsville reservoir shape file.
-  # list.files("2_observations/in/573567", pattern = ".shp$", full.names=TRUE)
-  # # getting directory for pepacton reservoir shape file.
-  # list.files("2_observations/in/009130", pattern = ".shp$", full.names=TRUE)
 
-  # read reservoirs shape file and convert it to dataframe.
+    # read reservoirs shape file and convert it to dataframe.
   cannonsville_reaLSAT_data <- data.frame(read_sf(cannonsville_sf_in))
   pepacton_reaLSAT_data <- data.frame(read_sf(pepacton_sf_in))
 
