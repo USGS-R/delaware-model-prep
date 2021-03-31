@@ -19,6 +19,7 @@ sources:
   - 2_observations/src/pull_ngwos_dat.R
   - 2_observations/src/munge_flow_dat.R
   - 2_observations/src/munge_diversion_data.R
+  - 2_observations/src/munge_surface_area_data.R
 
 
 targets:
@@ -133,4 +134,18 @@ targets:
       end_date = I('2020-12-31'),
       mgd_to_cms = 0.0438, cfs_to_cms = 0.0283,
       mg_to_cm = 4404.88, ft_to_m = 0.3048)
+
+ # reservoir surface area data
+ # you must download reservoir Monthly Shapefiles from here: 'http://umnlcc.cs.umn.edu/realsat/'
+ # unzip downloaded folder to 2_observations/in
+ # such that the structure becomes
+ # 2_observations/in/ID-Number
+      # in/573567/573567
+      # in/009130/009130
+  2_observations/out/realsat_monthly_surface_area.csv:
+    command: combine_reaLSAT_reservoir_data <- (
+      cannonsville_sf_in = "2_observations/in/573567/573567.shp",
+      pepacton_sf_in = "2_observations/in/009130/009130.shp",
+      out_file = target_name)
+
 
