@@ -142,10 +142,13 @@ targets:
  # 2_observations/in/ID-Number
       # in/573567/573567
       # in/009130/009130
+  2_observations/out/reserviors_sf_directory:
+    command: read_monthly_surface_area_data(res_sf_dir = target_name)
+
   2_observations/out/realsat_monthly_surface_area.csv:
-    command: combine_reaLSAT_reservoir_data <- (
-      cannonsville_sf_in = "2_observations/in/573567/573567.shp",
-      pepacton_sf_in = "2_observations/in/009130/009130.shp",
+    command: combine_reaLSAT_reservoir_data(
+      cannonsville_sf_in = '2_observations/in/573567/573567.shp',
+      pepacton_sf_in = '2_observations/in/009130/009130.shp',
       out_file = target_name)
 
 
