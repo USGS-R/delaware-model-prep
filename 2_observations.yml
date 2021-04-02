@@ -11,6 +11,7 @@ packages:
   - readr
   - readxl
   - lubridate
+  - purrr
 
 sources:
   - 2_observations/src/crosswalk_functions.R
@@ -30,6 +31,7 @@ targets:
      - 2_observations/out/drb_temp_summary.csv
      - ngwos_reaches
      - 2_observations/out/interpolated_daily_diversions.csv.ind
+     - realsat_ids
 
   2_observations/out/NGWOS_sites_data.rds.ind:
     command: retrieve_ngwos(
@@ -136,19 +138,20 @@ targets:
       mg_to_cm = 4404.88, ft_to_m = 0.3048)
 
  # reservoir surface area data
- # you must download reservoir Monthly Shapefiles from here: 'http://umnlcc.cs.umn.edu/realsat/'
- # unzip downloaded folder to 2_observations/in
- # such that the structure becomes
- # 2_observations/in/ID-Number
-      # in/573567/573567
-      # in/009130/009130
-  2_observations/out/reserviors_sf_directory:
-    command: read_monthly_surface_area_data(res_sf_dir = target_name)
+ # You must download reservoir Monthly Shapefiles from here: 'http://umnlcc.cs.umn.edu/realsat/'.
+ # the corresponding shapefile folder is numbered according to the last digit of the ID.
+ # The ID can be found in the Base Shapefile.
+ # Unzip downloaded folders to 2_observations/in/realsat,
+ # such that the structure becomes:
+ # 2_observations/in/realsat/ID:
+      # in/realsat/573567
+      # in/realsat/009130
+  realsat_ids:
+    command: c(I(c(Pepacton = '009130', Cannonsville = '573567')))
 
   2_observations/out/realsat_monthly_surface_area.csv:
-    command: combine_reaLSAT_reservoir_data(
-      cannonsville_sf_in = '2_observations/in/573567/573567.shp',
-      pepacton_sf_in = '2_observations/in/009130/009130.shp',
+    command: combine_realsat_reservoir_data(
+      reservoir_ids = realsat_ids,
       out_file = target_name)
 
 
