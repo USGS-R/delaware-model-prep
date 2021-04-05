@@ -147,7 +147,7 @@ targets:
       # in/realsat/573567
       # in/realsat/009130
   realsat_ids:
-    command: c(I(c(Pepacton = '009130', Cannonsville = '573567')))
+    command: c(Pepacton = I('009130'), Cannonsville = I('573567'))
 
   2_observations/out/realsat_monthly_surface_area.csv:
     command: combine_realsat_reservoir_data(
