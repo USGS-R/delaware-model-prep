@@ -1,0 +1,17 @@
+version: 0.3.0
+name: 9_collaborator_data/res/res_io_obs.feather.ind
+type: file
+hash: 5b85f9e8bbb8b8c0fe2a05b01b19bb25
+time: 2021-04-06 08:58:41 UTC
+depends:
+  res_inflow_ids: 231bec7a74ccbbd7372f928daf999aed
+  res_outflow_ids: a52fc0a24b70565d43ee35a4f3933d9a
+  2_observations/in/daily_flow.rds.ind: 321ba00b14ed1d6c0aaaec7f30bb7390
+  2_observations/out/all_drb_temp_obs.rds.ind: deab3018269e1fb5eb811d82d2297352
+fixed: c77b4849e98201a6179c69aded51cc39
+code:
+  functions:
+    get_inout_obs: 0a61c49c856379c4038cbcc0510af776
+    get_inout_obs_all: 81d27139a9ab2f8e0f5009262b7f25fb
+    get_inout_obs_one: a1cda532de9cd8eb9a15c80d6f72f947
+

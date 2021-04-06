@@ -6,6 +6,7 @@ temp/
 */mkrsp/*
 */psu/*
 */umn/*
+*/res/*
 */tmp/*
 !*.ind
 !2_observations/out/drb_temp_summary.csv
@@ -13,6 +14,7 @@ temp/
 
 !3_predictions/out/model_evaluation.csv
 !9_collaborator_data/psu/model_variable_description.txt
+!9_collaborator_data/res/*.ind
 *.gif
 # Ignore files and directories created by local tools (RStudio, remake, Mac OS, etc.)
 .Rproj.user
