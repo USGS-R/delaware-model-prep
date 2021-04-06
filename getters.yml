@@ -234,3 +234,9 @@ targets:
     command: gd_get('9_collaborator_data/psu/temp_obs_high_obs_sites.csv.ind')
   9_collaborator_data/psu/flow_obs_high_obs_sites.csv:
     command: gd_get('9_collaborator_data/psu/flow_obs_high_obs_sites.csv.ind')
+
+  ## Reservoirs ##
+  9_collaborator_data/res/res_io_obs.feather:
+    command: gd_get('9_collaborator_data/res/res_io_obs.feather.ind')
+  9_collaborator_data/res/res_io_sntemp.feather:
+    command: gd_get('9_collaborator_data/res/res_io_sntemp.feather.ind')
