@@ -11,6 +11,7 @@ packages:
   - readr
   - readxl
   - lubridate
+  - purrr
 
 sources:
   - 2_observations/src/crosswalk_functions.R
@@ -19,6 +20,7 @@ sources:
   - 2_observations/src/pull_ngwos_dat.R
   - 2_observations/src/munge_flow_dat.R
   - 2_observations/src/munge_diversion_data.R
+  - 2_observations/src/munge_surface_area_data.R
 
 
 targets:
@@ -29,6 +31,7 @@ targets:
      - 2_observations/out/drb_temp_summary.csv
      - ngwos_reaches
      - 2_observations/out/interpolated_daily_diversions.csv.ind
+     - realsat_ids
 
   2_observations/out/NGWOS_sites_data.rds.ind:
     command: retrieve_ngwos(
@@ -133,4 +136,22 @@ targets:
       end_date = I('2020-12-31'),
       mgd_to_cms = 0.0438, cfs_to_cms = 0.0283,
       mg_to_cm = 4404.88, ft_to_m = 0.3048)
+
+ # reservoir surface area data
+ # You must download reservoir Monthly Shapefiles from here: 'http://umnlcc.cs.umn.edu/realsat/'.
+ # the corresponding shapefile folder is numbered according to the last digit of the ID.
+ # The ID can be found in the Base Shapefile.
+ # Unzip downloaded folders to 2_observations/in/realsat,
+ # such that the structure becomes:
+ # 2_observations/in/realsat/ID:
+      # in/realsat/573567
+      # in/realsat/009130
+  realsat_ids:
+    command: c(Pepacton = I('009130'), Cannonsville = I('573567'))
+
+  2_observations/out/realsat_monthly_surface_area.csv:
+    command: combine_realsat_reservoir_data(
+      reservoir_ids = realsat_ids,
+      out_file = target_name)
+
 
