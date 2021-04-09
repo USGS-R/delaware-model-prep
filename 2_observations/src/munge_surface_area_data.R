@@ -22,10 +22,10 @@ combine_realsat_reservoir_data <- function(reservoir_ids, out_file){
                stop(paste("You must download reservoir monthly shapefile data ", reservoir_id, " from: ", sep = ''),
                     paste("http://umnlcc.cs.umn.edu/realsat",
                           "The shapefile data is located in a folder that is numbered according to the last digit of the ID.
-                          E.g. shapefile (009130) is located in monthly shapefile '0'.",
+                          E.g. shapefile (573567) is located in monthly shapefile '7'.",
                           "The ID can be found in the Base Shapefile.",
                           "unzip the folder",
-                          "then locate the approapaite folder using the ID and unzip the folder into '2_observations/in/realsat'",
+                          "then locate the appropriate folder using the ID and unzip the folder into '2_observations/in/realsat'",
                           sep='\n '))
              }
     )
@@ -36,15 +36,17 @@ combine_realsat_reservoir_data <- function(reservoir_ids, out_file){
   })
   # using the reservoir_shapefiles (shape file paths).
   # read reservoirs shape file and convert it to dataframe.
+  # convert area (in units of LANDSAT 30-m pixels) to m2
   # Extract columns of interest: reservoir id, month, year, and surface area.
   # Create reservoir column to provide the associated reservoir's name.
   monthly_reservoir_data <- purrr::map_df(reservoir_shapefiles,
                                           function(reservoir_shapefile) {
                                             data.frame(read_sf(reservoir_shapefile)) %>%
-                                              select(id, month, year, area)
+                                              mutate(area_m2 = area*900) %>%
+                                              select(id, month, year, area_m2)
                                           },
                                           .id = "reservoir") # the reservoir column will be made using the names of the listed of path file.
 
-  readr:: write_csv(monthly_reservoir_data, path = out_file)
+  readr:: write_csv(monthly_reservoir_data, file = out_file)
 
 }
