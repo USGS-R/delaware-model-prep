@@ -139,13 +139,18 @@ targets:
 
  # reservoir surface area data
  # You must download reservoir Monthly Shapefiles from here: 'http://umnlcc.cs.umn.edu/realsat/'.
- # the corresponding shapefile folder is numbered according to the last digit of the ID.
- # The ID can be found in the Base Shapefile.
- # Unzip downloaded folders to 2_observations/in/realsat,
- # such that the structure becomes:
+ # The reservoir reaLSAT ID can be found in the Base shapefile: ReaLSAT.shp.
+ # ReaLSAT.shp has no attribute information other than id --> the best way to find the reservoir
+ # id is to load the shapefile in ArcMap and zoom to where your reservoir is, visually id it by shape
+ # and then select the polygon to identify its reaLSAT id.
+ # The reservoir-specific shapefiles with surface-area data are zipped within larger monthly shapefiles.
+ # For each reaLSAT id, the corresponding monthly shapefile folder is numbered according
+ # to the LAST digit of the ID, e.g. the shapefile for 573567 is in the zipped monthly shapefile folder named '7'
+ # Download and unzip the monthly shapefile folder and place the reservoir-specific folder with its shapefile
+ # in 2_observations/in/realsat, such that the structure becomes:
  # 2_observations/in/realsat/ID:
-      # in/realsat/573567
-      # in/realsat/009130
+      # in/realsat/573567/573567.shp
+      # in/realsat/573536/573536.shp
   realsat_ids:
     command: c(Pepacton = I('573567'), Cannonsville = I('573536'))
 
