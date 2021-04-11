@@ -125,7 +125,7 @@ get_inout_obs_one <- function(inouts_raw, res_name, res_abbv, res_outflow_ids, r
 # could require more in the future, but then those outputs are recombined into a single feather file
 # to serve as a scipiper target.
 get_inout_obs_all <- function(
-  out_file = '9_collaborator_data/res/res_io_obs.feather',
+  out_ind = '9_collaborator_data/res/res_io_obs.feather.ind',
   res_inflow_ids,
   res_outflow_ids,
   flow_ind = '2_observations/in/daily_flow.rds.ind',
@@ -158,7 +158,8 @@ get_inout_obs_all <- function(
     nhdhr_120022743 = can_io,
     nhdhr_151957878 = pep_io,
     .id = 'res_id') %>%
-    arrow::write_feather(out_file)
+    arrow::write_feather(as_data_file(out_ind))
+  gd_put(out_ind)
 }
 
 #### SNTemp Predictions ####
@@ -174,7 +175,7 @@ get_inout_sntemp <- function(inouts_raw, inflow_segs, outflow_segs) {
 }
 
 get_inout_sntemp_all <- function(
-  out_file = '9_collaborator_data/res/res_io_sntemp.feather',
+  out_ind = '9_collaborator_data/res/res_io_sntemp.feather.ind',
   sntemp_ind = '3_predictions/out/uncal_sntemp_input_output.feather') {
 
   # read in the raw-ish SNTemp output
@@ -199,7 +200,8 @@ get_inout_sntemp_all <- function(
     nhdhr_120022743 = can_io,
     nhdhr_151957878 = pep_io,
     .id = 'res_id') %>%
-    arrow::write_feather(out_file)
+    arrow::write_feather(as_data_file(out_ind))
+  gd_put(out_ind)
 }
 
 #### PGDL Predictions ####
