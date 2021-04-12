@@ -161,7 +161,6 @@ targets:
 
   2_observations/out/realsat_monthly_surface_area.csv:
     command: combine_realsat_reservoir_data(
-      reservoir_ids = realsat_ids,
       in_file = '2_observations/out/raw_realsat_reservoir_data.csv',
       out_file = target_name)
 

@@ -52,7 +52,7 @@ retrieve_realsat_reservoir_data <- function(reservoir_ids, out_file){
 }
 
 ##### Function to combine realsat reservoir surface area data for each reservoir #####
-combine_realsat_reservoir_data <- function(reservoir_ids, in_file, out_file) {
+combine_realsat_reservoir_data <- function(in_file, out_file) {
   raw_monthly_reservoir_data <- readr::read_csv(in_file, col_types='cdddd')
 
   # Add values for each year-month for each reservoir
