@@ -31,7 +31,7 @@ targets:
      - 2_observations/out/drb_temp_summary.csv
      - ngwos_reaches
      - 2_observations/out/interpolated_daily_diversions.csv.ind
-     - realsat_ids
+     - 2_observations/out/realsat_monthly_surface_area.csv
 
   2_observations/out/NGWOS_sites_data.rds.ind:
     command: retrieve_ngwos(
@@ -152,11 +152,16 @@ targets:
       # in/realsat/573567/573567.shp
       # in/realsat/573536/573536.shp
   realsat_ids:
-    command: c(Pepacton = I('573567'), Cannonsville = I('573536'))
+    command: c(Pepacton = I('573567'), Cannonsville = I('573536'), Cannonsville = I('556766'))
+
+  2_observations/out/raw_realsat_reservoir_data.csv:
+    command: retrieve_realsat_reservoir_data(
+      reservoir_ids = realsat_ids,
+      out_file = target_name)
 
   2_observations/out/realsat_monthly_surface_area.csv:
     command: combine_realsat_reservoir_data(
       reservoir_ids = realsat_ids,
+      in_file = '2_observations/out/raw_realsat_reservoir_data.csv',
       out_file = target_name)
-
 
