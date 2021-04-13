@@ -89,6 +89,9 @@ targets:
     command: gd_get('2_observations/out/interpolated_daily_diversions.csv.ind')
 
   # reservoir realsat surface area data
+  2_observations/out/raw_realsat_reservoir_data.csv:
+    command: gd_get('2_observations/out/raw_realsat_reservoir_data.csv.ind')
+
   2_observations/out/realsat_monthly_surface_area.csv:
     command: gd_get('2_observations/out/realsat_monthly_surface_area.csv.ind')
 

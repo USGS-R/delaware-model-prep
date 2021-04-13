@@ -154,13 +154,13 @@ targets:
   realsat_ids:
     command: c(Pepacton = I('573567'), Cannonsville = I('573536'), Cannonsville = I('556766'))
 
-  2_observations/out/raw_realsat_reservoir_data.csv:
+  2_observations/out/raw_realsat_reservoir_data.csv.ind:
     command: retrieve_realsat_reservoir_data(
       reservoir_ids = realsat_ids,
-      out_file = target_name)
+      out_ind = target_name)
 
   2_observations/out/realsat_monthly_surface_area.csv.ind:
     command: combine_realsat_reservoir_data(
-      in_file = '2_observations/out/raw_realsat_reservoir_data.csv',
+      in_ind = '2_observations/out/raw_realsat_reservoir_data.csv.ind',
       out_ind = target_name)
 

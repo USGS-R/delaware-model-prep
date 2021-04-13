@@ -9,7 +9,7 @@
 # Pull Pepacton (009130) can be retrieved from monthly shape file 0.
 # And Cannsonville (573567) can be retrieved from monthly shape file 7.
 
-retrieve_realsat_reservoir_data <- function(reservoir_ids, out_file){
+retrieve_realsat_reservoir_data <- function(reservoir_ids, out_ind){
   # Entering reservoirs ids. then looping through reservoir ids one at a time.
   # Check if data file path exists,
   # If not, throw error indicating how to download the data.
@@ -47,13 +47,13 @@ retrieve_realsat_reservoir_data <- function(reservoir_ids, out_file){
                                           },
                                           .id = "reservoir") # the reservoir column will be made using the names of the listed of path file.
 
-  readr:: write_csv(raw_monthly_reservoir_data, file = out_file)
-
+  readr:: write_csv(raw_monthly_reservoir_data, as_data_file(out_ind))
+  gd_put(out_ind)
 }
 
 ##### Function to combine realsat reservoir surface area data for each reservoir #####
-combine_realsat_reservoir_data <- function(in_file, out_ind) {
-  raw_monthly_reservoir_data <- readr::read_csv(in_file, col_types='cdddd')
+combine_realsat_reservoir_data <- function(in_ind, out_ind) {
+  raw_monthly_reservoir_data <- readr::read_csv(sc_retrieve(in_ind, 'getters.yml'), col_types='cdddd')
 
   # Add values for each year-month for each reservoir
   # convert year month columns to date, with 15th as day of month
