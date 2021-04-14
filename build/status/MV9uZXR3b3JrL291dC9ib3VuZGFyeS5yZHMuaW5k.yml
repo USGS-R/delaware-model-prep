@@ -1,0 +1,11 @@
+version: 0.3.0
+name: 1_network/out/boundary.rds.ind
+type: file
+hash: 0a1bc6cd40a17b76b33bf32dc407a909
+time: 2020-08-06 19:55:46 UTC
+depends: {}
+fixed: 914393ffac43b7ba86137ad1e7b6b286
+code:
+  functions:
+    create_boundary: 6383faee977753d1fb20566ee04418dd
+

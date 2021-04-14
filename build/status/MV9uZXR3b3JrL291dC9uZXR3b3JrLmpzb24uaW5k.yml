@@ -1,0 +1,12 @@
+version: 0.3.0
+name: 1_network/out/network.json.ind
+type: file
+hash: 2adabf88ee26ddb7c3f56e77ce5f7138
+time: 2020-11-30 16:42:24 UTC
+depends:
+  1_network/out/network.rds.ind: 67bc625285a9a5e2430b5b8adee07a95
+fixed: dd8305405a59301b0d3524ac993dce16
+code:
+  functions:
+    save_network_as_geojson: 77c8673f37fe85c9ff214d1048a18feb
+

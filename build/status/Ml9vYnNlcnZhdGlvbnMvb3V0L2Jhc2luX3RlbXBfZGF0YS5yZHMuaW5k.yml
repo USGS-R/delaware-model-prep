@@ -1,0 +1,13 @@
+version: 0.3.0
+name: 2_observations/out/basin_temp_data.rds.ind
+type: file
+hash: 2136e1a9fcd4038912fa555f137ca046
+time: 2020-01-24 23:12:30 UTC
+depends:
+  2_observations/out/crosswalk_site_reach.rds.ind: 6b09d1b0076da8d6e5213cb44668c7d7
+  2_observations/in/daily_temperatures.rds.ind: 2b22b3573f047aabd8312a69a49c2a07
+fixed: 1a5e4bfc02bae5ffa93f76f4d81a9873
+code:
+  functions:
+    subset_data: 4cd4ef2e808646f64dcabf65ee876ffe
+

@@ -1,0 +1,12 @@
+version: 0.3.0
+name: 9_collaborator_data/umn/obs_temp_full.csv.ind
+type: file
+hash: f16187a55b7e5f73ed902bfda78a7f3f
+time: 2021-03-04 16:33:25 UTC
+depends:
+  2_observations/out/obs_temp_drb.rds.ind: 72bc7ce86fd9228465169ed8a86324fd
+fixed: 87a945d45f55490b2299b58866f56387
+code:
+  functions:
+    write_to_csv: 0d8a1a29a59da56d631c874f7ab99694
+

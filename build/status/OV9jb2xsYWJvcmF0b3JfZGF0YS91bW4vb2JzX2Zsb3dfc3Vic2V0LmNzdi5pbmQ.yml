@@ -1,0 +1,13 @@
+version: 0.3.0
+name: 9_collaborator_data/umn/obs_flow_subset.csv.ind
+type: file
+hash: 80fc792ac9879470723c4b48c8ad7eb9
+time: 2021-03-04 16:38:44 UTC
+depends:
+  2_observations/out/obs_flow_drb.rds.ind: da36ff642826b2075bcab5cfa8dbcec2
+  9_collaborator_data/umn/network_subset.rds.ind: debae3d8be0d8644477fe48f200dc816
+fixed: 0dd29a577634123fabb2d38d7330d7b7
+code:
+  functions:
+    filter_subset: 59c40b96834e4543c6fd18a6d7408301
+

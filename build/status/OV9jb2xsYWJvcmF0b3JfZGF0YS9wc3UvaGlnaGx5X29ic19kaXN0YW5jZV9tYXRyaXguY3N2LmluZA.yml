@@ -1,0 +1,12 @@
+version: 0.3.0
+name: 9_collaborator_data/psu/highly_obs_distance_matrix.csv.ind
+type: file
+hash: b94b6799e3dab762ccaea47a45d78a1d
+time: 2020-08-11 20:40:00 UTC
+depends:
+  9_collaborator_data/psu/highly_obs_distance_matrix.rds.ind: 32e304691b502d9f0aff4056f299305d
+fixed: d7ac987d84621d4460b664fe6e0144f2
+code:
+  functions:
+    write_distance: 130b2db1235c017f1025d5a37ed369fb
+

@@ -1,0 +1,13 @@
+version: 0.3.0
+name: 9_collaborator_data/umn/distance_matrix_lordville.rds.ind
+type: file
+hash: 4b38e92b11babbe1f6fad1552237711a
+time: 2020-11-09 22:20:54 UTC
+depends:
+  9_collaborator_data/umn/network_lordville_sntemp_segs.rds: 8f69e34f49cbf09a0efb34d3a3177687
+  1_network/out/subseg_distance_matrix.rds.ind: a36f397ec7b5868a865f684f2c98bf40
+fixed: 2ce92c9d3f9053d0faebc8f8cc24445d
+code:
+  functions:
+    subset_dist_to_subsegs: bdb4ad46b88cb169c48cdcc4a016854b
+

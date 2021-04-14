@@ -1,0 +1,12 @@
+version: 0.3.0
+name: 3_predictions/out/rgcn_v1_preds.feather.ind
+type: file
+hash: 74db2eacb408aa04e2974994b0d2afbe
+time: 2020-09-30 22:50:37 UTC
+depends:
+  3_predictions/in/rgcn_v1_preds_raw.npy.ind: a27ac341e3bec99415f05c176319f58a
+fixed: 3b9aa5a96c3a65be7dedbd98c91f2d3c
+code:
+  functions:
+    munge_rgcn_output: b7d1a96c9c346457b23b1d3f4c195ff2
+
