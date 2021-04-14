@@ -48,15 +48,19 @@ munge_temp_dat <- function(sites_ind, dat_ind, out_ind) {
   dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
 
   drb_dat <- filter(dat, site_id %in% unique(sites$site_id)) %>%
-    distinct(site_id, date, temp_degC, .keep_all = TRUE) %>%
+    distinct(site_id, date, mean_temp_degC, .keep_all = TRUE) %>%
     group_by(site_id, date) %>%
-    summarize(temp_C = mean(temp_degC)) %>%
+    summarize(mean_temp_C = mean(mean_temp_degC),
+              min_temp_C = min(min_temp_degC),
+              max_temp_C = max(max_temp_degC)) %>%
     ungroup()
 
   drb_dat <- drb_dat %>%
     left_join(sites) %>%
     group_by(subseg_id, seg_id_nat, date) %>%
-    summarize(temp_c = mean(temp_C),
+    summarize(mean_temp_c = mean(mean_temp_C),
+              min_temp_c = min(min_temp_C),
+              max_temp_c = max(max_temp_C),
               site_id = paste0(site_id, collapse = ', ')) %>%
     ungroup()
 
