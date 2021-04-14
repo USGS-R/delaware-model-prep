@@ -9,9 +9,9 @@ sites <- sites %>%
 dat <- d
 
 drb_dat <- filter(dat, site_id %in% unique(sites$site_id)) %>%
-  distinct(site_id, date, temp_degC, .keep_all = TRUE) %>%
+  distinct(site_id, date, mean_temp_degC, .keep_all = TRUE) %>%
   group_by(site_id, date) %>%
-  summarize(temp_C = mean(temp_degC)) %>%
+  summarize(temp_C = mean(mean_temp_degC)) %>%
   ungroup()
 
 drb_dat <- drb_dat %>%
