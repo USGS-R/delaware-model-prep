@@ -9,7 +9,7 @@
 # Pull Pepacton (009130) can be retrieved from monthly shape file 0.
 # And Cannsonville (573567) can be retrieved from monthly shape file 7.
 
-combine_realsat_reservoir_data <- function(reservoir_ids, out_file){
+retrieve_realsat_reservoir_data <- function(reservoir_ids, out_ind){
   # Entering reservoirs ids. then looping through reservoir ids one at a time.
   # Check if data file path exists,
   # If not, throw error indicating how to download the data.
@@ -22,10 +22,10 @@ combine_realsat_reservoir_data <- function(reservoir_ids, out_file){
                stop(paste("You must download reservoir monthly shapefile data ", reservoir_id, " from: ", sep = ''),
                     paste("http://umnlcc.cs.umn.edu/realsat",
                           "The shapefile data is located in a folder that is numbered according to the last digit of the ID.
-                          E.g. shapefile (009130) is located in monthly shapefile '0'.",
+                          E.g. shapefile (573567) is located in monthly shapefile '7'.",
                           "The ID can be found in the Base Shapefile.",
                           "unzip the folder",
-                          "then locate the approapaite folder using the ID and unzip the folder into '2_observations/in/realsat'",
+                          "then locate the appropriate folder using the ID and unzip the folder into '2_observations/in/realsat'",
                           sep='\n '))
              }
     )
@@ -36,15 +36,36 @@ combine_realsat_reservoir_data <- function(reservoir_ids, out_file){
   })
   # using the reservoir_shapefiles (shape file paths).
   # read reservoirs shape file and convert it to dataframe.
+  # convert area (in units of LANDSAT 30-m pixels) to m2
   # Extract columns of interest: reservoir id, month, year, and surface area.
   # Create reservoir column to provide the associated reservoir's name.
-  monthly_reservoir_data <- purrr::map_df(reservoir_shapefiles,
+  raw_monthly_reservoir_data <- purrr::map_df(reservoir_shapefiles,
                                           function(reservoir_shapefile) {
                                             data.frame(read_sf(reservoir_shapefile)) %>%
-                                              select(id, month, year, area)
+                                              mutate(area_m2 = area*900) %>%
+                                              select(id, month, year, area_m2)
                                           },
                                           .id = "reservoir") # the reservoir column will be made using the names of the listed of path file.
 
-  readr:: write_csv(monthly_reservoir_data, path = out_file)
+  readr:: write_csv(raw_monthly_reservoir_data, as_data_file(out_ind))
+  gd_put(out_ind)
+}
 
+##### Function to combine realsat reservoir surface area data for each reservoir #####
+combine_realsat_reservoir_data <- function(in_ind, out_ind) {
+  raw_monthly_reservoir_data <- readr::read_csv(sc_retrieve(in_ind, 'getters.yml'), col_types='cdddd')
+
+  # Add values for each year-month for each reservoir
+  # convert year month columns to date, with 15th as day of month
+  combined_monthly_reservoir_data <- raw_monthly_reservoir_data %>%
+      group_by(reservoir, month, year) %>%
+      summarize(area_m2 = sum(area_m2)) %>%
+      ungroup() %>%
+      mutate(day = 15) %>%
+      mutate(date = as.Date(paste(year, month, day, sep="-"), "%Y-%m-%d")) %>%
+      select(reservoir, date, area_m2) %>%
+      arrange(reservoir, date)
+
+  write_csv(combined_monthly_reservoir_data, as_data_file(out_ind))
+  gd_put(out_ind)
 }
