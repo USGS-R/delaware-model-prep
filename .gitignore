@@ -11,7 +11,6 @@ temp/
 !*.ind
 !2_observations/out/drb_temp_summary.csv
 !2_observations/out/drb_flow_summary.csv
-!2_observations/out/realsat_monthly_surface_area.csv
 !3_predictions/out/model_evaluation.csv
 !9_collaborator_data/psu/model_variable_description.txt
 !9_collaborator_data/res/*.ind
