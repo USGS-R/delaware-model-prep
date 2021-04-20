@@ -79,14 +79,14 @@ targets:
     command: gd_get('2_observations/out/obs_flow_drb.rds.ind')
 
   # reservoir diversion data
-  2_observations/out/observed_daily_diversions.csv:
-    command: gd_get('2_observations/out/observed_daily_diversions.csv.ind')
+  2_observations/out/observed_daily_reservoir_water_budget_components.csv:
+    command: gd_get('2_observations/out/observed_daily_reservoir_water_budget_components.csv.ind')
 
-  2_observations/out/observed_monthly_diversions.csv:
-    command: gd_get('2_observations/out/observed_monthly_diversions.csv.ind')
+  2_observations/out/observed_monthly_reservoir_water_budget_components.csv:
+    command: gd_get('2_observations/out/observed_monthly_reservoir_water_budget_components.csv.ind')
 
-  2_observations/out/interpolated_daily_diversions.csv:
-    command: gd_get('2_observations/out/interpolated_daily_diversions.csv.ind')
+  2_observations/out/interpolated_daily_reservoir_water_budget_components.csv:
+    command: gd_get('2_observations/out/interpolated_daily_reservoir_water_budget_components.csv.ind')
 
   # reservoir realsat surface area data
   2_observations/out/raw_realsat_reservoir_data.csv:
