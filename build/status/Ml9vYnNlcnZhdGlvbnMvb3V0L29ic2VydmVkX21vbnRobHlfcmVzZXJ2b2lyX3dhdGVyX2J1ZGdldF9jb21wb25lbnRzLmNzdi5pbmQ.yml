@@ -1,0 +1,12 @@
+version: 0.3.0
+name: 2_observations/out/observed_monthly_reservoir_water_budget_components.csv.ind
+type: file
+hash: 4ab882ea799abe6f405695a8a02e8c3e
+time: 2021-04-20 16:57:35 UTC
+depends:
+  2_observations/in/reservoir data/manually_extracted_diversions.csv: 173657b0ff3200448be32e71d6d1bf99
+fixed: ca5439eab12dadd1b17fd6fb968555fb
+code:
+  functions:
+    read_munge_monthly_diversions: 41986885f78c65d3207d0ca3699c729c
+

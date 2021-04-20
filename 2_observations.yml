@@ -117,10 +117,10 @@ targets:
       # ...
       # 01416900.WY2008.xls
       # ...
-  2_observations/out/observed_daily_diversions.csv.ind:
+  2_observations/out/observed_daily_reservoir_water_budget_components.csv.ind:
     command: read_munge_daily_diversions(out_ind = target_name)
 
-  2_observations/out/observed_monthly_diversions.csv.ind:
+  2_observations/out/observed_monthly_reservoir_water_budget_components.csv.ind:
     command: read_munge_monthly_diversions(
       in_file = '2_observations/in/reservoir data/manually_extracted_diversions.csv',
       out_ind = target_name)
@@ -128,11 +128,11 @@ targets:
   # interpolate to daily values
   # use daily observed values when available, populate same diversion value
   # over month when monthly values vailable
-  2_observations/out/interpolated_daily_diversions.csv.ind:
+  2_observations/out/interpolated_daily_reservoir_water_budget_components.csv.ind:
     command: interpolate_diversions_to_daily(
       out_ind = target_name,
-      daily_ind = '2_observations/out/observed_daily_diversions.csv.ind',
-      monthly_ind = '2_observations/out/observed_monthly_diversions.csv.ind',
+      daily_ind = '2_observations/out/observed_daily_reservoir_water_budget_components.csv.ind',
+      monthly_ind = '2_observations/out/observed_monthly_reservoir_water_budget_components.csv.ind',
       end_date = I('2020-12-31'),
       mgd_to_cms = 0.0438, cfs_to_cms = 0.0283,
       mg_to_cm = 4404.88, ft_to_m = 0.3048)
