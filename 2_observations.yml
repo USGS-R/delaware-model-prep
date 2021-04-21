@@ -74,7 +74,7 @@ targets:
   # this represent all DRB dat
   2_observations/out/all_drb_temp_obs.rds.ind:
     command: filter_temp_data(
-      dat_ind = '2_observations/in/daily_temperatures.rds.ind',
+      dat_ind = '2_observations/in/daily_temperatures_qaqc.rds.ind',
       cross_ind = '2_observations/out/crosswalk_site_reach.rds.ind',
       out_ind = target_name)
 
