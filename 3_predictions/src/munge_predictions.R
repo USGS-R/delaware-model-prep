@@ -62,9 +62,10 @@ calc_metrics <- function(compare_ind, out_file) {
   # make data long, filter where there are no observations
   # calculate error and squared error
   r_compare <- compare %>%
-    pivot_longer(c(-seg_id_nat, -site_id, -date, -temp_c), names_to = 'model', values_to = 'predicted') %>%
+    select(-max_temp_c, -min_temp_c) %>%
+    pivot_longer(c(-seg_id_nat, -site_id, -date, -mean_temp_c), names_to = 'model', values_to = 'predicted') %>%
     filter(!is.na(predicted)) %>%
-    filter(!is.na(temp_c))
+    filter(!is.na(mean_temp_c))
 
   # for now, find min and max dates to use as bounds on comparison
   # Jeff's model is setting the bounds as he's using a dev period
@@ -102,12 +103,12 @@ calc_metrics <- function(compare_ind, out_file) {
 # date, predicted, temp_c (for observed), and model
 calc_stats <- function(dat_compare){
   stats_out <- dat_compare %>%
-    mutate(error = temp_c - predicted, sq_error = error^2) %>%
+    mutate(error = mean_temp_c - predicted, sq_error = error^2) %>%
     group_by(model) %>%
     summarize(bias = round(mean(error), 2),
               rmse = round(sqrt(mean(sq_error)),2),
-              rmse_abv_20 = round(sqrt(mean(sq_error[temp_c > 20])),2),
-              rmse_blw_10 = round(sqrt(mean(sq_error[temp_c < 10])),2),
+              rmse_abv_20 = round(sqrt(mean(sq_error[mean_temp_c > 20])),2),
+              rmse_blw_10 = round(sqrt(mean(sq_error[mean_temp_c < 10])),2),
               rmse_april = round(sqrt(mean(sq_error[lubridate::month(date) == 4])),2),
               rmse_july = round(sqrt(mean(sq_error[lubridate::month(date) == 7])),2),
               n = n())
