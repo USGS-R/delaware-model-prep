@@ -42,11 +42,11 @@ targets:
 
   #### 2_observations ####
   # temperature sites (placed on drive from/by ____)
-  2_observations/in/all_sites.rds:
-    command: gd_get('2_observations/in/all_sites.rds.ind')
+  2_observations/in/stream_sites_us.rds:
+    command: gd_get('2_observations/in/stream_sites_us.rds.ind')
   # munged temperature data (placed on drive from/by ____)
-  2_observations/in/daily_temperatures.rds:
-    command: gd_get('2_observations/in/daily_temperatures.rds.ind')
+  2_observations/in/daily_temperatures_qaqc.rds:
+    command: gd_get('2_observations/in/daily_temperatures_qaqc.rds.ind')
 
   2_observations/in/daily_flow.rds:
     command: gd_get('2_observations/in/daily_flow.rds.ind')

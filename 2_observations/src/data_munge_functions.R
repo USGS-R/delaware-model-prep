@@ -29,11 +29,8 @@ filter_temp_data <- function(cross_ind, dat_ind, out_ind) {
 
   dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
 
-  dat_all <- ungroup(dat) %>%
-    mutate(source = gsub('nwiw', 'nwis', source))
-
-  drb_dat <- filter(dat_all, site_id %in% unique(sites$site_id)) %>%
-    distinct(site_id, date, mean_temp_degC, .keep_all = TRUE)
+  drb_dat <- filter(dat, site_id %in% unique(sites$site_id)) %>%
+    distinct(site_id, date, mean_temp_degC, min_temp_degC, max_temp_degC, .keep_all = TRUE)
 
   saveRDS(drb_dat, as_data_file(out_ind))
   gd_put(out_ind)

@@ -2,9 +2,10 @@
 
 modify_data <- function(in_ind){
   dat_mod <- feather::read_feather(sc_retrieve(in_ind, remake_file = 'getters.yml')) %>%
-    pivot_longer(c(-seg_id_nat, -site_id, -date, -temp_c), names_to = 'model', values_to = 'predicted') %>%
+    select(-min_temp_c, -max_temp_c) %>%
+    pivot_longer(c(-seg_id_nat, -site_id, -date, -mean_temp_c), names_to = 'model', values_to = 'predicted') %>%
     filter(!is.na(predicted)) %>%
-    filter(!is.na(temp_c))
+    filter(!is.na(mean_temp_c))
 
   ## creating a dateframe (4 X 3) with the start and end date for each model .
   dates <- group_by(dat_mod, model) %>%

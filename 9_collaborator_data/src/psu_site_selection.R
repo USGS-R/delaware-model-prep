@@ -56,7 +56,7 @@ write_sites <- function(dat, out_ind) {
   dat <- readRDS(dat) %>%
     select(-Shape, -rank)
 
-  write.csv(dat, as_data_file(out_ind), row.names = FALSE)
+  write_csv(dat, as_data_file(out_ind), row.names = FALSE)
   gd_put(out_ind)
 }
 
@@ -331,7 +331,7 @@ plot_upstream <- function(POIs, dist_mat_ind, labels=c('subseg_id','seg_id_nat')
 
 write_distance <- function(dat_ind, dist_type='updown', out_ind) {
   dist <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
-  write.csv(dist[[dist_type]], as_data_file(out_ind), row.names = TRUE)
+  write_csv(dist[[dist_type]], as_data_file(out_ind), row.names = TRUE)
   gd_put(out_ind)
 }
 
@@ -446,6 +446,6 @@ filter_obs <- function(dat_ind, subset, out_ind) {
 
   filt_dat <- filter(dat, seg_id_nat %in% unique(subset_sites$seg_id_nat))
 
-  write.csv(filt_dat, as_data_file(out_ind), row.names = FALSE)
+  write_csv(filt_dat, as_data_file(out_ind), row.names = FALSE)
   gd_put(out_ind)
 }

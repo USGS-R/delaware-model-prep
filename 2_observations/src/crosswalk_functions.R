@@ -10,10 +10,11 @@ crosswalk_sites_to_reaches <- function(network_ind, boundary_ind, temp_sites_ind
   flow_sites <-  readRDS(sc_retrieve(flow_sites_ind, 'getters.yml')) %>%
     mutate(site_id = paste0('USGS-', site_no), source = 'nwis') %>%
     select(site_id, site_type = site_tp_cd, latitude = dec_lat_va, longitude = dec_long_va, source)
+
   # read in sites from WQP, nwisdv, nwisuv
   sites <- readRDS(sc_retrieve(temp_sites_ind, 'getters.yml')) %>%
     bind_rows(flow_sites) %>%
-    filter(site_type %in% c('ST', 'Stream', 'ST-TS'))
+    filter(site_type %in% c('', 'ST', 'Stream', 'stream', 'ST-TS', 'Spring', 'SP'))
 
   # Convert to sfc
   obs_site_points <- purrr::map2(sites$longitude, sites$latitude, function(lat, lon) {
@@ -46,4 +47,12 @@ crosswalk_sites_to_reaches <- function(network_ind, boundary_ind, temp_sites_ind
   # write file and push to GD
   saveRDS(crosswalk_site_reach, as_data_file(out_ind))
   gd_put(out_ind)
+}
+
+summarize_sites <- function(out_file, in_ind) {
+  sites <- readRDS(sc_retrieve(in_ind, 'getters.yml'))
+  site_summary <- tibble(n_rows = nrow(sites),
+                         n_unique_sites = length(unique(sites$site_id)))
+
+  readr::write_csv(site_summary, out_file)
 }

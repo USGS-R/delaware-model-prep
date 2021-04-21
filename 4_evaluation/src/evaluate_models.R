@@ -17,13 +17,13 @@ calc_all_metric <- function(file_path, dat_in, grouping) {
 
   metrics <- dat_mod %>%
     dplyr::summarize(n = n(),
-              mae = calc_mae(observe_data = temp_c,
+              mae = calc_mae(observe_data = mean_temp_c,
                              predict_data = predicted),
-              rmse =  calc_rmse(observe_data = temp_c,
+              rmse =  calc_rmse(observe_data = mean_temp_c,
                                 predict_data = predicted),
-              mare = calc_mare(observe_data = temp_c,
+              mare = calc_mare(observe_data = mean_temp_c,
                                predict_data = predicted),
-              nse = calc_nash(observe_col = temp_c,
+              nse = calc_nash(observe_col = mean_temp_c,
                               predict_col =  predicted))
   write_csv(metrics, path = file_path)
 }
@@ -45,19 +45,19 @@ calc_exc_metric <- function(file_path, dat_in, grouping) {
   }
   exceedance_metric <- dat_mod %>%
     dplyr::summarize(n = n(),
-            true_pos = calc_exceedance(observe_col = temp_c,
+            true_pos = calc_exceedance(observe_col = mean_temp_c,
                             predict_col = predicted,
                             metric = 'prop_true_pos',
                             threshold = 25.5),
-            true_neg = calc_exceedance(observe_col = temp_c,
+            true_neg = calc_exceedance(observe_col = mean_temp_c,
                             predict_col = predicted,
                             metric = 'prop_true_neg',
                             threshold = 25.5),
-            false_pos = calc_exceedance(observe_col = temp_c,
+            false_pos = calc_exceedance(observe_col = mean_temp_c,
                             predict_col = predicted,
                             metric = 'prop_false_pos',
                             threshold = 25.5),
-            false_neg = calc_exceedance(observe_col = temp_c,
+            false_neg = calc_exceedance(observe_col = mean_temp_c,
                             predict_col = predicted,
                             metric = 'prop_false_neg'))
   write_csv(exceedance_metric, path = file_path)
@@ -70,7 +70,7 @@ calc_max_metric <- function(file_path, dat_in, date_range = 170:245){
 
   max_metric <-
     calc_tim_temp_max(data_in = dat_mod,
-                    observe_col = temp_c, predict_col = predicted,
+                    observe_col = mean_temp_c, predict_col = predicted,
                     date_col = date)
   write_csv(max_metric, path = file_path)
 }

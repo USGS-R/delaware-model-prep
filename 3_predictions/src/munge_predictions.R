@@ -95,7 +95,7 @@ calc_metrics <- function(compare_ind, out_file) {
   out <- bind_rows(stats_all, stats_all_full)
   # write, but don't push to GD
   # going to git commit this one
-  write.csv(out, out_file, row.names = FALSE)
+  write_csv(out, out_file)
 
 }
 
@@ -121,7 +121,7 @@ pull_sntemp_preds <- function(sntemp_ind, out_ind) {
   dat <- feather::read_feather(sc_retrieve(sntemp_ind, 'getters.yml'))
   preds <- select(dat, seg_id_nat, date, sntemp_temp_c = seg_tave_water)
 
-  write.csv(preds, as_data_file(out_ind))
+  write_csv(preds, as_data_file(out_ind))
   gd_put(out_ind)
 }
 
