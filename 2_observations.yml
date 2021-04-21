@@ -46,14 +46,14 @@ targets:
   2_observations/out/extra_flow_sites.rds.ind:
     command: get_flow_sites(
       flow_ind = '2_observations/in/daily_flow.rds.ind',
-      temp_sites_ind = '2_observations/in/all_sites.rds.ind',
+      temp_sites_ind = '2_observations/in/stream_sites_us.rds.ind',
       out_ind = target_name)
 
   # temperature data and sites info comes from the national NWIS temperature pull: https://github.com/USGS-R/2wp-temp-observations
   2_observations/out/crosswalk_site_reach.rds.ind:
     command: crosswalk_sites_to_reaches(
       out_ind = target_name,
-      temp_sites_ind = '2_observations/in/all_sites.rds.ind',
+      temp_sites_ind = '2_observations/in/stream_sites_us.rds.ind',
       flow_sites_ind = '2_observations/out/extra_flow_sites.rds.ind',
       boundary_ind = '1_network/out/boundary.rds.ind',
       network_ind = '1_network/out/network.rds.ind')
@@ -67,6 +67,9 @@ targets:
       fish_dist = I(20000),
       bird_dist = I(250))
 
+  # write a summary of matched sites to track changes
+  2_observations/out/site_summary.csv:
+    command: summarize_sites(out_file = target_name, in_ind = '2_observations/out/drb_filtered_sites.rds.ind')
   # temperature observations that have been filtered to crosswalk
   # this represent all DRB dat
   2_observations/out/all_drb_temp_obs.rds.ind:
