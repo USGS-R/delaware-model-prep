@@ -21,10 +21,12 @@ append_key_seg_names <- function(df) {
   neversink_seg_ids <- c('1645', '1638')
   beltzville_seg_ids <- c('1703', '1697')
   christina_seg_ids <- c('2007', '2012', '2013', '2014', '2037')
+  lordville_id <- '1573'
   df %>%
     mutate(key_seg = case_when(seg_id_nat %in% neversink_seg_ids ~ 'Neversink reservoir',
                                seg_id_nat %in% beltzville_seg_ids ~ 'Beltzville reservoir',
                                seg_id_nat %in% christina_seg_ids ~ 'Christina basin',
+                               seg_id_nat %in% lordville_id ~ 'Lordville',
                                TRUE ~ NA_character_))
 }
 
@@ -52,8 +54,27 @@ all_inf_or_zero <- function(x) {
 }
 headwater_reaches <- rownames(distance_matrix$upstream)[apply(distance_matrix$upstream, MARGIN = 1, FUN = all_inf_or_zero)]
 
+
+
 #reach distance upstream to reservoir-containing or overlapping reach
+reservoir_overlapping_reaches <- filter(reservoir_segs, grepl(pattern = 'inlet|outlet|contain|within', x = type_res)) %>%
+  left_join(select(network$edges, seg_id_nat, subseg_id), by = 'seg_id_nat')
+updown_matrix_monitor_to_reservoir <- distance_matrix$upstream[temp_seg_ids,reservoir_overlapping_reaches$subseg_id]
+temp_to_reservoir_row_mins <- apply(updown_matrix_monitor_to_reservoir, 1, min_abs_not_zero) %>%
+  na_if(Inf)
+
 #get site names, check others that shouldn't be held out
+temp_site_ids <- temp_obs %>% select(site_id) %>%
+  distinct() %>%
+  separate_rows(site_id, sep = ',') %>%
+  distinct() %>%
+  filter(grepl(pattern = '^USGS-', x = site_id)) %>%
+  mutate(site_no = gsub('USGS-', replacement = '', x = site_id))
+temp_site_info <- dataRetrieval::readNWISdata(service = 'site',
+                                              sites = temp_site_ids$site_no,
+                                              siteOutput = 'expanded') %>%
+  left_join(temp_site_ids, by = 'site_no')
+
 
 ##### Look for freebies — only data during test time periods #####
 #plot map with color by fraction training?
