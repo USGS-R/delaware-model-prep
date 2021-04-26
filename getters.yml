@@ -48,6 +48,10 @@ targets:
   2_observations/in/daily_temperatures_qaqc.rds:
     command: gd_get('2_observations/in/daily_temperatures_qaqc.rds.ind')
 
+  # flow sites
+  2_observations/in/observation_summary.rds:
+    command: gd_get('2_observations/in/observation_summary.rds.ind')
+
   2_observations/in/daily_flow.rds:
     command: gd_get('2_observations/in/daily_flow.rds.ind')
 
