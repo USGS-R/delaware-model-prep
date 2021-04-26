@@ -8,13 +8,17 @@ crosswalk_sites_to_reaches <- function(network_ind, boundary_ind, temp_sites_ind
 
   # bring in flow sites that were not represented in temperature data
   flow_sites <-  readRDS(sc_retrieve(flow_sites_ind, 'getters.yml')) %>%
-    mutate(site_id = paste0('USGS-', site_no), source = 'nwis') %>%
-    select(site_id, site_type = site_tp_cd, latitude = dec_lat_va, longitude = dec_long_va, source)
+    mutate(site_id = paste0('USGS-', site_id)) %>%
+    select(site_id, site_type = site_tp_cd, latitude = dec_lat_va, longitude = dec_long_va, source) %>%
+    filter(!is.na(latitude) & !is.na(longitude)) %>%
+    st_as_sf(coords = c('longitude', 'latitude'), crs = 4326, remove = FALSE)
+
 
   # read in sites from WQP, nwisdv, nwisuv
   sites <- readRDS(sc_retrieve(temp_sites_ind, 'getters.yml')) %>%
     bind_rows(flow_sites) %>%
-    filter(site_type %in% c('', 'ST', 'Stream', 'stream', 'ST-TS', 'Spring', 'SP'))
+    filter(site_type %in% c('', 'ST', 'Stream', 'stream', 'ST-TS', 'Spring', 'SP')) %>%
+    distinct(site_id, source, latitude, longitude, .keep_all = TRUE)
 
   # Convert to sfc
   obs_site_points <- purrr::map2(sites$longitude, sites$latitude, function(lat, lon) {
