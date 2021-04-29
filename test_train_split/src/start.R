@@ -84,8 +84,6 @@ temp_obs_time_holdout <- temp_obs %>%
 flow_obs_time_holdout <- flow_obs %>%
   mutate(in_time_holdout = date %in% time_holdout_days)
 
-#TODO: join on other attributes so see which these cover
-#TODO: getting 2021 data soon?  important here for holdouts
 temp_obs_time_holdout_summary <- temp_obs_time_holdout %>%
   summarize_holdout()
 
@@ -110,19 +108,20 @@ all_obs_stats <- full_join(temp_obs_stats, flow_obs_stats, by = c('seg_id_nat', 
 
 #bird distance as well as fish distance
 #obs count for closest observed reach, or possibly obs within X fish or bird distance?  How variable is reach length?
-fish_dist <- apply(updown_matrix_monitored, 1, get_distance_metrics, radius = 10e3,
+obs_search_radius <- 20e3
+fish_dist <- apply(updown_matrix_monitored, 1, get_distance_metrics, radius = obs_search_radius,
                    obs_summary = all_obs_stats, col_name_suffix = 'fish') %>%
   bind_rows(.id = 'subseg_id')
 
-bird_dist <- apply(reach_mouth_bird_matrix, 1, get_distance_metrics, radius = 10e3,
+bird_dist <- apply(reach_mouth_bird_matrix, 1, get_distance_metrics, radius = obs_search_radius,
                    obs_summary = all_obs_stats, col_name_suffix = 'bird') %>%
   bind_rows(.id = 'subseg_id')
 
 #TODO: headwaters, distance up to reservoir, distance to nearest site, catchment info
 all_info <- temp_obs_time_holdout_summary %>%
-  left_join(flow_obs_time_holdout_summary, by = 'seg_id_nat',
+  left_join(flow_obs_time_holdout_summary, by = c('seg_id_nat', 'subseg_id'),
             suffix = c('_temp', '_flow')) %>%
-  left_join(flow_obs_stats, by = c('seg_id_nat')) %>%
+  left_join(flow_obs_stats, by = c('seg_id_nat', 'subseg_id')) %>%
   append_key_seg_names() %>%
   left_join(reservoir_segs, by = 'seg_id_nat') %>%
   mutate(subseg_seg = as.numeric(subseg_seg)) %>%
@@ -130,17 +129,17 @@ all_info <- temp_obs_time_holdout_summary %>%
   mutate(headwater = subseg_id %in% headwater_reaches) %>%
   left_join(temp_to_reservoir_row_mins, by = 'subseg_id') %>%
   left_join(fish_dist, by = 'subseg_id') %>%
-  left_join(bird_dist, by = 'subseg_id')
+  left_join(bird_dist, by = 'subseg_id') %>%
   left_join(catchment_attributes, by = 'seg_id_nat')
 
 
 all_info_gt400 <- all_info %>% filter(n_data_points_temp > 400)
 ggplot(all_info_gt400) + geom_sf(aes(color = fraction_heldout_temp, geometry = geometry)) + theme_minimal() +
   scale_color_gradient(low = 'white', high = 'red')
-ggplot(all_info, aes(x = dist_to_nearest_site)) + geom_histogram()
 
 ggplot(network$edges, aes(x = as.numeric(subseg_length))) + stat_ecdf() +
-  scale_x_continuous(labels = scales::comma) + labs(x = 'Reach length (m)')
+  scale_x_continuous(labels = scales::comma) +
+  labs(x = 'Reach length (m)', y = 'Empirical cumulative distribution function')
 
 #sanity check: n_obs_xxx_radius_fish should never exceed n_obs_xxx_radius_bird (fish radius can never be shorter than bird radius)
 ggplot(all_info, aes(x = n_obs_temp_radius_fish, y = n_obs_temp_radius_bird)) + geom_abline(slope = 1) + geom_point()
@@ -148,3 +147,118 @@ ggplot(all_info, aes(x = n_obs_temp_radius_fish, y = n_obs_temp_radius_bird)) + 
 #TODO: distribution of data close by; check sites of interest
 ggplot(all_info_gt400, aes(x = n_obs_temp_radius_fish)) + stat_ecdf() + scale_x_log10()
 ggplot(all_info_gt400, aes(x = n_temp_closest_fish)) + stat_ecdf() + scale_x_log10()
+
+key_segments <- get_key_segments()
+all_info_select <- all_info_gt400 %>%
+  filter(seg_id_nat %in% key_segments$lordville_id |
+         seg_id_nat == '2007' | #headwater reach in Christina sub-basin
+         seg_id_nat == key_segments$montague_seg_id |
+         seg_id_nat == key_segments$trenton_seg_id |
+         seg_id_nat %in% key_segments$neversink_seg_ids |
+         seg_id_nat %in% key_segments$beltzville_seg_ids |
+          seg_id_nat %in% c('2319', '3570'))
+ggplot(all_info_gt400, aes(x = n_obs_temp_radius_fish)) + stat_ecdf() + scale_x_log10() +
+  geom_vline(data = all_info_select, aes(xintercept = n_obs_temp_radius_fish, color = key_seg), lwd = 1,
+             alpha = 1) +
+  labs(x = sprintf('Temperature observations within %s m of reach', obs_search_radius),
+       y = 'Cumulative distribution function')
+
+ggplot(all_info_gt400, aes(x = n_obs_flow_radius_fish)) + stat_ecdf() + scale_x_log10() +
+  geom_vline(data = all_info_select, aes(xintercept = n_obs_flow_radius_fish, color = key_seg))
+
+ggplot(network$edges) + geom_sf() + theme_minimal() +
+  geom_sf(data = all_info_select, aes(color = key_seg, geometry = geometry), lwd = 3)
+
+
+all_info_lt100_radius <- all_info %>%
+  filter(n_obs_temp_radius_fish < 100)
+
+#reaches with >400 temp obs, less than 100 within radius
+ggplot(network$edges) + geom_sf() + theme_minimal() +
+  geom_sf(data = all_info_lt100_radius, aes(color = n_data_points_temp, geometry = geometry), lwd = 3) +
+  scale_color_binned()
+
+#All delaware mainstem monitored reaches
+delaware_reaches <- get_delaware_mainstem_sites() %>%
+  group_by(subseg_id) %>%
+  summarize(station_names = paste(station_nm, collapse = '|'))
+all_info_delaware_mainstem <- all_info_gt400 %>%
+  filter(grepl(pattern = 'delaware', x = key_seg, ignore.case = TRUE)) %>%
+  left_join(delaware_reaches, by = c('subseg_id'))
+
+ggplot(network$edges) + geom_sf() + theme_minimal() +
+   geom_sf(data = all_info_delaware_mainstem, aes(color = n_data_points_temp, geometry = geometry), lwd = 3) +
+   #geom_sf_label(data = all_info_delaware_mainstem, aes(label = subseg_id, geometry = geometry)) +
+   ggrepel::geom_label_repel(
+    data = all_info_delaware_mainstem,
+    aes(label = subseg_id, geometry = geometry),
+    stat = "sf_coordinates",
+    min.segment.length = 0,
+    colour = "magenta",
+    segment.colour = "magenta"
+  )
+  # geom_sf(data = filter(all_info_delaware_mainstem, key_seg != 'Delaware mainstem'),
+  #         aes(color = key_seg, geometry = geometry), inherit.aes = FALSE)
+
+ggplot(all_info_delaware_mainstem, aes(x = n_data_points_temp, y = n_obs_temp_radius_fish, label = subseg_id)) + geom_point() +
+  ggrepel::geom_label_repel() +
+  labs(x = 'Number of temperature observations', y = sprintf('Temperature observations within %s m of reach', obs_search_radius))
+
+
+#network mouths?
+network_mouths <- network$edges %>% st_line_sample(sample = 1)
+network_coords <- network_mouths %>% st_coordinates() %>%
+  as_tibble() %>% bind_cols(select(network$edges, subseg_id))
+network_coords_north_south <- network_coords %>%
+  arrange(desc(Y)) %>%
+  mutate(order = 1:n())
+
+#sanity check reach mouths
+ggplot(network$edges) + geom_sf() + theme_minimal() +
+  geom_sf(data = network_mouths, color = 'red')
+reach_time_range_plot(subseg_ids = all_info_delaware_mainstem$subseg_id,
+                      obs_df = temp_obs_time_holdout,
+                      min_year = 1950,
+                      holdout_years = time_holdout_years,
+                      subseg_order_df = network_coords_north_south,
+                      title = 'Mainstem reaches ordered N -> S')
+
+reach_time_range_plot(all_info_select$subseg_id,
+                      obs_df = temp_obs_time_holdout,
+                      min_year = 1950,
+                      holdout_years = time_holdout_years,
+                      subseg_order_df = tibble(subseg_id = all_info_select$subseg_id,
+                                               order = 1:nrow(all_info_select)),
+                      title = 'Select reaches of interest')
+
+ggplot(network$edges) + geom_sf() + theme_minimal() +
+  geom_sf(data = all_info_select, aes(color = n_data_points_temp, geometry = geometry), lwd = 3) +
+  #geom_sf_label(data = all_info_delaware_mainstem, aes(label = subseg_id, geometry = geometry)) +
+  ggrepel::geom_label_repel(
+    data = all_info_select,
+    aes(label = subseg_id, geometry = geometry),
+    stat = "sf_coordinates",
+    min.segment.length = 0,
+    colour = "magenta",
+    segment.colour = "magenta"
+  ) +
+  labs(title = 'Reaches of interest')
+
+#what fraction of total data at each site?
+all_obs_stats_frac_total <- all_obs_stats %>%
+  ungroup() %>%
+  mutate(frac_obs_temp = n_temp / sum(n_temp, na.rm = TRUE),
+         frac_obs_flow = n_flow / sum(n_flow, na.rm = TRUE),
+         label = if_else(frac_obs_temp > 0.005, true = subseg_id, false = NA_character_)) %>%
+  replace_na(replace = list(frac_obs_temp = 0, frac_obs_flow = 0))
+ggplot(all_obs_stats_frac_total, aes(x = frac_obs_temp*100, y = frac_obs_flow)) + geom_point() +
+  ggrepel::geom_label_repel(aes(label = label)) +
+  labs(x = 'Percent temperature observation days', y = 'Percent flow observation days',
+       title = 'Total fraction of observation days at each reach')
+
+all_obs_stats_frac_added_by_spatial <- temp_obs_time_holdout %>%
+  group_by(subseg_id, in_time_holdout) %>%
+  summarize(n_days = n()) %>%
+  mutate(fraction_total = n_days / sum(all_obs_stats$n_temp, na.rm = TRUE))
+
+#by mean discharge

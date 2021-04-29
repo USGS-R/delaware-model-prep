@@ -5,7 +5,7 @@ year_to_days <- function(year) {
 
 summarize_holdout <- function(df) {
   df %>%
-    group_by(seg_id_nat) %>%
+    group_by(seg_id_nat, subseg_id) %>%
     summarize(fraction_heldout = sum(in_time_holdout) / n(),
               n_data_points = n())
 }
@@ -51,12 +51,6 @@ get_distance_metrics <- function(x, radius, obs_summary, col_name_suffix) {
     rename(n_temp_closest = n_temp, n_flow_closest = n_flow) %>%
     rename_with(.fn = ~ paste(., col_name_suffix, sep = '_'))
   return(final_tibble)
-  # #closest pos/neg to zero
-  # min_dist <- postive_dist[which.min(positive_dist)]
-  # max_dist <- negative_dist[which.max(negative_dist)]
-  # out_tibble <- tibble(pos_dist_to_nearest = min_dist,
-  #                      nearest_pos_reach = )
-
 }
 
 
@@ -66,24 +60,62 @@ min_abs_not_zero <- function(x) {
   no_zeros[which.min(abs(no_zeros))]
 }
 
+get_key_segments <- function(){
+  list(
+    neversink_seg_ids = c('1645', '1638'),
+    beltzville_seg_ids = c('1703', '1697'),
+    christina_seg_ids = c('2007', '2012', '2013', '2014', '2037'),
+    lordville_id = '1573',
+    cannonsville_seg_ids = c('1566', '1562', '1561', '1560', '1559', '1557'),
+    pepacton_seg_ids = c('1449', '1447', '1448', '1446', '1445', '1438'),
+    trenton_seg_id = '1498',
+    montague_seg_id = '1659'
+  )
+}
+
 #could put these in a yaml?  Or in a single list object that would be more easily re-used
 append_key_seg_names <- function(df) {
-  neversink_seg_ids <- c('1645', '1638')
-  beltzville_seg_ids <- c('1703', '1697')
-  christina_seg_ids <- c('2007', '2012', '2013', '2014', '2037')
-  lordville_id <- '1573'
-  cannonsville_seg_ids <- c('1566', '1562', '1561', '1560', '1559', '1557')
-  pepacton_seg_ids <- c('1449', '1447', '1448', '1446', '1445', '1438')
-  trenton_seg_id <- '1498'
-  montague_seg_id <- '1659'
+  key_segments <- get_key_segments()
+  delaware_mainstem_segments_df <- get_delaware_mainstem_sites()
   df %>%
-    mutate(key_seg = case_when(seg_id_nat %in% neversink_seg_ids ~ 'Neversink reservoir',
-                               seg_id_nat %in% beltzville_seg_ids ~ 'Beltzville reservoir',
-                               seg_id_nat %in% christina_seg_ids ~ 'Christina basin',
-                               seg_id_nat %in% lordville_id ~ 'Delaware @Lordville',
-                               seg_id_nat %in% cannonsville_seg_ids ~ 'Cannonsville reservoir',
-                               seg_id_nat %in% pepacton_seg_ids ~ 'Pepacton Reservoir',
-                               seg_id_nat %in% trenton_seg_id ~ 'Delaware @Trenton',
-                               seg_id_nat %in% montague_seg_id ~ 'Delaware @Montague',
+    mutate(key_seg = case_when(seg_id_nat %in% key_segments$neversink_seg_ids ~ 'Neversink reservoir',
+                               seg_id_nat %in% key_segments$beltzville_seg_ids ~ 'Beltzville reservoir',
+                               seg_id_nat %in% key_segments$christina_seg_ids ~ 'Christina basin',
+                               seg_id_nat %in% key_segments$lordville_id ~ 'Delaware @Lordville',
+                               seg_id_nat %in% key_segments$cannonsville_seg_ids ~ 'Cannonsville reservoir',
+                               seg_id_nat %in% key_segments$pepacton_seg_ids ~ 'Pepacton Reservoir',
+                               seg_id_nat %in% key_segments$trenton_seg_id ~ 'Delaware @Trenton',
+                               seg_id_nat %in% key_segments$montague_seg_id ~ 'Delaware @Montague',
+                               seg_id_nat %in% delaware_mainstem_segments_df$seg_id_nat ~ 'Delaware mainstem',
                                TRUE ~ NA_character_))
+}
+
+
+get_delaware_mainstem_sites <- function() {
+  site_summary <- readRDS('2_observations/out/drb_filtered_sites.rds') %>%
+    filter(grepl(pattern = '^USGS-', x = site_id)) %>%
+    mutate(usgs_site_id = gsub(pattern = '^USGS-', replacement = '', x = site_id))
+  site_info <- readNWISsite(site_summary$usgs_site_id)
+  delaware_sites <- site_info %>%
+    filter(grepl(pattern = '^delaware', ignore.case = TRUE, x = station_nm)) %>%
+    mutate(site_id = paste0('USGS-', site_no)) %>%
+    left_join(site_summary, by = 'site_id')
+}
+
+
+reach_time_range_plot <- function(subseg_ids, obs_df, min_year, holdout_years, subseg_order_df, title = NA) {
+  subseg_df <- obs_df %>%
+    filter(subseg_id %in% subseg_ids)
+  subseg_df_year <- subseg_df %>%
+    mutate(year = year(date)) %>%
+    group_by(year, subseg_id) %>%
+    summarize(n_obs = n()) %>%
+    filter(year >= min_year) %>%
+    mutate(holdout_year = year %in% holdout_years) %>%
+    left_join(subseg_order_df, by = 'subseg_id')
+  ggplot(subseg_df_year, aes(x = reorder(subseg_id, order), y = `year`)) + geom_tile(aes(fill = n_obs, col = holdout_year), lwd = 1) +
+    scale_color_manual(values = c(`FALSE` = NA, `TRUE` = 'green')) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(title = title, y = 'Year', x = 'subseg_id')
 }
