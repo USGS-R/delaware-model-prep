@@ -148,7 +148,7 @@ ggplot(network$edges, aes(x = as.numeric(subseg_length))) + stat_ecdf() +
 #sanity check: n_obs_xxx_radius_fish should never exceed n_obs_xxx_radius_bird (fish radius can never be shorter than bird radius)
 ggplot(all_info, aes(x = n_obs_temp_radius_fish, y = n_obs_temp_radius_bird)) + geom_abline(slope = 1) + geom_point()
 
-#TODO: distribution of data close by; check sites of interest
+#distribution of data close by; check sites of interest
 ggplot(all_info_gt400, aes(x = n_obs_temp_radius_fish)) + stat_ecdf() + scale_x_log10()
 ggplot(all_info_gt400, aes(x = n_temp_closest_fish)) + stat_ecdf() + scale_x_log10()
 
@@ -209,7 +209,7 @@ ggplot(all_info_delaware_mainstem, aes(x = n_data_points_temp, y = n_obs_temp_ra
   labs(x = 'Number of temperature observations', y = sprintf('Temperature observations within %s m of reach', obs_search_radius))
 
 
-#network mouths?
+#Find reach mouth points, used to order by north/south
 network_mouths <- network$edges %>% st_line_sample(sample = 1)
 network_coords <- network_mouths %>% st_coordinates() %>%
   as_tibble() %>% bind_cols(select(network$edges, subseg_id))
@@ -312,7 +312,23 @@ reach_time_range_plot(all_info_gt400_imperv$subseg_id,
                                                order = 1:nrow(all_info_select)),
                       title = 'Reaches % impervious > 0.2')
 
-##### specify holdouts #####
+##### decide between mainstem sites: Trenton vs Montague, Lordville vs Callicoon ####
+target_mainstem_reaches <- tibble(name = c('Trenton', 'Montague', 'Lordville', 'Callicoon'),
+                                  subseg_id = c('64_1', '225_1', '139_1', '144_1'))
+target_mainstem_info <- all_info_gt400 %>%
+  #filter(subseg_id %in% target_mainstem_reaches$subseg_id) %>%
+  left_join(target_mainstem_reaches, by = 'subseg_id')
+named_delaware <- all_info_delaware_mainstem %>%
+  left_join(target_mainstem_reaches, by = 'subseg_id')
+ggplot(target_mainstem_info, aes(x = n_obs_temp_radius_fish)) + stat_ecdf() + scale_x_log10() +
+   geom_vline(data = named_delaware, aes(xintercept = n_obs_temp_radius_fish, color = name), lwd = 1,
+              alpha = 1) +
+  labs(x = sprintf('Temperature observations within %s m of reach', obs_search_radius),
+       y = 'Cumulative distribution function',
+       title = 'Delaware mainstem reaches vs distribution of fish radius temp obs')
+
+
+##### specify final holdouts #####
 holdout_segs <- tibble(seg_id_nat = as.numeric(c(key_segments$beltzville_seg_ids, '2007',
                                       key_segments$lordville_id, key_segments$trenton_seg_id,
                                       '3570', '2338'))) %>%
