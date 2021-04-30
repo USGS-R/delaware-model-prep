@@ -14,6 +14,10 @@ all_inf_or_zero <- function(x) {
   all(x == 0 | is.infinite(x))
 }
 
+min_abs_not_zero <- function(x) {
+  no_zeros <- x[x != 0]
+  no_zeros[which.min(abs(no_zeros))]
+}
 
 #' Compute various metrics about nearby monitored reaches
 #' Look at obs for closest monitored reach by fish distance,
@@ -54,12 +58,7 @@ get_distance_metrics <- function(x, radius, obs_summary, col_name_suffix) {
 }
 
 
-
-min_abs_not_zero <- function(x) {
-  no_zeros <- x[x != 0]
-  no_zeros[which.min(abs(no_zeros))]
-}
-
+#' Get list of pre-specified segments of interest
 get_key_segments <- function(){
   list(
     neversink_seg_ids = c('1645', '1638'),
@@ -74,6 +73,7 @@ get_key_segments <- function(){
 }
 
 #could put these in a yaml?  Or in a single list object that would be more easily re-used
+#' appends names of segments of interest to a dataframe based on seg_id_nat
 append_key_seg_names <- function(df) {
   key_segments <- get_key_segments()
   delaware_mainstem_segments_df <- get_delaware_mainstem_sites()
@@ -90,7 +90,7 @@ append_key_seg_names <- function(df) {
                                TRUE ~ NA_character_))
 }
 
-
+#' Searches DRB filtered sites for names starting with Delaware
 get_delaware_mainstem_sites <- function() {
   site_summary <- readRDS('2_observations/out/drb_filtered_sites.rds') %>%
     filter(grepl(pattern = '^USGS-', x = site_id)) %>%
@@ -102,7 +102,13 @@ get_delaware_mainstem_sites <- function() {
     left_join(site_summary, by = 'site_id')
 }
 
-
+#' produce heat map of site observations through time (Y = years, x = sites)
+#' @param subseg_ids char subseg_ids to include in plot
+#' @param obs_df data frame of daily observations; will be summarized to annual observations per subseg_id
+#' @param min_year don't plot data before this year
+#' @param holdout_years numeric Will be highlighted in heatmap
+#' @param subseg_order_df data frame of subseg_id and order columns, used to set order in plot
+#' @param title char plot title
 reach_time_range_plot <- function(subseg_ids, obs_df, min_year, holdout_years, subseg_order_df, title = NA) {
   subseg_df <- obs_df %>%
     filter(subseg_id %in% subseg_ids)

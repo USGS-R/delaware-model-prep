@@ -329,9 +329,13 @@ ggplot(target_mainstem_info, aes(x = n_obs_temp_radius_fish)) + stat_ecdf() + sc
 
 
 ##### specify final holdouts #####
-holdout_segs <- tibble(seg_id_nat = as.numeric(c(key_segments$beltzville_seg_ids, '2007',
-                                      key_segments$lordville_id, key_segments$trenton_seg_id,
-                                      '3570', '2338'))) %>%
+holdout_segs <- tibble(seg_id_nat = as.numeric(c(key_segments$beltzville_seg_ids, '2007', #2007 = christina headwater
+                                      #key_segments$lordville_id,
+                                      key_segments$trenton_seg_id,
+                                      '1578', #Callicoon
+                                      '3570',  #Maurice River
+                                      '2338')),#2338 = Schuylkill @Philly for high impervious
+                       spatial_holdout = TRUE) %>%
   left_join(select(all_info, seg_id_nat, subseg_id, key_seg), by = 'seg_id_nat')
 
 #add up data not in time holdout, get total fraction added by holding out these sites
@@ -351,11 +355,20 @@ flow_catchment_atts_long <- flow_catchment_atts %>%
   pivot_longer(cols = !all_of(c('seg_id_nat', 'subseg_id', 'n', 'holdout')),
                names_to = 'reach_metric')
 ggplot(flow_catchment_atts_long, aes(x = value, fill = holdout)) +
-  geom_dotplot() +
+  geom_dotplot(stackgroups = TRUE, dotsize = 0.5) +
   facet_wrap('reach_metric', scales = 'free') +
   scale_y_continuous(NULL, breaks = NULL)
-ggplot(flow_catchment_atts, aes(x = cov_type, fill = holdout)) + geom_dotplot()
+ggplot(flow_catchment_atts, aes(x = cov_type, fill = holdout)) + geom_dotplot(stackgroups = TRUE, dotsize = 0.2,
+                                                                              stackratio = 0.8, width = 2)
 
+# by distance downstream of reservoir
+all_info_marked_holdouts <- all_info_gt400 %>%
+  left_join(holdout_segs, by = 'subseg_id') %>%
+  replace_na(replace = list(dist_up_to_reservoir = -20e3))
+ggplot(all_info_marked_holdouts, aes(x = dist_up_to_reservoir, fill = spatial_holdout)) +
+  geom_dotplot(stackgroups = TRUE, dotsize = 0.45)
+
+##### Final output #####
 #for final output, add columns to observations for time, spatial, either holdout
 temp_obs_marked_holdout <- temp_obs_time_holdout %>%
   mutate(in_spatial_holdout = subseg_id %in% holdout_segs$subseg_id,
