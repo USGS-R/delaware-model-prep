@@ -344,7 +344,9 @@ ggplot(flow_catchment_atts, aes(x = cov_type, fill = holdout)) + geom_dotplot()
 temp_obs_marked_holdout <- temp_obs_time_holdout %>%
   mutate(in_spatial_holdout = subseg_id %in% holdout_segs$subseg_id,
          in_any_holdout = in_time_holdout | in_spatial_holdout)
+saveRDS(temp_obs_marked_holdout, file = 'test_train_split/out/temp_obs_marked_holdout.rds')
+
 flow_obs_marked_holdout <- flow_obs_time_holdout %>%
   mutate(in_spatial_holdout = subseg_id %in% holdout_segs$subseg_id,
          in_any_holdout = in_time_holdout | in_spatial_holdout)
-
+saveRDS(temp_obs_marked_holdout, file = 'test_train_split/out/flow_obs_marked_holdout.rds')
