@@ -5,9 +5,13 @@ scmake('2_observations/out/obs_flow_drb.rds', remake_file = 'getters.yml')
 scmake('1_network/out/segments_relative_to_reservoirs.rds', remake_file = 'getters.yml')
 scmake('1_network/out/subseg_distance_matrix.rds', remake_file = 'getters.yml')
 
-temp_obs <- readRDS('2_observations/out/obs_temp_drb.rds')
+min_date <- '1980-01-01'
+
+temp_obs <- readRDS('2_observations/out/obs_temp_drb.rds') %>%
+  filter(date > min_date)
 flow_obs <- readRDS('2_observations/out/obs_flow_drb.rds') %>%
-  mutate(date = as.POSIXct(date, tz = 'UTC'))
+  mutate(date = as.POSIXct(date, tz = 'UTC')) %>%
+  filter(date > min_date)
 reservoir_segs <- readRDS('1_network/out/segments_relative_to_reservoirs.rds')
 distance_matrix <- readRDS('1_network/out/subseg_distance_matrix.rds')
 network <- readRDS('1_network/out/network.rds')
@@ -251,14 +255,96 @@ all_obs_stats_frac_total <- all_obs_stats %>%
          frac_obs_flow = n_flow / sum(n_flow, na.rm = TRUE),
          label = if_else(frac_obs_temp > 0.005, true = subseg_id, false = NA_character_)) %>%
   replace_na(replace = list(frac_obs_temp = 0, frac_obs_flow = 0))
-ggplot(all_obs_stats_frac_total, aes(x = frac_obs_temp*100, y = frac_obs_flow)) + geom_point() +
-  ggrepel::geom_label_repel(aes(label = label)) +
-  labs(x = 'Percent temperature observation days', y = 'Percent flow observation days',
-       title = 'Total fraction of observation days at each reach')
+ggplot(all_obs_stats_frac_total, aes(x = frac_obs_temp*100, y = 100*frac_obs_flow)) + geom_point() +
+  ggrepel::geom_text_repel(aes(label = label), max.overlaps = 20) +
+  labs(x = 'Percent of total temperature observation days', y = 'Percent of total flow observation days',
+       title = 'Percent of total observation days at each reach')
 
 all_obs_stats_frac_added_by_spatial <- temp_obs_time_holdout %>%
+  mutate(has_temp = TRUE) %>%
+  full_join(flow_obs_time_holdout, by = c('subseg_id', 'seg_id_nat', 'date', 'in_time_holdout')) %>%
   group_by(subseg_id, in_time_holdout) %>%
-  summarize(n_days = n()) %>%
-  mutate(fraction_total = n_days / sum(all_obs_stats$n_temp, na.rm = TRUE))
+  summarize(n_days_temp = sum(!is.na(has_temp)), #join will fill in NAs where only flow or temp values
+            n_days_flow = sum(!is.na(discharge_cms))) %>%
+  mutate(fraction_total_temp = n_days_temp / sum(all_obs_stats$n_temp, na.rm = TRUE),
+         fraction_total_flow = n_days_flow / sum(all_obs_stats$n_flow, na.rm = TRUE))
 
-#by mean discharge
+
+#what is the test/train split based solely on time?
+all_obs_stats_frac_added_by_spatial %>% group_by(in_time_holdout) %>%
+  summarize(total_frac_temp = sum(fraction_total_temp),
+            total_frac_flow = sum(fraction_total_flow))
+
+#now what does each site contribute on top of that if it is a spatial holdout?
+all_obs_stats_frac_outside_time_holdout <- all_obs_stats_frac_added_by_spatial %>%
+  filter(!in_time_holdout) %>%
+  mutate(label = if_else(fraction_total_temp > 0.005, true = subseg_id, false = NA_character_))
+ggplot(all_obs_stats_frac_outside_time_holdout, aes(x = 100*fraction_total_temp, y = 100*fraction_total_flow)) +
+  geom_point() + ggrepel::geom_text_repel(aes(label = label)) +
+  labs(title = 'Additional loss of training data if a reach is a spatial holdout',
+       x = 'Percent temp data lost', y = 'Percent flow data lost')
+
+#check urban drainages impervious > 0.2
+all_info_gt400_imperv <- filter(all_info_gt400, hru_percent_imperv > 0.2)
+ggplot(network$edges) + geom_sf() + theme_minimal() +
+  geom_sf(data = all_info_gt400_imperv, aes(color = n_data_points_temp, geometry = geometry), lwd = 3) +
+  #geom_sf_label(data = all_info_delaware_mainstem, aes(label = subseg_id, geometry = geometry)) +
+  ggrepel::geom_label_repel(
+    data = all_info_gt400_imperv,
+    aes(label = subseg_id, geometry = geometry),
+    stat = "sf_coordinates",
+    min.segment.length = 0,
+    colour = "magenta",
+    segment.colour = "magenta",
+    max.overlaps = 15
+  ) +
+  labs(title = 'Reaches with >400 temp obs, >0.2 imperv')
+#fish radius vs % imperv
+ggplot(all_info_gt400_imperv, aes(x = hru_percent_imperv, y = n_obs_temp_radius_fish, color = n_data_points_temp)) +
+  geom_point() + ggrepel::geom_text_repel(aes(label = subseg_id)) +
+  labs(title = 'Reaches with at least 400 temp obs, >0.2 impervious')
+#data time ranges in imperv subsegs
+reach_time_range_plot(all_info_gt400_imperv$subseg_id,
+                      obs_df = temp_obs_time_holdout,
+                      min_year = 1980,
+                      holdout_years = time_holdout_years,
+                      subseg_order_df = tibble(subseg_id = all_info_select$subseg_id,
+                                               order = 1:nrow(all_info_select)),
+                      title = 'Reaches % impervious > 0.2')
+
+##### specify holdouts #####
+holdout_segs <- tibble(seg_id_nat = as.numeric(c(key_segments$beltzville_seg_ids, '2007',
+                                      key_segments$lordville_id, key_segments$trenton_seg_id,
+                                      '3570', '2338'))) %>%
+  left_join(select(all_info, seg_id_nat, subseg_id, key_seg), by = 'seg_id_nat')
+
+#add up data not in time holdout, get total fraction added by holding out these sites
+spatial_holdout_frac_time_removed <- all_obs_stats_frac_added_by_spatial %>%
+  filter(!in_time_holdout) %>%
+  right_join(holdout_segs, by = c('subseg_id'))
+sum(spatial_holdout_frac_time_removed$fraction_total_temp)
+sum(spatial_holdout_frac_time_removed$fraction_total_flow)
+
+#by mean discharge, basin characteristics
+#dotplot highlighting held-out reaches
+flow_catchment_atts <- flow_obs_stats %>%
+  left_join(catchment_attributes, by = c('seg_id_nat')) %>%
+  mutate(holdout = subseg_id %in% holdout_segs$subseg_id)
+
+flow_catchment_atts_long <- flow_catchment_atts %>%
+  pivot_longer(cols = !all_of(c('seg_id_nat', 'subseg_id', 'n', 'holdout')),
+               names_to = 'reach_metric')
+ggplot(flow_catchment_atts_long, aes(x = value, fill = holdout)) +
+  geom_dotplot() +
+  facet_wrap('reach_metric', scales = 'free') +
+  scale_y_continuous(NULL, breaks = NULL)
+ggplot(flow_catchment_atts, aes(x = cov_type, fill = holdout)) + geom_dotplot()
+
+#for final output, add columns to observations for time, spatial, either holdout
+temp_obs_marked_holdout <- temp_obs_time_holdout %>%
+  mutate(in_spatial_holdout = subseg_id %in% holdout_segs$subseg_id,
+         in_any_holdout = in_time_holdout | in_spatial_holdout)
+flow_obs_marked_holdout <- flow_obs_time_holdout %>%
+  mutate(in_spatial_holdout = subseg_id %in% holdout_segs$subseg_id,
+         in_any_holdout = in_time_holdout | in_spatial_holdout)
+
