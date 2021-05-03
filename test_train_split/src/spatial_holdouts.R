@@ -374,9 +374,17 @@ all_info_marked_holdouts <- all_info_gt400 %>%
 ggplot(all_info_marked_holdouts, aes(x = dist_up_to_reservoir, fill = spatial_holdout)) +
   geom_dotplot(stackgroups = TRUE, dotsize = 0.45)
 
-#what fraction of sites by source?
-drb_filtered_sites_sources <- readRDS('2_observations/out/drb_filtered_sites.rds')
+#what fraction of sites by source are held out by spatial holdout?
+#this df has some duplicates in site_id, source, site_type, that are only differentiated by original_source
+drb_filtered_sites_sources <- readRDS('2_observations/out/drb_filtered_sites.rds') %>%
+  distinct(site_id, source, site_type, .keep_all = TRUE) %>%
+  left_join(holdout_segs, by = c('seg_id_nat', 'subseg_id'))
 
+source_holdout_summary <- drb_filtered_sites_sources %>%
+  group_by(source, spatial_holdout) %>%
+  summarize(n_sites = n(), .groups = 'drop_last') %>%
+  mutate(fraction_source = n_sites / sum(n_sites))
+print(source_holdout_summary)
 
 
 
