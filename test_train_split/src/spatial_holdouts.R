@@ -12,6 +12,7 @@ scmake('2_observations/out/obs_flow_drb.rds', remake_file = 'getters.yml')
 scmake('1_network/out/segments_relative_to_reservoirs.rds', remake_file = 'getters.yml')
 scmake('1_network/out/subseg_distance_matrix.rds', remake_file = 'getters.yml')
 scmake('2_observations/out/drb_filtered_sites.rds', remake_file = 'getters.yml')
+scmake('1_network/out/filtered_dams_reservoirs.rds', remake_file = 'getters.yml')
 
 min_date <- '1980-01-01'
 
@@ -23,6 +24,7 @@ flow_obs <- readRDS('2_observations/out/obs_flow_drb.rds') %>%
 reservoir_segs <- readRDS('1_network/out/segments_relative_to_reservoirs.rds')
 distance_matrix <- readRDS('1_network/out/subseg_distance_matrix.rds')
 network <- readRDS('1_network/out/network.rds')
+reservoirs <- readRDS('1_network/out/filtered_dams_reservoirs.rds')
 
 #created in Jeff's Snakefile in this repo (20_catchment_attributes); I downloaded this file from Caldera
 catchment_attributes <- feather::read_feather('seg_attr_drb.feather')
@@ -353,7 +355,10 @@ sum(spatial_holdout_frac_time_removed$fraction_total_flow)
 
 #by mean discharge, basin characteristics
 #dotplot highlighting held-out reaches
-flow_catchment_atts <- flow_obs_stats %>%
+flow_catchment_atts <- network$edges %>%
+  select(subseg_id, seg_id_nat) %>%
+  st_drop_geometry() %>%
+  left_join(flow_obs_stats, by = c('seg_id_nat', 'subseg_id')) %>%
   left_join(catchment_attributes, by = c('seg_id_nat')) %>%
   mutate(holdout = subseg_id %in% holdout_segs$subseg_id)
 
@@ -361,7 +366,7 @@ flow_catchment_atts_long <- flow_catchment_atts %>%
   pivot_longer(cols = !all_of(c('seg_id_nat', 'subseg_id', 'n', 'holdout')),
                names_to = 'reach_metric')
 ggplot(flow_catchment_atts_long, aes(x = value, fill = holdout)) +
-  geom_dotplot(stackgroups = TRUE, dotsize = 0.5) +
+  geom_dotplot(dotsize = 0.5, stroke = 0, binpositions = 'all') +
   facet_wrap('reach_metric', scales = 'free') +
   scale_y_continuous(NULL, breaks = NULL)
 ggplot(flow_catchment_atts, aes(x = cov_type, fill = holdout)) + geom_dotplot(stackgroups = TRUE, dotsize = 0.2,
@@ -373,6 +378,12 @@ all_info_marked_holdouts <- all_info_gt400 %>%
   replace_na(replace = list(dist_up_to_reservoir = -20e3))
 ggplot(all_info_marked_holdouts, aes(x = dist_up_to_reservoir, fill = spatial_holdout)) +
   geom_dotplot(stackgroups = TRUE, dotsize = 0.45)
+#map of downstream_of_reservoir reaches
+ggplot(network$edges) + geom_sf() + theme_linedraw() +
+  geom_sf(data = reservoirs$reservoirs, col = 'blue', fill = 'blue') +
+  geom_sf(data = all_info_marked_holdouts, aes(col = dist_up_to_reservoir, geometry = geometry), lwd = 1) +
+  scale_color_gradient2(low = 'red', high = 'green', limits = c(-20e3, NA))
+
 
 #what fraction of sites by source are held out by spatial holdout?
 #this df has some duplicates in site_id, source, site_type, that are only differentiated by original_source
@@ -385,8 +396,6 @@ source_holdout_summary <- drb_filtered_sites_sources %>%
   summarize(n_sites = n(), .groups = 'drop_last') %>%
   mutate(fraction_source = n_sites / sum(n_sites))
 print(source_holdout_summary)
-
-
 
 ##### Final output #####
 #for final output, add columns to observations for time, spatial, either holdout
