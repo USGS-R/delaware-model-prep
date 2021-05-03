@@ -1,9 +1,17 @@
 library(scipiper)
+library(tidyverse)
+library(sf)
+library(dataRetrieval)
+library(lubridate)
+
+
 source('test_train_split/src/functions.R')
+#download various pipeline targets
 scmake('2_observations/out/obs_temp_drb.rds', remake_file = 'getters.yml')
 scmake('2_observations/out/obs_flow_drb.rds', remake_file = 'getters.yml')
 scmake('1_network/out/segments_relative_to_reservoirs.rds', remake_file = 'getters.yml')
 scmake('1_network/out/subseg_distance_matrix.rds', remake_file = 'getters.yml')
+scmake('2_observations/out/drb_filtered_sites.rds', remake_file = 'getters.yml')
 
 min_date <- '1980-01-01'
 
@@ -20,7 +28,7 @@ network <- readRDS('1_network/out/network.rds')
 catchment_attributes <- feather::read_feather('seg_attr_drb.feather')
 catchment_att_metadata <- readr::read_csv('combined_metadata.csv')
 
-library(tidyverse)
+
 
 ##### distance matrix #####
 #transform distance matrix to table of distances between reaches with data, and
@@ -74,7 +82,6 @@ temp_site_info <- dataRetrieval::readNWISdata(service = 'site',
                                               siteOutput = 'expanded') %>%
   left_join(temp_site_ids, by = 'site_no')
 
-
 ##### Look for freebies — only data during test time periods #####
 #plot map with color by fraction training?
 
@@ -93,7 +100,6 @@ temp_obs_time_holdout_summary <- temp_obs_time_holdout %>%
 
 flow_obs_time_holdout_summary <- flow_obs_time_holdout %>%
   summarize_holdout()
-
 
 flow_obs_stats <- flow_obs %>%
   group_by(seg_id_nat, subseg_id) %>%
@@ -367,6 +373,12 @@ all_info_marked_holdouts <- all_info_gt400 %>%
   replace_na(replace = list(dist_up_to_reservoir = -20e3))
 ggplot(all_info_marked_holdouts, aes(x = dist_up_to_reservoir, fill = spatial_holdout)) +
   geom_dotplot(stackgroups = TRUE, dotsize = 0.45)
+
+#what fraction of sites by source?
+drb_filtered_sites_sources <- readRDS('2_observations/out/drb_filtered_sites.rds')
+
+
+
 
 ##### Final output #####
 #for final output, add columns to observations for time, spatial, either holdout
