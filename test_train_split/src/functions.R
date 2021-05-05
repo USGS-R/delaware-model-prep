@@ -109,7 +109,8 @@ get_delaware_mainstem_sites <- function() {
 #' @param holdout_years numeric Will be highlighted in heatmap
 #' @param subseg_order_df data frame of subseg_id and order columns, used to set order in plot
 #' @param title char plot title
-reach_time_range_plot <- function(subseg_ids, obs_df, min_year, holdout_years, subseg_order_df, title = NA) {
+reach_time_range_plot <- function(subseg_ids, obs_df, min_year, holdout_years, subseg_order_df,
+                                  title = NA, lwd = 1) {
   subseg_df <- obs_df %>%
     filter(subseg_id %in% subseg_ids)
   subseg_df_year <- subseg_df %>%
@@ -119,7 +120,7 @@ reach_time_range_plot <- function(subseg_ids, obs_df, min_year, holdout_years, s
     filter(year >= min_year) %>%
     mutate(holdout_year = year %in% holdout_years) %>%
     left_join(subseg_order_df, by = 'subseg_id')
-  ggplot(subseg_df_year, aes(x = reorder(subseg_id, order), y = `year`)) + geom_tile(aes(fill = n_obs, col = holdout_year), lwd = 1) +
+  ggplot(subseg_df_year, aes(x = reorder(subseg_id, order), y = `year`)) + geom_tile(aes(fill = n_obs, col = holdout_year), lwd = lwd) +
     scale_color_manual(values = c(`FALSE` = NA, `TRUE` = 'green')) +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +

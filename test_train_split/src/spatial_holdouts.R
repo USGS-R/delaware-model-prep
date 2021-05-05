@@ -14,13 +14,13 @@ scmake('1_network/out/subseg_distance_matrix.rds', remake_file = 'getters.yml')
 scmake('2_observations/out/drb_filtered_sites.rds', remake_file = 'getters.yml')
 scmake('1_network/out/filtered_dams_reservoirs.rds', remake_file = 'getters.yml')
 
-min_date <- '1980-01-01'
+min_date <- as.POSIXct('1980-01-01 00:00:00', tz = 'UTC')
 
 temp_obs <- readRDS('2_observations/out/obs_temp_drb.rds') %>%
-  filter(date > min_date)
+  filter(date >= min_date)
 flow_obs <- readRDS('2_observations/out/obs_flow_drb.rds') %>%
   mutate(date = as.POSIXct(date, tz = 'UTC')) %>%
-  filter(date > min_date)
+  filter(date >= min_date)
 reservoir_segs <- readRDS('1_network/out/segments_relative_to_reservoirs.rds')
 distance_matrix <- readRDS('1_network/out/subseg_distance_matrix.rds')
 network <- readRDS('1_network/out/network.rds')
@@ -29,8 +29,6 @@ reservoirs <- readRDS('1_network/out/filtered_dams_reservoirs.rds')
 #created in Jeff's Snakefile in this repo (20_catchment_attributes); I downloaded this file from Caldera
 catchment_attributes <- feather::read_feather('seg_attr_drb.feather')
 catchment_att_metadata <- readr::read_csv('combined_metadata.csv')
-
-
 
 ##### distance matrix #####
 #transform distance matrix to table of distances between reaches with data, and
@@ -129,7 +127,7 @@ bird_dist <- apply(reach_mouth_bird_matrix, 1, get_distance_metrics, radius = ob
                    obs_summary = all_obs_stats, col_name_suffix = 'bird') %>%
   bind_rows(.id = 'subseg_id')
 
-#TODO: headwaters, distance up to reservoir, distance to nearest site, catchment info
+#headwaters, distance up to reservoir, distance to nearest site, catchment info
 all_info <- temp_obs_time_holdout_summary %>%
   left_join(flow_obs_time_holdout_summary, by = c('seg_id_nat', 'subseg_id'),
             suffix = c('_temp', '_flow')) %>%
@@ -343,8 +341,47 @@ holdout_segs <- tibble(seg_id_nat = as.numeric(c(key_segments$beltzville_seg_ids
                                       '1578', #Callicoon
                                       '3570',  #Maurice River
                                       '2338')),#2338 = Schuylkill @Philly for high impervious
-                       spatial_holdout = TRUE) %>%
+                       spatial_holdout = TRUE,
+                       spatial_holdout_name = c('Beltzville', 'Beltzville', 'Christina headwater','Trenton', 'Callicoon',
+                                                'Maurice River', 'Schuylkill @PHL')) %>%
   left_join(select(all_info, seg_id_nat, subseg_id, key_seg), by = 'seg_id_nat')
+
+#map of spatial holdouts
+ggplot(left_join(network$edges, holdout_segs), by = c('subseg_id', 'seg_id_nat'),
+       aes(label = spatial_holdout_name, color = spatial_holdout, geometry = geometry)) +
+  geom_sf(lwd = 1.1) +
+  scale_color_manual(values = c(`TRUE` = 'blue4'), na.value = 'grey') +
+  coord_sf(clip = 'off') +
+  theme_minimal() +
+  ggrepel::geom_label_repel(
+    stat = "sf_coordinates",
+    min.segment.length = 0.5,
+    colour = "blue4",
+    segment.colour = "blue4",
+    max.overlaps = 3,
+    force_pull = 0.1,
+    direction = 'both',
+    xlim = c(1815858, 1900000) #forces labels to right of reach geoms; units are network CRS
+  ) +
+  labs(x = '', y = '') +
+  theme(legend.position = 'none')
+
+#tile plot of periods of records, all holdouts marked
+holdout_segs_years <- holdout_segs %>% expand(subseg_id, year = 1980:2021) %>%
+  mutate(spatial_holdout = TRUE)
+outline_colors <- c('Spatial holdout' = 'red', 'TRUE' = 'green', `FALSE` = NA)
+reach_time_range_plot(subseg_ids = all_info_gt400$subseg_id,
+                      obs_df = temp_obs_time_holdout,
+                      min_year = 1980,
+                      holdout_years = time_holdout_years,
+                      subseg_order_df = network_coords_north_south,
+                      title = 'Reaches with >400 observed days ordered N -> S',
+                      lwd = 0.5) +
+  geom_tile(data = holdout_segs_years, fill = NA,
+            inherit.aes = FALSE, aes(x = subseg_id, y = year, color = 'Spatial holdout'), lwd = 0.5) +
+  labs(color = 'Holdouts') +
+  scale_color_manual(values = outline_colors, labels = c('Spatial holdout', `TRUE` = 'Temporal holdout', `FALSE` = 'training'))
+
 
 #add up data not in time holdout, get total fraction added by holding out these sites
 spatial_holdout_frac_time_removed <- all_obs_stats_frac_added_by_spatial %>%
@@ -408,3 +445,12 @@ flow_obs_marked_holdout <- flow_obs_time_holdout %>%
   mutate(in_spatial_holdout = subseg_id %in% holdout_segs$subseg_id,
          in_any_holdout = in_time_holdout | in_spatial_holdout)
 saveRDS(temp_obs_marked_holdout, file = 'test_train_split/out/flow_obs_marked_holdout.rds')
+
+##### final overall test/train split, including both time and space holdouts ####
+temp_obs_marked_holdout %>% group_by(in_any_holdout) %>%
+  summarize(n_obs_days = n()) %>%
+  mutate(obs_frac = n_obs_days / sum(n_obs_days))
+
+flow_obs_marked_holdout %>% group_by(in_any_holdout) %>%
+  summarize(n_obs_days = n()) %>%
+  mutate(obs_frac = n_obs_days / sum(n_obs_days))
