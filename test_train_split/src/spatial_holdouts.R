@@ -333,17 +333,23 @@ ggplot(target_mainstem_info, aes(x = n_obs_temp_radius_fish)) + stat_ecdf() + sc
        y = 'Cumulative distribution function',
        title = 'Delaware mainstem reaches vs distribution of fish radius temp obs')
 
-
+##### Select one more site north of Callicoon #####
+network_north_ids <- network_coords %>% filter(Y > 2271500)
+all_info_gt400_north <- all_info_gt400 %>%
+  filter(subseg_id %in% network_north_ids$subseg_id,
+                                                  is.na(dist_up_to_reservoir),
+                                                  n_obs_temp_radius_fish < 1200)
 ##### specify final holdouts #####
 holdout_segs <- tibble(seg_id_nat = as.numeric(c(key_segments$beltzville_seg_ids, '2007', #2007 = christina headwater
                                       #key_segments$lordville_id,
                                       key_segments$trenton_seg_id,
                                       '1578', #Callicoon
                                       '3570',  #Maurice River
-                                      '2338')),#2338 = Schuylkill @Philly for high impervious
+                                      '2338',
+                                      '1455')),#2338 = Schuylkill @Philly for high impervious
                        spatial_holdout = TRUE,
                        spatial_holdout_name = c('Beltzville', 'Beltzville', 'Christina headwater','Trenton', 'Callicoon',
-                                                'Maurice River', 'Schuylkill @PHL')) %>%
+                                                'Maurice River', 'Schuylkill @PHL', 'Willowemoc Creek')) %>%
   left_join(select(all_info, seg_id_nat, subseg_id, key_seg), by = 'seg_id_nat')
 
 #map of spatial holdouts
@@ -436,21 +442,21 @@ print(source_holdout_summary)
 
 ##### Final output #####
 #for final output, add columns to observations for time, spatial, either holdout
-temp_obs_marked_holdout <- temp_obs_time_holdout %>%
+temp_obs_marked_test <- temp_obs_time_holdout %>%
   mutate(in_spatial_holdout = subseg_id %in% holdout_segs$subseg_id,
-         in_any_holdout = in_time_holdout | in_spatial_holdout)
-saveRDS(temp_obs_marked_holdout, file = 'test_train_split/out/temp_obs_marked_holdout.rds')
+         test = in_time_holdout | in_spatial_holdout)
+saveRDS(temp_obs_marked_test, file = 'test_train_split/out/temp_obs_marked_test.rds')
 
-flow_obs_marked_holdout <- flow_obs_time_holdout %>%
+flow_obs_marked_test <- flow_obs_time_holdout %>%
   mutate(in_spatial_holdout = subseg_id %in% holdout_segs$subseg_id,
-         in_any_holdout = in_time_holdout | in_spatial_holdout)
-saveRDS(temp_obs_marked_holdout, file = 'test_train_split/out/flow_obs_marked_holdout.rds')
+         test = in_time_holdout | in_spatial_holdout)
+saveRDS(temp_obs_marked_test, file = 'test_train_split/out/flow_obs_marked_test.rds')
 
 ##### final overall test/train split, including both time and space holdouts ####
-temp_obs_marked_holdout %>% group_by(in_any_holdout) %>%
+temp_obs_marked_test %>% group_by(test) %>%
   summarize(n_obs_days = n()) %>%
   mutate(obs_frac = n_obs_days / sum(n_obs_days))
 
-flow_obs_marked_holdout %>% group_by(in_any_holdout) %>%
+flow_obs_marked_test %>% group_by(test) %>%
   summarize(n_obs_days = n()) %>%
   mutate(obs_frac = n_obs_days / sum(n_obs_days))
