@@ -1,6 +1,6 @@
-year_to_days <- function(year) {
-  seq(from = as.POSIXct(paste0(year, "-01-01"), tz = 'UTC'),
-      to = as.POSIXct(paste0(year, "-12-31"), tz = 'UTC'), by="+1 day")
+water_year_to_days <- function(year) {
+  seq(from = as.POSIXct(paste0(year - 1, "-10-01"), tz = 'UTC'),
+      to = as.POSIXct(paste0(year, "-09-30"), tz = 'UTC'), by="+1 day")
 }
 
 summarize_holdout <- function(df) {
@@ -109,20 +109,21 @@ get_delaware_mainstem_sites <- function() {
 #' @param holdout_years numeric Will be highlighted in heatmap
 #' @param subseg_order_df data frame of subseg_id and order columns, used to set order in plot
 #' @param title char plot title
-reach_time_range_plot <- function(subseg_ids, obs_df, min_year, holdout_years, subseg_order_df,
+reach_time_range_plot <- function(subseg_ids, obs_df, min_year, holdout_water_years, subseg_order_df,
                                   title = NA, lwd = 1) {
   subseg_df <- obs_df %>%
     filter(subseg_id %in% subseg_ids)
   subseg_df_year <- subseg_df %>%
-    mutate(year = year(date)) %>%
-    group_by(year, subseg_id) %>%
+    mutate(water_year = calcWaterYear(date)) %>%
+    group_by(water_year, subseg_id) %>%
     summarize(n_obs = n()) %>%
-    filter(year >= min_year) %>%
-    mutate(holdout_year = year %in% holdout_years) %>%
+    filter(water_year >= min_year) %>%
+    mutate(holdout_water_year = water_year %in% holdout_water_years) %>%
     left_join(subseg_order_df, by = 'subseg_id')
-  ggplot(subseg_df_year, aes(x = reorder(subseg_id, order), y = `year`)) + geom_tile(aes(fill = n_obs, col = holdout_year), lwd = lwd) +
+  ggplot(subseg_df_year, aes(x = reorder(subseg_id, order), y = water_year)) +
+    geom_tile(aes(fill = n_obs, col = holdout_water_year), lwd = lwd) +
     scale_color_manual(values = c(`FALSE` = NA, `TRUE` = 'green')) +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(title = title, y = 'Year', x = 'subseg_id')
+    labs(title = title, y = 'Water year', x = 'subseg_id')
 }

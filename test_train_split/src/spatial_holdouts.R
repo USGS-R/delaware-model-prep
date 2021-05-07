@@ -4,7 +4,6 @@ library(sf)
 library(dataRetrieval)
 library(lubridate)
 
-
 source('test_train_split/src/functions.R')
 #download various pipeline targets
 scmake('2_observations/out/obs_temp_drb.rds', remake_file = 'getters.yml')
@@ -14,7 +13,7 @@ scmake('1_network/out/subseg_distance_matrix.rds', remake_file = 'getters.yml')
 scmake('2_observations/out/drb_filtered_sites.rds', remake_file = 'getters.yml')
 scmake('1_network/out/filtered_dams_reservoirs.rds', remake_file = 'getters.yml')
 
-min_date <- as.POSIXct('1980-01-01 00:00:00', tz = 'UTC')
+min_date <- as.POSIXct('1979-10-01 00:00:00', tz = 'UTC')
 
 temp_obs <- readRDS('2_observations/out/obs_temp_drb.rds') %>%
   filter(date >= min_date)
@@ -85,8 +84,8 @@ temp_site_info <- dataRetrieval::readNWISdata(service = 'site',
 ##### Look for freebies — only data during test time periods #####
 #plot map with color by fraction training?
 
-time_holdout_years <- c(1980:1984, 2011:2015, 2021)
-time_holdout_days <- sapply(time_holdout_years, year_to_days) %>%
+time_holdout_water_years <- c(1980:1984, 2011:2015, 2021)
+time_holdout_days <- sapply(time_holdout_water_years, water_year_to_days) %>%
   reduce(.f = c)
 
 temp_obs_time_holdout <- temp_obs %>%
@@ -229,14 +228,14 @@ ggplot(network$edges) + geom_sf() + theme_minimal() +
 reach_time_range_plot(subseg_ids = all_info_delaware_mainstem$subseg_id,
                       obs_df = temp_obs_time_holdout,
                       min_year = 1950,
-                      holdout_years = time_holdout_years,
+                      holdout_water_years = time_holdout_water_years,
                       subseg_order_df = network_coords_north_south,
                       title = 'Mainstem reaches ordered N -> S')
 
 reach_time_range_plot(all_info_select$subseg_id,
                       obs_df = temp_obs_time_holdout,
                       min_year = 1950,
-                      holdout_years = time_holdout_years,
+                      holdout_water_years = time_holdout_water_years,
                       subseg_order_df = tibble(subseg_id = all_info_select$subseg_id,
                                                order = 1:nrow(all_info_select)),
                       title = 'Select reaches of interest')
@@ -290,7 +289,7 @@ ggplot(all_obs_stats_frac_outside_time_holdout, aes(x = 100*fraction_total_temp,
   labs(title = 'Additional loss of training data if a reach is a spatial holdout',
        x = 'Percent temp data lost', y = 'Percent flow data lost')
 
-#check urban drainages impervious > 0.2
+##### check urban drainages impervious > 0.2 ######
 all_info_gt400_imperv <- filter(all_info_gt400, hru_percent_imperv > 0.2)
 ggplot(network$edges) + geom_sf() + theme_minimal() +
   geom_sf(data = all_info_gt400_imperv, aes(color = n_data_points_temp, geometry = geometry), lwd = 3) +
@@ -313,7 +312,7 @@ ggplot(all_info_gt400_imperv, aes(x = hru_percent_imperv, y = n_obs_temp_radius_
 reach_time_range_plot(all_info_gt400_imperv$subseg_id,
                       obs_df = temp_obs_time_holdout,
                       min_year = 1980,
-                      holdout_years = time_holdout_years,
+                      holdout_water_years = time_holdout_water_years,
                       subseg_order_df = tibble(subseg_id = all_info_select$subseg_id,
                                                order = 1:nrow(all_info_select)),
                       title = 'Reaches % impervious > 0.2')
@@ -340,18 +339,19 @@ all_info_gt400_north <- all_info_gt400 %>%
                                                   is.na(dist_up_to_reservoir),
                                                   n_obs_temp_radius_fish < 1200)
 ##### specify final holdouts #####
-holdout_segs <- tibble(seg_id_nat = as.numeric(c(key_segments$beltzville_seg_ids, '2007', #2007 = christina headwater
+holdout_segs <- tibble(seg_id_nat = as.numeric(c(key_segments$beltzville_seg_ids, '2007', #2007 = christina headwater (birch run)
                                       #key_segments$lordville_id,
                                       key_segments$trenton_seg_id,
                                       '1578', #Callicoon
                                       '3570',  #Maurice River
-                                      '2338',
-                                      '1455')),#2338 = Schuylkill @Philly for high impervious
+                                      '2338', #2338 = Schuylkill @Philly for high impervious
+                                      '1455')), #Willowemoc Creek
                        spatial_holdout = TRUE,
                        spatial_holdout_name = c('Beltzville', 'Beltzville', 'Christina headwater','Trenton', 'Callicoon',
                                                 'Maurice River', 'Schuylkill @PHL', 'Willowemoc Creek')) %>%
   left_join(select(all_info, seg_id_nat, subseg_id, key_seg), by = 'seg_id_nat')
 
+##### figures using final holdouts ######
 #map of spatial holdouts
 ggplot(left_join(network$edges, holdout_segs), by = c('subseg_id', 'seg_id_nat'),
        aes(label = spatial_holdout_name, color = spatial_holdout, geometry = geometry)) +
@@ -379,7 +379,7 @@ outline_colors <- c('Spatial holdout' = 'red', 'TRUE' = 'green', `FALSE` = NA)
 reach_time_range_plot(subseg_ids = all_info_gt400$subseg_id,
                       obs_df = temp_obs_time_holdout,
                       min_year = 1980,
-                      holdout_years = time_holdout_years,
+                      holdout_water_years = time_holdout_water_years,
                       subseg_order_df = network_coords_north_south,
                       title = 'Reaches with >400 observed days ordered N -> S',
                       lwd = 0.5) +
