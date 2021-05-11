@@ -4,7 +4,7 @@ May 11th 2021
 
 We sought to create a test set representative of temperature dynamics throughout the Delaware River basin from water year 1980-present.  To minimize the possibility of the correlation between sites and temporal autocorrelation at single sites causing artificially high test performance, we created temporal holdouts (time periods where data from all sites were reserved for testing), and spatial holdouts (sites where all data were reserved for testing).  **In all, this resulted in a train/test split of 66.2%/33.8% for observed temperature reach  days, and 71.4%/28.6% for observed flow reach days.**
 
-__Temporal_holdouts__: All data in the water years 1980-84, 2011-15, and 2021 were reserved for the test set.  These windows were chosen to attempt to balance the ability to test on the most recent data (critical to assess performance in an operational setting) and historical periods, while still training on a sufficient amount of modern continuous data.
+__Temporal holdouts__: All data in the water years 1980-84, 2011-15, and 2021 were reserved for the test set.  These windows were chosen to attempt to balance the ability to test on the most recent data (critical to assess performance in an operational setting) and historical periods, while still training on a sufficient amount of modern continuous data.
 
 __Spatial holdouts__: We chose eight reaches of the PRMS network to reserve all data for testing, based on representing key parts of the Delaware basin (mainstem, headwaters, reservoir-adjacent reaches), representing the distribution catchment attributes (e.g. fraction of impervious surfaces) and minimizing the number of observations within a 20 km distance along the network ('fish radius').  Segments are listed north to south.
 
