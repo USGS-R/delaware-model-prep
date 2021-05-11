@@ -17,7 +17,7 @@ __Spatial holdouts__: We chose eight reaches of the PRMS network to reserve all 
   - Maurice River (above Union Lake) (3570): Part of the southeast portion of the Delaware Basin that drains south directly into Delaware Bay, rather than the Delaware main stem.
 
 Map of spatial holdouts:
-![map of basin](drb_holdouts.png)
+![map of basin](drb_holdouts_map.png)
 
 Data coverage for reaches with at least 400 observed days:
 ![tile plot](data_coverage_tiles.png)
