@@ -46,3 +46,14 @@ save_dist_matrices <- function(dist_mat_ind, out_ind) {
 
 
 }
+
+write_zarr_tarfile <- function(dat_ind, out_ind){
+  out_file <- as_data_file(out_ind)
+  write_py <- reticulate::import_from_path('write_functions_py', path='9_collaborator_data/src/')
+  data_file <- sc_retrieve(dat_ind, 'getters.yml')
+  write_py$write_zarr_tar(
+    data_file,
+    as_data_file(out_ind)
+  )
+  gd_put(out_ind)
+}

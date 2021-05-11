@@ -1,0 +1,9 @@
+name: drb_prep
+channels:
+    - conda-forge
+    - defaults
+dependencies:
+    - dask
+    - pyarrow
+    - xarray
+    - zarr
