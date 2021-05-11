@@ -11,8 +11,8 @@ def make_tar(in_flder, outfile):
 
 def write_zarr_tar(data_file, out_tar=None, delete_zarr=True):
     """
-    write a tar of a zarr store from a csv
-    :param data_file: csv file with columns 'seg_id_nat' and 'date'
+    write a tar of a zarr store from a csv or feather file
+    :param data_file: csv or feather file with columns 'seg_id_nat' and 'date'
     :param out_tar: path that the tar file will be written to
     :param delete_zarr: whether or not to delete the intermediate zarr store
     """
@@ -26,7 +26,7 @@ def write_zarr_tar(data_file, out_tar=None, delete_zarr=True):
     # specify zarr store name and tar name
     zarr_storename = filename + ".zarr"
     if not out_tar:
-        out_tar_filename = zarr_filename + ".tar"
+        out_tar_filename = zarr_storename + ".tar"
         out_tar = os.path.join(base, out_tar_filename) 
 
     # read in data
@@ -49,9 +49,9 @@ def write_zarr_tar(data_file, out_tar=None, delete_zarr=True):
               'date': len(ds.date)}).to_zarr(zarr_storename, mode='w')
 
     # write tar
-    make_tar(zarr_filename, out_tar)
+    make_tar(zarr_storename, out_tar)
 
     # delete zarr
     if delete_zarr:
-        shutil.rmtree(zarr_filename)
+        shutil.rmtree(zarr_storename)
 
