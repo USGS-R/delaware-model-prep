@@ -5,6 +5,7 @@ library(dataRetrieval)
 library(lubridate)
 
 source('test_train_split/src/functions.R')
+source('2_observations/src/data_munge_functions.R') #moved some functions here so pipeline could use them
 #download various pipeline targets
 scmake('2_observations/out/obs_temp_drb.rds', remake_file = 'getters.yml')
 scmake('2_observations/out/obs_flow_drb.rds', remake_file = 'getters.yml')
