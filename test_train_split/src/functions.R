@@ -1,8 +1,3 @@
-water_year_to_days <- function(year) {
-  seq(from = as.POSIXct(paste0(year - 1, "-10-01"), tz = 'UTC'),
-      to = as.POSIXct(paste0(year, "-09-30"), tz = 'UTC'), by="+1 day")
-}
-
 summarize_holdout <- function(df) {
   df %>%
     group_by(seg_id_nat, subseg_id) %>%

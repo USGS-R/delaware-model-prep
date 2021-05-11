@@ -2,12 +2,16 @@ version: 0.3.0
 name: 2_observations/out/obs_flow_drb.rds.ind
 type: file
 hash: b09c3d49cff1b99234d2face6fcc9981
-time: 2021-04-26 17:02:29 UTC
+time: 2021-05-11 17:35:22 UTC
 depends:
   2_observations/in/daily_flow.rds.ind: 14915648b1ce9cc5b4e69564494ab1da
   2_observations/out/drb_filtered_sites.rds.ind: 32e4780c4a6fb6d4331472cf618c5dbf
+  holdout_water_years: 09355750a3f5df011b5a31f3e2b04b61
+  holdout_reach_ids: b18bf9f68b16a629071cd1529b33baae
 fixed: 676a81c3405922c452521e3b90119aad
 code:
   functions:
-    munge_flow: 47e426b465bcb9c23cd33b0edd6bf28a
+    mark_time_space_holdouts: f7358c681ef089a521c2be8d560fac1e
+    munge_split_flow: eb4b478918fe859f850b6c4c0ae197f1
+    water_year_to_days: 30b427eab5eab43d896fa012a744ba73
 
