@@ -42,6 +42,20 @@ targets:
   ngwos_sites:
     command: filter_ngwos(ngwos_ind = '2_observations/out/NGWOS_sites_data.rds.ind')
 
+  holdout_water_years:
+    command: c(I(1980:1984), I(2011:2015), I(2021))
+
+  #seg_id_nats; Birch Run is a Christina basin headwater; Willowemoc is a northern site upstream of all reservoirs
+  holdout_reach_ids:
+    command: c('Willowemoc Creek' = 1455,
+                'Callicoon' = 1578,
+                 'Beltzville' = 1703,
+                 'Beltzville' = 1697,
+                 'Birch Run' = 2007,
+                 'Trenton' = 1498,
+                 'Schuylkill @PHL' = 2338,
+                 'Maurice River' = 3570)
+
   # temperature data and sites info comes from the national NWIS temperature pull: https://github.com/USGS-R/2wp-temp-observations
   2_observations/out/crosswalk_site_reach.rds.ind:
     command: crosswalk_sites_to_reaches(
@@ -74,9 +88,11 @@ targets:
   # keep only data in the filtered sites above,
   # and take mean of multiple obs/reach-dat to reduce duplicate vals
   2_observations/out/obs_temp_drb.rds.ind:
-    command: munge_temp_dat(
+    command: munge_split_temp_dat(
       sites_ind = '2_observations/out/drb_filtered_sites.rds.ind',
       dat_ind = '2_observations/out/all_drb_temp_obs.rds.ind',
+      holdout_water_years = holdout_water_years,
+      holdout_reach_ids = holdout_reach_ids,
       out_ind = target_name)
 
   # ngwos reaches that should be withheld after 2017-10-01 for NGWOS experiment
@@ -85,10 +101,12 @@ targets:
 
   # discharge data
   2_observations/out/obs_flow_drb.rds.ind:
-    command: munge_flow(
+    command: munge_split_flow(
       out_ind = target_name,
       dat_ind = '2_observations/in/daily_flow.rds.ind',
-      sites_ind = '2_observations/out/drb_filtered_sites.rds.ind')
+      sites_ind = '2_observations/out/drb_filtered_sites.rds.ind',
+      holdout_water_years = holdout_water_years,
+      holdout_reach_ids = holdout_reach_ids)
 
   2_observations/out/drb_temp_summary.csv:
     command: summarize_dat(in_ind = '2_observations/out/obs_temp_drb.rds.ind', out_file = target_name)

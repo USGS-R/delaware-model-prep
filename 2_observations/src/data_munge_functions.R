@@ -28,7 +28,6 @@ filter_temp_data <- function(cross_ind, dat_ind, out_ind) {
     distinct(site_id, subseg_id, seg_id_nat, .keep_all = TRUE)
 
   dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
-
   drb_dat <- filter(dat, site_id %in% unique(sites$site_id)) %>%
     distinct(site_id, date, mean_temp_degC, min_temp_degC, max_temp_degC, .keep_all = TRUE)
 
@@ -37,7 +36,21 @@ filter_temp_data <- function(cross_ind, dat_ind, out_ind) {
 
 }
 
-munge_temp_dat <- function(sites_ind, dat_ind, out_ind) {
+mark_time_space_holdouts <- function(df, holdout_water_years, holdout_reach_ids){
+  time_holdout_days <- sapply(holdout_water_years, water_year_to_days) %>%
+    reduce(.f = c)
+  df %>% mutate(in_time_holdout = date %in% time_holdout_days,
+                in_space_holdout = seg_id_nat %in% holdout_reach_ids,
+                test = in_time_holdout | in_space_holdout)
+}
+
+water_year_to_days <- function(year) {
+  seq(from = as.POSIXct(paste0(year - 1, "-10-01"), tz = 'UTC'),
+      to = as.POSIXct(paste0(year, "-09-30"), tz = 'UTC'), by="+1 day")
+}
+
+munge_split_temp_dat <- function(sites_ind, dat_ind, holdout_water_years,
+                           holdout_reach_ids, out_ind) {
 
   sites <- readRDS(sc_retrieve(sites_ind, 'getters.yml')) %>%
     select(site_id, subseg_id, seg_id_nat) %>%
@@ -52,19 +65,20 @@ munge_temp_dat <- function(sites_ind, dat_ind, out_ind) {
               max_temp_C = max(max_temp_degC)) %>%
     ungroup()
 
-  drb_dat <- drb_dat %>%
+  drb_dat_by_subseg <- drb_dat %>%
     left_join(sites) %>%
     group_by(subseg_id, seg_id_nat, date) %>%
     summarize(mean_temp_c = mean(mean_temp_C),
               min_temp_c = min(min_temp_C),
               max_temp_c = max(max_temp_C),
               site_id = paste0(site_id, collapse = ', ')) %>%
-    ungroup()
+    ungroup() %>%
+    mark_time_space_holdouts(holdout_water_years, holdout_reach_ids)
 
-  saveRDS(drb_dat, as_data_file(out_ind))
+  saveRDS(drb_dat_by_subseg, as_data_file(out_ind))
   gd_put(out_ind)
-
 }
+
 generate_site_summary <- function(dat_ind, crosswalk_ind, out_ind) {
   dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml')) %>%
     group_by(site_id) %>%

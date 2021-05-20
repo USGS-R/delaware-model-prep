@@ -1,13 +1,17 @@
 version: 0.3.0
 name: 2_observations/out/obs_temp_drb.rds.ind
 type: file
-hash: 33517d083c07d9960a8d29725e825ba3
-time: 2021-04-26 16:54:23 UTC
+hash: 0451b72a6785678b52d099e440d33369
+time: 2021-05-11 22:36:38 UTC
 depends:
   2_observations/out/drb_filtered_sites.rds.ind: 32e4780c4a6fb6d4331472cf618c5dbf
   2_observations/out/all_drb_temp_obs.rds.ind: 23f8f6693f69b5d34e2b83e6376a8d6a
+  holdout_water_years: 09355750a3f5df011b5a31f3e2b04b61
+  holdout_reach_ids: b18bf9f68b16a629071cd1529b33baae
 fixed: 85ad163e39713348fdbadb6028747ced
 code:
   functions:
-    munge_temp_dat: e4f52123fcf414f9c293062953cb0cf4
+    mark_time_space_holdouts: f7358c681ef089a521c2be8d560fac1e
+    munge_split_temp_dat: 9b0108d369d9ece96225d72e46833c9b
+    water_year_to_days: 30b427eab5eab43d896fa012a744ba73
 
