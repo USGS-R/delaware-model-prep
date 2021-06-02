@@ -2,7 +2,6 @@ calc_decay <- function(segs_downstream,
                        reservoir_nhdid,
                        preds_obs_ind = '3_predictions/out/compare_predictions_obs.feather.ind',
                        glm_preds_file,
-                       res_data = '../lake-temperature-model-prep/7b_temp_merge/out/drb_daily_reservoir_temps.rds',
                        test_period,
                        distance_file = '1_network/out/subseg_distance_matrix.rds',
                        crosswalk_ind = '2_observations/out/crosswalk_site_reach.rds.ind',
@@ -24,16 +23,6 @@ calc_decay <- function(segs_downstream,
 
   # crosswalk between segs and sites
   cross <- readRDS(sc_retrieve(crosswalk_ind))
-
-  # right now this is deep-water reservoir observations
-  # but we will switch this to GLM outflow predictions
-  res <- readRDS(res_data) %>%
-    filter(site_id %in% reservoir_nhdid) %>%
-    mutate(year = lubridate::year(date),
-           doy = lubridate::yday(date)) %>%
-    group_by(date) %>%
-    slice_max(depth) %>%
-    filter(depth > 30)
 
   # stream dat
   stream_dat <- compare
@@ -63,11 +52,16 @@ calc_decay <- function(segs_downstream,
     st_drop_geometry() %>%
     distinct()
 
+  # get reservoir predictions
+  glm_preds <- readr::read_csv(scmake(glm_preds_file, 'getters.yml')) %>%
+    rename(date = time, glm_temp_c = temp) %>%
+    filter(res_id %in% reservoir_nhdid)
+
   # calculate adjustment
   obs_adjustment <-  select(res_preds, seg_id_nat, date, sntemp_temp_c, mean_temp_c, subseg_id, distance, site_id) %>%
-    left_join(select(res, date, res_bottom_temp = temp)) %>%
+    left_join(glm_preds) %>%
     # need both reservoir temp and stream temp to make comparison
-    filter(!is.na(res_bottom_temp)) %>%
+    filter(!is.na(glm_temp_c)) %>%
     filter(!is.na(mean_temp_c)) %>%
     rowwise() %>%
     # calculate distance from res to observation sites. Take mean of all listed sites when multiple listed
@@ -76,7 +70,7 @@ calc_decay <- function(segs_downstream,
     # the equation for calculating stream temp which
     # we assume to be a combination of "reservoir temperature processes" and "stream temperature processes"
     # observed stream temp = obs_adjustment*res_bottom_temp + (1-obs_adjustment)*Modeled_Stream_temp
-    mutate(obs_adjustment = (mean_temp_c - sntemp_temp_c)/(res_bottom_temp - sntemp_temp_c)) %>%
+    mutate(obs_adjustment = (mean_temp_c - sntemp_temp_c)/(glm_temp_c - sntemp_temp_c)) %>%
     # sometimes get infinite because obs_adjustment is negative, and you cant take the root of a negative number
     # if observed adjustment is <0, set it to 0
     # if observed adjustement is >1, set to 1
@@ -142,10 +136,7 @@ calc_decay <- function(segs_downstream,
     summarize(median_obs_rate_contrained = median(obs_rate_constrained[!date %in% test_period], na.rm = TRUE),
               median_obs_rate = median(obs_rate[!date %in% test_period], na.rm = TRUE))
 
-  # use the same rate adjustments for Pepacton
-  # calculate adjustment
-  glm_preds <- readr::read_csv(glm_preds_file) %>%
-    rename(date = time, glm_temp_c = temp)
+
 
   dwallin_full <-  select(res_preds, seg_id_nat, date, sntemp_temp_c, mean_temp_c, subseg_id, distance, site_id) %>%
     left_join(glm_preds) %>%
