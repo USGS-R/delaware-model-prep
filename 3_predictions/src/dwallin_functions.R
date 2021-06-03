@@ -138,41 +138,6 @@ calc_decay <- function(segs_downstream,
 
 
 
-# plots
-# plot_dat <- cannon_obs_outflow[[1]]
-# ggplot(filter(plot_dat, year %in% 2014, seg_id_nat %in% '1566'), aes(x = doy, y = sntemp_temp_c)) +
-#   geom_line(color = 'goldenrod') +
-#   geom_point(data = filter(plot_dat, year %in% 2014, seg_id_nat %in% '1566'), aes(x = doy, y = mean_temp_c)) +
-#   geom_line(data = filter(plot_dat, year %in% 2014, seg_id_nat %in% '1566'), aes(x = doy, y = dwallin_temp_c), color = 'darkolivegreen4') +
-#   geom_line(data = filter(plot_dat, year %in% 2014), aes(x = doy, y = glm_temp_c), color = 'royalblue3') +
-#   theme_bw() +
-#   labs(#subtitle = 'Temperature observations from streams below Cannonsville (filled dots). \nReservior outflow temperature predictions from GLM (black line). \nPRMS-SNTemp predictions from each segment are solid lines of the same color. \nDWALLIN predictions from each segment are dotted lines of the same color.',
-#        x = 'Day of year in 2014', y = 'Temperature [deg C]')
-#
-# cannon_pred_outflow[[1]] %>%
-#   filter(date %in% test_period) %>%
-#   mutate(sqerror_dwallin = (dwallin_temp_c - mean_temp_c)^2,
-#          sqerror_sntemp = (sntemp_temp_c - mean_temp_c)^2) %>%
-#   group_by(seg_id_nat) %>%
-#   summarize(rmse_sntemp = sqrt(mean(sqerror_sntemp)),
-#             rmse_dwallin = sqrt(mean(sqerror_dwallin)),
-#             distance_downstream = unique(distance),
-#             n = n()) %>%
-#   arrange(distance_downstream) %>%
-#   filter(n > 10)
-#
-# cannon_obs_outflow[[1]] %>%
-#   filter(date %in% test_period) %>%
-#   mutate(sqerror_dwallin = (dwallin_temp_c - mean_temp_c)^2,
-#          sqerror_sntemp = (sntemp_temp_c - mean_temp_c)^2) %>%
-#   group_by(seg_id_nat) %>%
-#   summarize(rmse_sntemp = sqrt(mean(sqerror_sntemp)),
-#             rmse_dwallin = sqrt(mean(sqerror_dwallin)),
-#             distance_downstream = unique(distance),
-#             n = n()) %>%
-#   arrange(distance_downstream) %>%
-#   filter(n > 10)
-
 combine_dwallin_models <- function(
   west = cannonsville_decay_estimate,
   east = pepacton_decay_estimate,
