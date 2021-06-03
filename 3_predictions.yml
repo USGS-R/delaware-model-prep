@@ -2,9 +2,9 @@ target_default: 3_predictions
 
 packages:
   - RcppCNPy
-  - dplyr
+  - tidyverse
+  - sf
   - feather
-  - lubridate
   - yaml
 
 sources:
@@ -17,6 +17,8 @@ sources:
   - 3_predictions/src/gather_sntemp_output.R
   - 3_predictions/src/get_subbasins.R
   - 3_predictions/src/get_upstream_downstream_segs.R
+  - 3_predictions/src/download_files.R
+  - 3_predictions/src/dwallin_functions.R
 
 targets:
   3_predictions:
@@ -118,3 +120,50 @@ targets:
     command: calc_metrics(
       compare_ind = '3_predictions/out/compare_predictions_obs.feather.ind',
       out_file = target_name)
+
+  # get GLM reservoir predictions
+  3_predictions/in/reservoir_downstream_preds.csv.ind:
+    command: get_sb_item(out_ind = target_name,
+      sb_id = I('5f6a28a782ce38aaa2449137'),
+      sb_names = I('reservoir_downstream_preds.csv'))
+
+  # calculate decay rates to be used to weight GLM vs PRMS-SNTemp preds
+  # for Cannonsville
+
+  test_period:
+    command: c(I(c(seq(as.Date('1979-10-01'), as.Date('1984-09-30'), 1),
+      seq(as.Date('2010-10-01'), as.Date('2015-09-30'), 1),
+      seq(as.Date('2020-10-01'), as.Date('2021-09-30'), 1))))
+
+  cannonsville_decay_estimate:
+   command: calc_decay(
+     segs_downstream = I(c('1566', '1563', '1565' , '1571', '1572')),
+     reservoir_nhdid = I('nhdhr_120022743'),
+     glm_preds_file = '3_predictions/in/reservoir_downstream_preds.csv.ind',
+     reservoir_subseg = I('128_1'),
+     test_period = test_period)
+
+  pepacton_decay_estimate:
+   command: calc_decay(
+     segs_downstream = I(c('1444', '1450', '1459', '1461', '1462', '1463')),
+     reservoir_nhdid = I('nhdhr_151957878'),
+     glm_preds_file = '3_predictions/in/reservoir_downstream_preds.csv.ind',
+     reservoir_subseg = I('15_1'),
+     test_period = test_period)
+
+  # object that retains observations and sntemp predictions for comparison purposes
+  dwallin_preds:
+    command: combine_dwallin_models(
+      west = cannonsville_decay_estimate,
+      east = pepacton_decay_estimate,
+      distance_ind = '1_network/out/subseg_distance_matrix.rds.ind',
+      confluence_subseg = I('140_1'),
+      west_subseg = I('128_1'),
+      east_subseg = I('15_1'))
+
+  # pare down columns and write to file for data release
+  3_predictions/out/dwallin_stream_preds.csv.ind:
+    command: simplify_and_write(dwallin_preds, target_name)
+
+
+

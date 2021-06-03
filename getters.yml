@@ -133,6 +133,14 @@ targets:
   3_predictions/out/compare_predictions_obs.feather:
     command: gd_get('3_predictions/out/compare_predictions_obs.feather.ind')
 
+  # dwallin model
+  3_predictions/in/reservoir_downstream_preds.csv:
+    command: gd_get('3_predictions/in/reservoir_downstream_preds.csv.ind')
+
+  3_predictions/out/dwallin_stream_preds.csv:
+    command: gd_get('3_predictions/out/dwallin_stream_preds.csv.ind')
+
+
   ### 3_hybrid_predictions ###
   # these files were uploaded to GD to the appropriate place,
   # then used gd_confirm_posted to check and create indicator file
