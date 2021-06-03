@@ -172,5 +172,115 @@ calc_decay <- function(segs_downstream,
 #             n = n()) %>%
 #   arrange(distance_downstream) %>%
 #   filter(n > 10)
-#
+
+combine_dwallin_models <- function(
+  west = cannonsville_decay_estimate,
+  east = pepacton_decay_estimate,
+  distance_ind = '1_network/out/subseg_distance_matrix.rds.ind',
+  preds_obs_ind = '3_predictions/out/compare_predictions_obs.feather.ind',
+  glm_preds_ind = '3_predictions/in/reservoir_downstream_preds.csv.ind',
+  network_ind = '1_network/out/network.rds.ind',
+  west_subseg = I('128_1'),
+  east_subseg = I('15_1'),
+  west_nhdid = I('nhdhr_120022743'),
+  east_nhdid = I('nhdhr_151957878'),
+  confluence_subseg = I('140_1')) {
+
+  # get distances
+  dist <- readRDS(sc_retrieve(distance_ind, 'getters.yml'))[[2]]
+  network <- readRDS(sc_retrieve(network_ind, 'getters.yml'))[[1]] %>%
+    mutate(seg_id_nat = as.character(seg_id_nat))
+
+  west_confluence <- west[[1]] %>%
+    select(seg_id_nat, distance) %>%
+    distinct() %>%
+    slice_max(distance)%>%
+    left_join(select(network, seg_id_nat, subseg_id)) %>%
+    select(-geometry)
+
+  distances_west <- tibble(subseg_id = names(dist[west_subseg,]),
+                      distance = as.numeric(dist[west_subseg,])) %>%
+    left_join(select(network, subseg_id, seg_id_nat)) %>%
+    select(-geometry) %>%
+    mutate(distance = distance/1000) %>%
+    filter(!is.infinite(distance)) %>%
+    filter(distance > max(west[[1]]$distance)) %>%
+    mutate(seg_id_nat = as.character(seg_id_nat)) %>%
+    mutate(res_weight_west = exp(-1*west[[2]]['obs_rate_cons']*distance)) %>%
+    rename(west_distance = distance)
+
+  east_confluence <- east[[1]] %>%
+    select(seg_id_nat, distance) %>%
+    distinct() %>%
+    slice_max(distance)%>%
+    left_join(select(network, seg_id_nat, subseg_id)) %>%
+    select(-geometry)
+
+  distances_east <- tibble(subseg_id = names(dist[east_subseg,]),
+                           distance = as.numeric(dist[east_subseg,])) %>%
+    left_join(select(network, subseg_id, seg_id_nat)) %>%
+    select(-geometry) %>%
+    mutate(distance = distance/1000) %>%
+    filter(!is.infinite(distance)) %>%
+    filter(distance > max(east[[1]]$distance)) %>%
+    mutate(seg_id_nat = as.character(seg_id_nat)) %>%
+    mutate(res_weight_east = exp(-1*east[[2]]['obs_rate_cons']*distance)) %>%
+    rename(east_distance = distance)
+
+  weights <- left_join(distances_west, distances_east) %>%
+    select(seg_id_nat, res_weight_east, res_weight_west)
+
+  preds <- feather::read_feather(sc_retrieve(preds_obs_ind))
+
+  # get GLM reservoir predictions
+  glm_preds <- readr::read_csv(sc_retrieve(glm_preds_ind, 'getters.yml')) %>%
+    rename(date = time)
+
+  glm_west <- filter(glm_preds, res_id %in% west_nhdid) %>%
+    rename(glm_west_temp_c = temp) %>% select(-res_id, -flow)
+
+  glm_east <- filter(glm_preds, res_id %in% east_nhdid) %>%
+    rename(glm_east_temp_c = temp) %>% select(-res_id, -flow)
+
+  # calculate adjustment
+  # need to get east/west GLM predictions to the right segments
+  obs_adjustment <-  select(preds, seg_id_nat, date, sntemp_temp_c, mean_temp_c, site_id) %>%
+    filter(seg_id_nat %in% unique(weights$seg_id_nat)) %>%
+    left_join(glm_west) %>%
+    left_join(glm_east) %>%
+    left_join(weights) %>%
+    filter(!is.na(glm_west_temp_c)) %>%
+    mutate(west_dwallin = (res_weight_west*glm_west_temp_c) + ((1-res_weight_west)*sntemp_temp_c),
+           east_dwallin = (res_weight_east*glm_west_temp_c) + ((1-res_weight_east)*sntemp_temp_c)) %>%
+    mutate(dwallin_temp_c = 0.5*west_dwallin + 0.5*east_dwallin)
+
+  # now combine east/west branch estimates with estimates below confluence
+  dwallin <- bind_rows(east[[1]],
+                   west[[1]],
+                   select(obs_adjustment, seg_id_nat, date, sntemp_temp_c, mean_temp_c, dwallin_temp_c)) %>%
+    mutate(date = as.Date(date))
+
+  non_reservoir_reaches <- filter(preds, !seg_id_nat %in% unique(dwallin$seg_id_nat)) %>%
+    mutate(date = as.Date(date)) %>%
+    filter(date >= min(dwallin$date) & date <= max(dwallin$date))
+
+  out <- bind_rows(dwallin, non_reservoir_reaches) %>%
+    # filter out SNTEMP error codes (e.g., -99 for no flow conditions)
+    filter(sntemp_temp_c > -1) %>%
+    # if there are no dwallin estimates for a reach, use PRMS-SNTemp predictions
+    mutate(dwallin_temp_c = ifelse(is.na(dwallin_temp_c), sntemp_temp_c, dwallin_temp_c))
+
+  return(out)
+
+
+}
+
+simplify_and_write <- function(dwallin, out_ind) {
+
+  out <- dwallin %>%
+    select(seg_id_nat, date, dwallin_temp_c)
+
+  readr::write_csv(out, as_data_file(out_ind))
+  gd_put(out_ind)
+}
 

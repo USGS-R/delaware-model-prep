@@ -151,11 +151,19 @@ targets:
      reservoir_subseg = I('15_1'),
      test_period = test_period)
 
-  #3_predictions/out/dwallin_preds.csv:
-   # command: combine_dwallin_models(
-    #  cannonsville_decay_estimate,
-     # pepacton_decay_estimate,
-      #distance_ind = '1_network/out/subseg_distance_matrix.rds.ind',
-      #confluence_subseg = '')
+  # object that retains observations and sntemp predictions for comparison purposes
+  dwallin_preds:
+    command: combine_dwallin_models(
+      west = cannonsville_decay_estimate,
+      east = pepacton_decay_estimate,
+      distance_ind = '1_network/out/subseg_distance_matrix.rds.ind',
+      confluence_subseg = I('140_1'),
+      west_subseg = I('128_1'),
+      east_subseg = I('15_1'))
+
+  # pare down columns and write to file for data release
+  3_predictions/out/dwallin_stream_preds.csv.ind:
+    command: simplify_and_write(dwallin_preds, target_name)
+
 
 
