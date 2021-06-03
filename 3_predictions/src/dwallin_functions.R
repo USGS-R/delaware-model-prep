@@ -156,13 +156,6 @@ combine_dwallin_models <- function(
   network <- readRDS(sc_retrieve(network_ind, 'getters.yml'))[[1]] %>%
     mutate(seg_id_nat = as.character(seg_id_nat))
 
-  west_confluence <- west[[1]] %>%
-    select(seg_id_nat, distance) %>%
-    distinct() %>%
-    slice_max(distance)%>%
-    left_join(select(network, seg_id_nat, subseg_id)) %>%
-    select(-geometry)
-
   distances_west <- tibble(subseg_id = names(dist[west_subseg,]),
                       distance = as.numeric(dist[west_subseg,])) %>%
     left_join(select(network, subseg_id, seg_id_nat)) %>%
@@ -173,13 +166,6 @@ combine_dwallin_models <- function(
     mutate(seg_id_nat = as.character(seg_id_nat)) %>%
     mutate(res_weight_west = exp(-1*west[[2]]['obs_rate_cons']*distance)) %>%
     rename(west_distance = distance)
-
-  east_confluence <- east[[1]] %>%
-    select(seg_id_nat, distance) %>%
-    distinct() %>%
-    slice_max(distance)%>%
-    left_join(select(network, seg_id_nat, subseg_id)) %>%
-    select(-geometry)
 
   distances_east <- tibble(subseg_id = names(dist[east_subseg,]),
                            distance = as.numeric(dist[east_subseg,])) %>%
