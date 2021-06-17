@@ -1,0 +1,12 @@
+version: 0.3.0
+name: 2_observations/out/raw_realsat_reservoir_data.csv.ind
+type: file
+hash: 6fc3d2fabe44a11963ba4695ff1a782e
+time: 2021-04-13 21:04:02 UTC
+depends:
+  realsat_ids: 7e0a172ae4ff6447d3d8f99ad33f77ac
+fixed: 9c9a9861c4243434e78a67eca02ccda0
+code:
+  functions:
+    retrieve_realsat_reservoir_data: a7594fb25c7a133a0b80821ff2021650
+
