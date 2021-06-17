@@ -1,0 +1,12 @@
+version: 0.3.0
+name: 2_observations/out/realsat_monthly_surface_area.csv.ind
+type: file
+hash: c41e8533c024d6cf7d74fac688d5cd64
+time: 2021-04-13 21:05:51 UTC
+depends:
+  2_observations/out/raw_realsat_reservoir_data.csv.ind: 6fc3d2fabe44a11963ba4695ff1a782e
+fixed: 5bca1342b158feaec4a3481640b97fa9
+code:
+  functions:
+    combine_realsat_reservoir_data: 601288cb8eb0585761590b815870a5a6
+
