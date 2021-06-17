@@ -81,7 +81,7 @@ munge_split_temp_dat <- function(sites_ind, dat_ind, holdout_water_years,
 }
 
 get_priority_data <- function(out_ind, sites, site_meta_ind, pcode, statcd,
-                              dummy_date, other_dat_ind, holdout_water_years,
+                              dummy_date, other_dat_ind = NA, holdout_water_years,
                               holdout_reach_ids) {
 
   all_dat <- readNWISdv(siteNumbers = sites,

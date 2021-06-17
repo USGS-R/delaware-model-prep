@@ -29,9 +29,8 @@ targets:
      - 2_observations/out/obs_temp_drb.rds.ind
      - 2_observations/out/obs_flow_drb.rds.ind
      - 2_observations/out/drb_temp_summary.csv
-     - ngwos_reaches
-     - 2_observations/out/interpolated_daily_diversions.csv.ind
      - 2_observations/out/realsat_monthly_surface_area.csv.ind
+     - 2_observations/out/interpolated_daily_reservoir_water_budget_components.csv.ind
 
   2_observations/out/NGWOS_sites_data.rds.ind:
     command: retrieve_ngwos(
@@ -136,7 +135,6 @@ targets:
       pcode = I('00060'),
       statcd = I('00003'),
       site_meta_ind = I('2_observations/out/crosswalk_site_reach.rds.ind'),
-      other_dat_ind = '2_observations/out/obs_flow_drb.rds.ind',
       holdout_water_years = holdout_water_years,
       holdout_reach_ids = holdout_reach_ids)
   2_observations/out/drb_temp_summary.csv:

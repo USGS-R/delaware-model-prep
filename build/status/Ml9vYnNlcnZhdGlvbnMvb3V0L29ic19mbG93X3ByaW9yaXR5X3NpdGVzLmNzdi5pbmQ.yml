@@ -2,16 +2,15 @@ version: 0.3.0
 name: 2_observations/out/obs_flow_priority_sites.csv.ind
 type: file
 hash: b79fb7939082ebc6a76d8ab9fa0fa04e
-time: 2021-06-17 15:16:49 UTC
+time: 2021-06-17 16:40:05 UTC
 depends:
   priority_sites: 2406fd9238d8037a7f56b816b59c02ee
-  2_observations/out/obs_flow_drb.rds.ind: b09c3d49cff1b99234d2face6fcc9981
   holdout_water_years: 09355750a3f5df011b5a31f3e2b04b61
   holdout_reach_ids: b18bf9f68b16a629071cd1529b33baae
 fixed: cb33b523d3c522ab484ce3a095e8be88
 code:
   functions:
-    get_priority_data: 916bea85a84bf84d8859cb876594ebad
+    get_priority_data: 27a67412c1787de8dcd2cec1b21040a3
     mark_time_space_holdouts: f7358c681ef089a521c2be8d560fac1e
     water_year_to_days: 30b427eab5eab43d896fa012a744ba73
 
