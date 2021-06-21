@@ -79,7 +79,19 @@ munge_split_temp_dat <- function(sites_ind, dat_ind, holdout_water_years,
   saveRDS(drb_dat_by_subseg, as_data_file(out_ind))
   gd_put(out_ind)
 }
-
+#' Function to retrieve all NWIS data from priority forecasting sites
+#' Appends data from national pull (e.g., EcoSHEDS, WQP) when site-dates
+#' are missing from NWIS
+#'
+#' @param out_ind output indicator file
+#' @param sites priority sites from which to pull NWIS data
+#' @param site_meta_ind indicator file of site metadata, which allows us to match USGS site number to seg_id_nat
+#' @param pcode USGS parameter code
+#' @param statcd USGS stat code
+#' @param dummy_date A dummy date to modify if you want to trigger a rebuild
+#' @param other_dat_ind Indicator file for other flow/temp data. This will be appended for missing NWIS sites/dates, so adds data from WQP or EcoSHEDS
+#' @param holdout_water_years Test years to withhold from training
+#' @param holdout_reach_ids Test sites to withhold from training
 get_priority_data <- function(out_ind, sites, site_meta_ind, pcode, statcd,
                               dummy_date, other_dat_ind = NA, holdout_water_years,
                               holdout_reach_ids) {
