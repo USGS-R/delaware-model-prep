@@ -55,6 +55,7 @@ munge_split_temp_dat <- function(sites_ind, dat_ind, holdout_water_years,
   sites <- readRDS(sc_retrieve(sites_ind, 'getters.yml')) %>%
     select(site_id, subseg_id, seg_id_nat) %>%
     distinct()
+
   dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
 
   drb_dat <- filter(dat, site_id %in% unique(sites$site_id)) %>%
@@ -77,6 +78,77 @@ munge_split_temp_dat <- function(sites_ind, dat_ind, holdout_water_years,
 
   saveRDS(drb_dat_by_subseg, as_data_file(out_ind))
   gd_put(out_ind)
+}
+#' Function to retrieve all NWIS data from priority forecasting sites
+#' Appends data from national pull (e.g., EcoSHEDS, WQP) when site-dates
+#' are missing from NWIS
+#'
+#' @param out_ind output indicator file
+#' @param sites priority sites from which to pull NWIS data
+#' @param site_meta_ind indicator file of site metadata, which allows us to match USGS site number to seg_id_nat
+#' @param pcode USGS parameter code
+#' @param statcd USGS stat code
+#' @param dummy_date A dummy date to modify if you want to trigger a rebuild
+#' @param other_dat_ind Indicator file for other flow/temp data. This will be appended for missing NWIS sites/dates, so adds data from WQP or EcoSHEDS
+#' @param holdout_water_years Test years to withhold from training
+#' @param holdout_reach_ids Test sites to withhold from training
+get_priority_data <- function(out_ind, sites, site_meta_ind, pcode, statcd,
+                              dummy_date, other_dat_ind = NA, holdout_water_years,
+                              holdout_reach_ids) {
+
+  all_dat <- readNWISdv(siteNumbers = sites,
+                        parameterCd = pcode,
+                        statCd = statcd,
+                        startDate = '1980-01-01') %>%
+    renameNWISColumns()
+
+  meta <- readRDS(sc_retrieve(site_meta_ind)) %>%
+    filter(site_id %in% paste0('USGS-', sites)) %>%
+    filter(source %in% 'nwis_dv') %>%
+    select(site_id, seg_id_nat, subseg_id) %>% st_drop_geometry() %>% distinct()
+
+
+
+  if (pcode %in% '00010') {
+    out_dat <- all_dat %>%
+      mutate(site_id = paste0('USGS-', site_no),
+             date = as.POSIXct(Date, tz = 'UTC')) %>%
+      select(site_id, date, mean_temp_c = Wtemp, min_temp_c = Wtemp_Min, max_temp_c = Wtemp_Max, cd = Wtemp_cd) %>%
+      left_join(meta)
+
+    # site-dates we already have
+    exclude <- paste0(out_dat$seg_id_nat, out_dat$date)
+
+    # bind data that doesn't come from nwis_dv
+    other_dat <- readRDS(sc_retrieve(other_dat_ind)) %>%
+      filter(seg_id_nat %in% meta$seg_id_nat) %>%
+      mutate(date = date,
+             compare = paste0(seg_id_nat, date)) %>%
+      filter(!compare %in% exclude) %>%
+      select(subseg_id, seg_id_nat, date, mean_temp_c, min_temp_c, max_temp_c, site_id)
+
+    out <- bind_rows(out_dat, other_dat)
+
+  } else {
+    out <- all_dat %>%
+     mutate(discharge_cms = Flow / 35.314666,
+            site_id = paste0('USGS-', site_no),
+            date = as.POSIXct(Date, tz = 'UTC'),
+            cd = Flow_cd) %>%
+      select(site_id, date, discharge_cms, cd) %>%
+      left_join(meta)
+  }
+
+
+
+  out <- out %>%
+    ungroup() %>%
+    filter(date >= as.POSIXct('1980-01-01', tz = 'UTC')) %>%
+    mark_time_space_holdouts(holdout_water_years, holdout_reach_ids)
+
+  readr::write_csv(out, as_data_file(out_ind))
+  gd_put(out_ind)
+
 }
 
 generate_site_summary <- function(dat_ind, crosswalk_ind, out_ind) {

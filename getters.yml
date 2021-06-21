@@ -58,6 +58,12 @@ targets:
   2_observations/out/extra_flow_sites.rds:
     command: gd_get('2_observations/out/extra_flow_sites.rds.ind')
 
+  # priority sites for forecasting
+  2_observations/out/obs_temp_priority_sites.csv:
+    command: gd_get('2_observations/out/obs_temp_priority_sites.csv.ind')
+
+  2_observations/out/obs_flow_priority_sites.csv:
+    command: gd_get('2_observations/out/obs_flow_priority_sites.csv.ind')
 
   # reservoir release data, from Jeff, via Kendra request from NYC employee
   2_observations/in/PCN_Spill_Release.xlsx:

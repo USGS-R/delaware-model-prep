@@ -29,9 +29,8 @@ targets:
      - 2_observations/out/obs_temp_drb.rds.ind
      - 2_observations/out/obs_flow_drb.rds.ind
      - 2_observations/out/drb_temp_summary.csv
-     - ngwos_reaches
-     - 2_observations/out/interpolated_daily_diversions.csv.ind
      - 2_observations/out/realsat_monthly_surface_area.csv.ind
+     - 2_observations/out/interpolated_daily_reservoir_water_budget_components.csv.ind
 
   2_observations/out/NGWOS_sites_data.rds.ind:
     command: retrieve_ngwos(
@@ -95,6 +94,24 @@ targets:
       holdout_reach_ids = holdout_reach_ids,
       out_ind = target_name)
 
+
+  priority_sites:
+    command: c(I(c('01427207', '01417500', '01427000', '01426500', '01436690')))
+
+  # for priority sites, repull from NWIS, append any
+  # missing dates from "other" sources
+  2_observations/out/obs_temp_priority_sites.csv.ind:
+    command: get_priority_data(
+      out_ind = target_name,
+      dummy_date = I('2021-06-17'),
+      sites = priority_sites,
+      pcode = I('00010'),
+      statcd = I(c('00001', '00002', '00003')),
+      site_meta_ind = I('2_observations/out/crosswalk_site_reach.rds.ind'),
+      other_dat_ind = '2_observations/out/obs_temp_drb.rds.ind',
+      holdout_water_years = holdout_water_years,
+      holdout_reach_ids = holdout_reach_ids)
+
   # ngwos reaches that should be withheld after 2017-10-01 for NGWOS experiment
   ngwos_reaches:
     command: get_ngwos_reaches(sites_ind = '2_observations/out/drb_filtered_sites.rds.ind', ngwos_sites)
@@ -108,6 +125,18 @@ targets:
       holdout_water_years = holdout_water_years,
       holdout_reach_ids = holdout_reach_ids)
 
+  # for priority sites, repull from NWIS, append any
+  # missing dates from "other" sources
+  2_observations/out/obs_flow_priority_sites.csv.ind:
+    command: get_priority_data(
+      out_ind = target_name,
+      dummy_date = I('2021-06-17'),
+      sites = priority_sites,
+      pcode = I('00060'),
+      statcd = I('00003'),
+      site_meta_ind = I('2_observations/out/crosswalk_site_reach.rds.ind'),
+      holdout_water_years = holdout_water_years,
+      holdout_reach_ids = holdout_reach_ids)
   2_observations/out/drb_temp_summary.csv:
     command: summarize_dat(in_ind = '2_observations/out/obs_temp_drb.rds.ind', out_file = target_name)
 
