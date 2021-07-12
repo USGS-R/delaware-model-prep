@@ -143,7 +143,7 @@ targets:
   2_observations/out/drb_flow_summary.csv:
     command: summarize_dat(in_ind = '2_observations/out/obs_flow_drb.rds.ind', out_file = target_name)
 
-  # reservoir release data
+  # reservoir release data provided by NYC DEP
 
   2_observations/out/reservoir_releases.csv.ind:
     command: clean_release_dat(
@@ -151,6 +151,8 @@ targets:
       out_ind = target_name,
       mgd_to_cms = I(0.0438125))
 
+  # modern reservoir releases that can be retrieved from NWIS.
+  # These are real-time releases that started in March 2021
   2_observations/out/modern_reservoir_releases.rds.ind:
     command: get_releases(
       out_ind = target_name,
@@ -214,6 +216,8 @@ targets:
       out_ind = target_name)
 
   # combine all sources of releases to complete total release time series
+  # the manually extracted ODRM data is being used to cover the gaps between
+  # these data sources
   2_observations/out/complete_reservoir_releases.csv.ind:
     command: combine_release_sources(
       out_ind = target_name,

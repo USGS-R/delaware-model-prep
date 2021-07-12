@@ -258,6 +258,11 @@ combine_release_sources <- function(out_ind, hist_rel_ind, usgs_rel_ind, modern_
       select(-release_volume_cfs, -Date) %>%
       filter(!is.na(release_volume_cms))
 
+    # group by and slice_min picks the sources in order of the bind
+    # e.g., always use the historical data from the NYC DEP, and then prioritize
+    # data in the order of modern pull from NWIS, manually data from ODRM,
+    # and data imported from the NY WSC (NY WSC data was messies/most prone to
+    # error in importing)
     all <- bind_rows(hist_out, modern, manual_out, usgs_out, .id = 'id') %>%
       group_by(reservoir, date) %>%
       slice_min(id)

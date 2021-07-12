@@ -70,6 +70,10 @@ targets:
     command: gd_get('2_observations/in/PCN_Spill_Release.xlsx.ind')
   2_observations/out/reservoir_releases.csv:
     command: gd_get('2_observations/out/reservoir_releases.csv.ind')
+
+  # these data were manually extracted from ODRM reports
+  # to gap fill NYC DEP data, data from NY WSC, and modern data from NWIS
+  # reports found here under weekly data archived by month/year: https://webapps.usgs.gov/odrm/data/data.html
   2_observations/in/manually_extracted_odrm_data.csv:
     command: gd_get('2_observations/in/manually_extracted_odrm_data.csv.ind')
 
