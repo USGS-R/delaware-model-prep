@@ -265,7 +265,8 @@ combine_release_sources <- function(out_ind, hist_rel_ind, usgs_rel_ind, modern_
     # error in importing)
     all <- bind_rows(hist_out, modern, manual_out, usgs_out, .id = 'id') %>%
       group_by(reservoir, date) %>%
-      slice_min(id)
+      slice_min(id) %>%
+      select(-id, -site_no)
 
     readr::write_csv(all, as_data_file(out_ind))
     gd_put(out_ind)
