@@ -1,0 +1,11 @@
+version: 0.3.0
+name: 2_observations/out/modern_reservoir_releases.rds.ind
+type: file
+hash: 0bce88a9235298fd1ca75202c4d85430
+time: 2021-07-09 19:28:43 UTC
+depends: {}
+fixed: 67fae4419efd8539a74e14e0f67867c8
+code:
+  functions:
+    get_releases: 19297bdd98f38247efb79584799fe441
+

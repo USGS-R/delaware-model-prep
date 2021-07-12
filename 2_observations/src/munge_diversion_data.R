@@ -235,5 +235,39 @@ map_over_wy_files <- function(sub_dirs, root_dir) {
   return(dat2)
 }
 
+combine_release_sources <- function(out_ind, hist_rel_ind, usgs_rel_ind, modern_rel_ind, manual_rel_ind) {
+
+    hist <- readr::read_csv(sc_retrieve(hist_rel_ind, 'getters.yml'))
+    usgs <- readr::read_csv(sc_retrieve(usgs_rel_ind, 'getters.yml'))
+    modern <- readRDS(sc_retrieve(modern_rel_ind, 'getters.yml'))
+    manual <- readr::read_csv(sc_retrieve(manual_rel_ind, 'getters.yml'))
+
+    # bind together
+
+    hist_out <- group_by(hist, date, reservoir) %>%
+      summarize(release_volume_cms = sum(release_volume_cms)) %>%
+      ungroup()
+    usgs_out <- usgs %>%
+      select(reservoir, date, total_release_mgd) %>%
+      mutate(release_volume_cms = total_release_mgd*0.0438125) %>%
+      select(-total_release_mgd)
+    manual_out <- manual %>%
+      pivot_longer(cols = -Date, names_to = 'reservoir', values_to = 'release_volume_cfs') %>%
+      mutate(release_volume_cms = release_volume_cfs/35.314666) %>%
+      mutate(date = as.Date(Date, format = '%m/%d/%Y')) %>%
+      select(-release_volume_cfs, -Date) %>%
+      filter(!is.na(release_volume_cms))
+
+    all <- bind_rows(hist_out, modern, manual_out, usgs_out, .id = 'id') %>%
+      group_by(reservoir, date) %>%
+      slice_min(id)
+
+    readr::write_csv(all, as_data_file(out_ind))
+    gd_put(out_ind)
+
+
+}
+
+
 
 
