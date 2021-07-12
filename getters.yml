@@ -70,6 +70,11 @@ targets:
     command: gd_get('2_observations/in/PCN_Spill_Release.xlsx.ind')
   2_observations/out/reservoir_releases.csv:
     command: gd_get('2_observations/out/reservoir_releases.csv.ind')
+  2_observations/in/manually_extracted_odrm_data.csv:
+    command: gd_get('2_observations/in/manually_extracted_odrm_data.csv.ind')
+
+  2_observations/out/modern_reservoir_releases.rds:
+    command: gd_get('2_observations/out/modern_reservoir_releases.rds.ind')
 
 
   # list of NGWOS sites from Brian Pellerin, receieved 2020-04-18
