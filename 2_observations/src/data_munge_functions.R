@@ -112,22 +112,23 @@ get_priority_data <- function(out_ind, sites, site_meta_ind, pcode, statcd,
   if (pcode %in% '00010') {
     out_dat <- all_dat %>%
       mutate(site_id = paste0('USGS-', site_no),
-             date = as.POSIXct(Date, tz = 'UTC')) %>%
+             date = Date) %>%
       select(site_id, date, mean_temp_c = Wtemp, min_temp_c = Wtemp_Min, max_temp_c = Wtemp_Max, cd = Wtemp_cd) %>%
+      filter(!is.na(max_temp_c)) %>%
       left_join(meta)
 
     # site-dates we already have
-    exclude <- paste0(out_dat$seg_id_nat, out_dat$date)
+    exclude <- paste0(out_dat$seg_id_nat, as.Date(out_dat$date))
 
     # bind data that doesn't come from nwis_dv
     other_dat <- readRDS(sc_retrieve(other_dat_ind)) %>%
       filter(seg_id_nat %in% meta$seg_id_nat) %>%
-      mutate(date = date,
-             compare = paste0(seg_id_nat, date)) %>%
+      mutate(compare = paste0(seg_id_nat, date)) %>%
       filter(!compare %in% exclude) %>%
       select(subseg_id, seg_id_nat, date, mean_temp_c, min_temp_c, max_temp_c, site_id)
 
-    out <- bind_rows(out_dat, other_dat)
+    out <- bind_rows(out_dat, other_dat) %>%
+      mutate(date = as.POSIXct(date))
 
   } else {
     out <- all_dat %>%
@@ -138,8 +139,6 @@ get_priority_data <- function(out_ind, sites, site_meta_ind, pcode, statcd,
       select(site_id, date, discharge_cms, cd) %>%
       left_join(meta)
   }
-
-
 
   out <- out %>%
     ungroup() %>%
@@ -218,6 +217,25 @@ clean_release_dat <- function(in_ind, out_ind, mgd_to_cms) {
     left_join(grand_ids)
 
   readr::write_csv(x = dat_out, path = as_data_file(out_ind))
+  gd_put(out_ind)
+
+}
+
+# get most recent reservoir release data
+get_releases <- function(out_ind, site_ids, reservoir_names) {
+  dataRetrieval::setAccess('internal')
+  sites <- data.frame(site_no = site_ids, reservoir = reservoir_names)
+  dat <- dataRetrieval::readNWISuv(siteNumbers = site_ids,
+                                   parameterCd = '00060',
+                                   tz = "Etc/GMT+5") %>%
+    mutate(releases_cms = X_.Spill.Release._00060_00000/35.314666) %>%
+    mutate(date = as.Date(dateTime, tz = "Etc/GMT+5")) %>%
+    group_by(site_no, date) %>%
+    summarize(release_volume_cms = round(mean(releases_cms, na.rm = TRUE), 2)) %>%
+    ungroup() %>%
+    left_join(sites)
+
+  saveRDS(dat, file = as_data_file(out_ind))
   gd_put(out_ind)
 
 }

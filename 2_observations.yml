@@ -103,7 +103,7 @@ targets:
   2_observations/out/obs_temp_priority_sites.csv.ind:
     command: get_priority_data(
       out_ind = target_name,
-      dummy_date = I('2021-06-17'),
+      dummy_date = I('2021-07-12'),
       sites = priority_sites,
       pcode = I('00010'),
       statcd = I(c('00001', '00002', '00003')),
@@ -143,13 +143,21 @@ targets:
   2_observations/out/drb_flow_summary.csv:
     command: summarize_dat(in_ind = '2_observations/out/obs_flow_drb.rds.ind', out_file = target_name)
 
-  # reservoir release data
+  # reservoir release data provided by NYC DEP
 
   2_observations/out/reservoir_releases.csv.ind:
     command: clean_release_dat(
       in_ind = '2_observations/in/PCN_Spill_Release.xlsx.ind',
       out_ind = target_name,
       mgd_to_cms = I(0.0438125))
+
+  # modern reservoir releases that can be retrieved from NWIS.
+  # These are real-time releases that started in March 2021
+  2_observations/out/modern_reservoir_releases.rds.ind:
+    command: get_releases(
+      out_ind = target_name,
+      site_ids = I(c('01436499', '01417499', '01436599')),
+      reservoir_names = I(c('Cannonsville', 'Pepacton', 'Neversink')))
 
   # reservoir diversion data
   # you must download reservoir data from here: 'https://doimspp-my.sharepoint.com/:f:/g/personal/soliver_usgs_gov/EiawwIR59vdApLCkeyob4t0Bx86d2SoTic8ahCm6MH5wRA?e=KEk1zE'
@@ -207,3 +215,13 @@ targets:
       in_ind = '2_observations/out/raw_realsat_reservoir_data.csv.ind',
       out_ind = target_name)
 
+  # combine all sources of releases to complete total release time series
+  # the manually extracted ODRM data is being used to cover the gaps between
+  # these data sources
+  2_observations/out/complete_reservoir_releases.csv.ind:
+    command: combine_release_sources(
+      out_ind = target_name,
+      hist_rel_ind = '2_observations/out/reservoir_releases.csv.ind',
+      usgs_rel_ind = '2_observations/out/observed_daily_reservoir_water_budget_components.csv.ind',
+      modern_rel_ind = '2_observations/out/modern_reservoir_releases.rds.ind',
+      manual_rel_ind = '2_observations/in/manually_extracted_odrm_data.csv.ind')
