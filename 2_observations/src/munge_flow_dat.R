@@ -24,7 +24,7 @@ munge_split_flow <- function(dat_ind, sites_ind, holdout_water_years,
   drb_sites <- readRDS(sc_retrieve(sites_ind, 'getters.yml'))
   dat_drb <- flow_dat %>%
     mutate(site_id = sprintf('USGS-%s', site_id),
-           discharge_cms = flow_cfs / 35.314666) %>%
+           discharge_cms = round(flow_cfs / 35.314666, 3)) %>%
     select(-flow_cfs) %>%
     filter(!is.na(discharge_cms)) %>%
     filter(site_id %in% unique(drb_sites$site_id)) %>%
