@@ -152,12 +152,12 @@ get_inout_obs_all <- function(
     res_outflow_ids$Pepacton,
     res_inflow_ids$Pepacton) %>%
     filter(site_id != '01417000') # we started with two outflow sites, but after plotting in the function above, we don't need both any more
-
   # Join all the reservoir data and write to file
   bind_rows(
     nhdhr_120022743 = can_io,
     nhdhr_151957878 = pep_io,
     .id = 'res_id') %>%
+    mutate(flow_cms = round(flow_cms, 3)) %>%
     arrow::write_feather(as_data_file(out_ind))
   gd_put(out_ind)
 }
@@ -200,6 +200,8 @@ get_inout_sntemp_all <- function(
     nhdhr_120022743 = can_io,
     nhdhr_151957878 = pep_io,
     .id = 'res_id') %>%
+    mutate(seg_outflow = round(seg_outflow, 3),
+           seg_tave_water = round(seg_tave_water, 2)) %>%
     arrow::write_feather(as_data_file(out_ind))
   gd_put(out_ind)
 }

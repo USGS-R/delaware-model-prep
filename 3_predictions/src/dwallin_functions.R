@@ -257,7 +257,8 @@ combine_dwallin_models <- function(
 simplify_and_write <- function(dwallin, out_ind) {
 
   out <- dwallin %>%
-    select(seg_id_nat, date, dwallin_temp_c)
+    select(seg_id_nat, date, dwallin_temp_c) %>%
+    mutate(dwallin_temp_c = round(dwallin_temp_c, 2))
 
   readr::write_csv(out, as_data_file(out_ind))
   gd_put(out_ind)

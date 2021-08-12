@@ -2,11 +2,11 @@ version: 0.3.0
 name: 9_collaborator_data/umn/network_subset.rds.ind
 type: file
 hash: debae3d8be0d8644477fe48f200dc816
-time: 2021-06-17 18:23:08 UTC
+time: 2021-08-05 14:26:23 UTC
 depends:
   1_network/out/network.rds.ind: 67bc625285a9a5e2430b5b8adee07a95
   1_network/out/subseg_distance_matrix.rds.ind: a36f397ec7b5868a865f684f2c98bf40
-  9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind: 629814977726d61702012d5222bd9003
+  9_collaborator_data/mkrsp/delaware_sites_summary.rds.ind: ab4ee88124aa4392fc4f9acc4391bb32
 fixed: ac1d8d10469d92512f36810395e38ac1
 code:
   functions:
