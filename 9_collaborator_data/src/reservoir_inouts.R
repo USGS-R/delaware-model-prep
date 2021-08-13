@@ -35,17 +35,17 @@ find_inout_obs_sites <- function(
         upstream_ids_list <- dataRetrieval::findNLDI(
           nwis = outflow_id, find='nwissite', nav='UT', distance_km = max_dist_km, no_sf=TRUE)
         setdiff(upstream_ids_list$UT_nwissite$identifier, upstream_ids_list$origin$identifier) %>%
+          gsub('USGS-', '', x = .) %>%
           intersect(obs_sites[[variable]])
       }) %>% unlist() %>% unique() %>% setdiff(outflow_ids)
       message(sprintf('### UPSTREAM OF %s: %s', paste(outflow_ids, collapse=' & '), paste(sort(upstream_ids), collapse=', ')))
       if(length(upstream_ids) == 0) message('  found no data-rich upstream sites')
-
       first_upstream <- purrr::map_lgl(upstream_ids, function(upstream_id) {
         downstream_ids_list <- dataRetrieval::findNLDI(
           nwis = upstream_id, find='nwissite', nav='DM', distance_km = max_dist_km)
         downstream_ids <- setdiff(downstream_ids_list$DM_nwissite$identifier, downstream_ids_list$origin$identifier)
         # message(sprintf('%s is upstream of: %s', upstream_id, paste(sort(downstream_ids), collapse=', ')))
-        is_first_upstream <- !any(downstream_ids %in% upstream_ids)
+        is_first_upstream <- !any(gsub('USGS-', '', downstream_ids) %in% upstream_ids)
         message(sprintf('  %s: %s is directly upstream', is_first_upstream, upstream_id), appendLF = is_first_upstream)
         if(!is_first_upstream) {
           message(sprintf('; interrupted by %s', paste(downstream_ids[downstream_ids %in% upstream_ids], collapse=', ')))
