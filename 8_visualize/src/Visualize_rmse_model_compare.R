@@ -130,15 +130,15 @@ dat_availability_plot <-
    cowplot::theme_cowplot(font_size = 14)+
    theme(legend.title = element_blank(), # to remove legend box title.
          ## for legend box position
-         #legend.position = c(.95, .95),
+         legend.position = c(.75, .45),
          #to place legend on top
          legend.justification="top",
          legend.box.just = "top",
          #setting the spacing between each legend .
-         legend.key.size = unit(2.5, 'lines'))+
+         legend.key.size = unit(1.5, 'lines'))+
    #legend.box.spacing = unit(-2, 'cm'))+
    labs(x = 'Training data used',
         y = 'Test RMSE (°C)')
 dat_availability_plot
 ggsave("8_visualize/out/dat_availability_plot.png", dat_availability_plot,
-       height = 5, width = 6.6, dpi = 250)
+       height = 5, width = 5, dpi = 300)
