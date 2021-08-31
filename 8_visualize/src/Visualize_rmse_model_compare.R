@@ -8,7 +8,7 @@ library(tidyverse)
 library(shades)
 
 model_names <- c('space_awareness', 'pretraining', 'time_awareness', 'plain_neural_network')
-plot_models <- setNames(c('+ space awareness', '+ pretraining', '+ time awareness', 'Plain neural network'), model_names)
+plot_models <- setNames(c('+ space awareness (hybrid RGCN)', '+ pretraining (hybrid LSTM)', '+ time awareness (LSTM)', 'Plain neural network (ANN)'), model_names)
 plot_color <- setNames(c('#47437e', '#7570b3', '#b3b0d5', '#d95f02'), model_names)
 plot_shape <- setNames(c(23, 24, 25, 22), model_names)
 
@@ -130,7 +130,7 @@ dat_availability_plot <-
    cowplot::theme_cowplot(font_size = 14)+
    theme(legend.title = element_blank(), # to remove legend box title.
          ## for legend box position
-         legend.position = c(.75, .45),
+         legend.position = c(.65, .40),
          #to place legend on top
          legend.justification="top",
          legend.box.just = "top",
@@ -147,6 +147,7 @@ ggsave("8_visualize/out/dat_availability_plot.png", dat_availability_plot,
 #### spatial figure of RMSEs ####
 
 library(scipiper)
+library(sf)
 # all model predictions and obs
 all_rmse = readRDS(sc_retrieve('3_hybrid_predictions/out/compare_predictions_obs.rds.ind',
                                      remake_file = 'getters.yml')) %>% tibble() %>%
