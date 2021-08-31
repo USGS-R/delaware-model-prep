@@ -142,3 +142,68 @@ dat_availability_plot <-
 dat_availability_plot
 ggsave("8_visualize/out/dat_availability_plot.png", dat_availability_plot,
        height = 5, width = 5, dpi = 300)
+
+
+#### spatial figure of RMSEs ####
+
+library(scipiper)
+# all model predictions and obs
+all_rmse = readRDS(sc_retrieve('3_hybrid_predictions/out/compare_predictions_obs.rds.ind',
+                                     remake_file = 'getters.yml')) %>% tibble() %>%
+   mutate(seg_id_nat = as.integer(seg_id_nat)) %>%
+   group_by(seg_id_nat, model, experiment) %>%
+   summarise(n_obs = sum(!is.na(temp_c)),
+             RMSE = sqrt(mean((predicted_temp_c - temp_c)^2, na.rm=T)),
+             .groups = 'drop')
+
+# spatial fabric
+network = readRDS(sc_retrieve('1_network/out/network.rds.ind',
+                                   remake_file = 'getters.yml'))
+edges = select(network$edges, seg_id_nat, geometry) %>%
+   dplyr::filter(!is.na(seg_id_nat),
+                 seg_id_nat %in% all_rmse$seg_id_nat)
+
+all_rmse_geo = left_join(edges, all_rmse, by = 'seg_id_nat')
+
+
+models_to_plot = c('RNN', 'RGCN_ptrn_ctr')
+experiment_to_plot = 'd001'
+min_n_obs = 5
+
+plot_dat = dplyr::filter(all_rmse_geo, model %in% models_to_plot,
+                         experiment %in% experiment_to_plot,
+                         n_obs >= min_n_obs) %>%
+   mutate(model = factor(model, levels = c('RNN', 'RGCN_ptrn_ctr'))) # changing order of facet
+
+model_labs = c(`RNN` = 'Plain neural network \n+ time awareness',
+               `RGCN_ptrn_ctr` = 'Plain neural network \n+ time awareness \n+ space awareness \n+ pretraining')
+
+rmse_map = ggplot() +
+   geom_sf(data = dplyr::filter(all_rmse_geo, model %in% models_to_plot)%>%
+              mutate(model = factor(model, levels = c('RNN', 'RGCN_ptrn_ctr'))) # changing order of facet
+           , size = 1, color ='grey') +
+   geom_sf(data = plot_dat, aes(color = RMSE), size = 2) +
+   scale_color_viridis_c('Test RMSE (°C)',
+                         direction = -1,
+                         option = 'inferno',
+                         na.value = 'lightgray') +
+   theme_bw() +
+   theme(strip.text = element_text(size =13)) +
+   facet_wrap(~model,
+              labeller = as_labeller(model_labs))
+
+rmse_map
+ggsave("8_visualize/out/rmse_map.png", rmse_map,
+       height = 5, width = 8, dpi = 300)
+
+# combining rmse_map and dat_avail_plot for Charu's ML paper
+library(cowplot)
+
+charu_plot = ggdraw() +
+   draw_plot(dat_availability_plot, x=0.1,y = .5, width = 5/8,height = .5)+
+   draw_plot(rmse_map, x=0, y =0, width = 1, height = .48) +
+   draw_label('A', x = 0.05, y = .95) +
+   draw_label('B', x = 0.05, y = .5)
+
+ggsave("8_visualize/out/charu_ml_fig1.png", charu_plot,
+       height = 10, width = 8, dpi = 300)
