@@ -35,17 +35,17 @@ find_inout_obs_sites <- function(
         upstream_ids_list <- dataRetrieval::findNLDI(
           nwis = outflow_id, find='nwissite', nav='UT', distance_km = max_dist_km, no_sf=TRUE)
         setdiff(upstream_ids_list$UT_nwissite$identifier, upstream_ids_list$origin$identifier) %>%
+          gsub('USGS-', '', x = .) %>%
           intersect(obs_sites[[variable]])
       }) %>% unlist() %>% unique() %>% setdiff(outflow_ids)
       message(sprintf('### UPSTREAM OF %s: %s', paste(outflow_ids, collapse=' & '), paste(sort(upstream_ids), collapse=', ')))
       if(length(upstream_ids) == 0) message('  found no data-rich upstream sites')
-
       first_upstream <- purrr::map_lgl(upstream_ids, function(upstream_id) {
         downstream_ids_list <- dataRetrieval::findNLDI(
           nwis = upstream_id, find='nwissite', nav='DM', distance_km = max_dist_km)
         downstream_ids <- setdiff(downstream_ids_list$DM_nwissite$identifier, downstream_ids_list$origin$identifier)
         # message(sprintf('%s is upstream of: %s', upstream_id, paste(sort(downstream_ids), collapse=', ')))
-        is_first_upstream <- !any(downstream_ids %in% upstream_ids)
+        is_first_upstream <- !any(gsub('USGS-', '', downstream_ids) %in% upstream_ids)
         message(sprintf('  %s: %s is directly upstream', is_first_upstream, upstream_id), appendLF = is_first_upstream)
         if(!is_first_upstream) {
           message(sprintf('; interrupted by %s', paste(downstream_ids[downstream_ids %in% upstream_ids], collapse=', ')))
@@ -152,12 +152,12 @@ get_inout_obs_all <- function(
     res_outflow_ids$Pepacton,
     res_inflow_ids$Pepacton) %>%
     filter(site_id != '01417000') # we started with two outflow sites, but after plotting in the function above, we don't need both any more
-
   # Join all the reservoir data and write to file
   bind_rows(
     nhdhr_120022743 = can_io,
     nhdhr_151957878 = pep_io,
     .id = 'res_id') %>%
+    mutate(flow_cms = round(flow_cms, 3)) %>%
     arrow::write_feather(as_data_file(out_ind))
   gd_put(out_ind)
 }
@@ -200,6 +200,8 @@ get_inout_sntemp_all <- function(
     nhdhr_120022743 = can_io,
     nhdhr_151957878 = pep_io,
     .id = 'res_id') %>%
+    mutate(seg_outflow = round(seg_outflow, 3),
+           seg_tave_water = round(seg_tave_water, 2)) %>%
     arrow::write_feather(as_data_file(out_ind))
   gd_put(out_ind)
 }

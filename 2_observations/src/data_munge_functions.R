@@ -29,7 +29,10 @@ filter_temp_data <- function(cross_ind, dat_ind, out_ind) {
 
   dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
   drb_dat <- filter(dat, site_id %in% unique(sites$site_id)) %>%
-    distinct(site_id, date, mean_temp_degC, min_temp_degC, max_temp_degC, .keep_all = TRUE)
+    distinct(site_id, date, mean_temp_degC, min_temp_degC, max_temp_degC, .keep_all = TRUE) %>%
+    mutate(mean_temp_degC = round(mean_temp_degC, 1),
+           min_temp_degC = round(min_temp_degC, 1),
+           max_temp_degC = round(max_temp_degC, 1))
 
   saveRDS(drb_dat, as_data_file(out_ind))
   gd_put(out_ind)
@@ -61,7 +64,7 @@ munge_split_temp_dat <- function(sites_ind, dat_ind, holdout_water_years,
   drb_dat <- filter(dat, site_id %in% unique(sites$site_id)) %>%
     distinct(site_id, date, mean_temp_degC, .keep_all = TRUE) %>%
     group_by(site_id, date) %>%
-    summarize(mean_temp_C = mean(mean_temp_degC),
+    summarize(mean_temp_C = round(mean(mean_temp_degC), 1),
               min_temp_C = min(min_temp_degC),
               max_temp_C = max(max_temp_degC)) %>%
     ungroup()
@@ -69,7 +72,7 @@ munge_split_temp_dat <- function(sites_ind, dat_ind, holdout_water_years,
   drb_dat_by_subseg <- drb_dat %>%
     left_join(sites) %>%
     group_by(subseg_id, seg_id_nat, date) %>%
-    summarize(mean_temp_c = mean(mean_temp_C),
+    summarize(mean_temp_c = round(mean(mean_temp_C), 1),
               min_temp_c = min(min_temp_C),
               max_temp_c = max(max_temp_C),
               site_id = paste0(site_id, collapse = ', ')) %>%
@@ -113,7 +116,7 @@ get_priority_data <- function(out_ind, sites, site_meta_ind, pcode, statcd,
     out_dat <- all_dat %>%
       mutate(site_id = paste0('USGS-', site_no),
              date = Date) %>%
-      select(site_id, date, mean_temp_c = Wtemp, min_temp_c = Wtemp_Min, max_temp_c = Wtemp_Max, cd = Wtemp_cd) %>%
+      select(site_id, date, mean_temp_c = Wtemp, min_temp_c = Wtemp_Min, max_temp_c = Wtemp_Max) %>%
       filter(!is.na(max_temp_c)) %>%
       left_join(meta)
 
@@ -132,11 +135,11 @@ get_priority_data <- function(out_ind, sites, site_meta_ind, pcode, statcd,
 
   } else {
     out <- all_dat %>%
-     mutate(discharge_cms = Flow / 35.314666,
+     mutate(discharge_cms = round(Flow / 35.314666, 3),
             site_id = paste0('USGS-', site_no),
             date = as.POSIXct(Date, tz = 'UTC'),
             cd = Flow_cd) %>%
-      select(site_id, date, discharge_cms, cd) %>%
+      select(site_id, date, discharge_cms) %>%
       left_join(meta)
   }
 
@@ -203,7 +206,9 @@ summarize_dat <- function(in_ind, out_file) {
 # clean reservoir release data
 clean_release_dat <- function(in_ind, out_ind, mgd_to_cms) {
 
-  dat <- readxl::read_xlsx(sc_retrieve(in_ind, 'getters.yml'), sheet = 'Sheet1', trim_ws = TRUE,)
+  dat <- readxl::read_xlsx(sc_retrieve(in_ind, 'getters.yml'),
+                           sheet = 'Sheet1',
+                           trim_ws = TRUE, skip = 1, col_names = c('Date', 'Neversink_Conser', 'Neversink_Direct', 'Pepacton_Conser', 'Pepacton_Direct', 'Cannonsville_Conser', 'Cannonsville_Direct', 'Neversink_Spill', 'Pepacton_Spill', 'Cannonsville_Spill'))
 
   grand_ids <- tibble(reservoir = c('Neversink', 'Pepacton', 'Cannonsville'),
                       GRAND_ID = c(2200, 2192, 1550))
@@ -211,12 +216,12 @@ clean_release_dat <- function(in_ind, out_ind, mgd_to_cms) {
     tidyr::pivot_longer(cols = -Date, names_to = 'release_type', values_to = 'release_volume') %>%
     mutate(reservoir = gsub('_.*', '', release_type),
            release_type = gsub('.*_', '', release_type)) %>%
-    mutate(release_volume_cms = release_volume*mgd_to_cms,
+    mutate(release_volume_cms = round(release_volume*mgd_to_cms, 3),
            date = as.Date(Date)) %>%
     select(date, reservoir, release_type, release_volume_cms) %>%
     left_join(grand_ids)
 
-  readr::write_csv(x = dat_out, path = as_data_file(out_ind))
+  readr::write_csv(x = dat_out, file = as_data_file(out_ind))
   gd_put(out_ind)
 
 }

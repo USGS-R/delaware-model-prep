@@ -1,3 +1,16 @@
+#' Calculate a decay rate for influence of reservoir temperature downstream
+#' as a function of distance
+#'
+#' @param segs_downstream segments downstream of reservoir to next confluence
+#' @param reservoir_nhdid NHDID of the reservoir
+#' @param pred_obs_ind indicator file for paired PRMS-SNTemp predictions and observations
+#' @param glm_preds_file predictions of temperature from the outlet depth of the reservoir produced by the General Lake Model (GLM)
+#' @param test_period test holdout period
+#' @param distance_file distance matrix
+#' @param crosswalk_ind dataframe of site to stream segment crosswalk
+#' @param network_file modeling network
+#' @param reservoir_subseg outlet segment of reservoir
+#'
 calc_decay <- function(segs_downstream,
                        reservoir_nhdid,
                        preds_obs_ind = '3_predictions/out/compare_predictions_obs.feather.ind',
@@ -137,7 +150,22 @@ calc_decay <- function(segs_downstream,
 }
 
 
-
+#' Applies the decay rate to calculate the proportion of stream and reservoir process influence
+#' as a function of distance downstream of reservoirs. Below the confluence of the East Branch and West Branch of the Delaware River,
+#' the branches were weighted equally.
+#'
+#' @param west West Branch decay rate estimates
+#' @param east East Branch decay rate estimates
+#' @param distance_ind indicator file of distance matrix
+#' @param pred_obs_ind indicator file for paired PRMS-SNTemp predictions and observations
+#' @param glm_preds_file predictions of temperature from the outlet depth of the reservoir produced by the General Lake Model (GLM)
+#' @param
+#' @param test_period test holdout period
+#' @param distance_file distance matrix
+#' @param crosswalk_ind dataframe of site to stream segment crosswalk
+#' @param network_file modeling network
+#' @param reservoir_subseg outlet segment of reservoir
+#'
 combine_dwallin_models <- function(
   west = cannonsville_decay_estimate,
   east = pepacton_decay_estimate,
@@ -229,7 +257,8 @@ combine_dwallin_models <- function(
 simplify_and_write <- function(dwallin, out_ind) {
 
   out <- dwallin %>%
-    select(seg_id_nat, date, dwallin_temp_c)
+    select(seg_id_nat, date, dwallin_temp_c) %>%
+    mutate(dwallin_temp_c = round(dwallin_temp_c, 2))
 
   readr::write_csv(out, as_data_file(out_ind))
   gd_put(out_ind)
