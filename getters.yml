@@ -41,7 +41,7 @@ targets:
   1_network/out/seg_attr_metadata.csv:
     command: gd_get('1_network/out/seg_attr_metadata.csv.ind')
   1_network/out/1_network/out/seg_attr_drb.feather:
-    command: gd_get('1_network/out/1_network/out/seg_attr_drb.feather.ind')
+    command: gd_get('1_network/out/seg_attr_drb.feather.ind')
 
 
   #### 2_observations ####
