@@ -3,7 +3,11 @@ channels:
     - conda-forge
     - defaults
 dependencies:
+    - bs4
     - dask
+    - geopandas
+    - lxml
+    - pandas
     - pyarrow
     - xarray
     - zarr

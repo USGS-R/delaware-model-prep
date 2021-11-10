@@ -9,6 +9,7 @@ packages:
   - purrr
   - scipiper
   - geojsonio
+  - reticulate
 
 sources:
   - 1_network/src/geo_fabric_functions.R
@@ -16,6 +17,7 @@ sources:
   - 1_network/src/calc_distance_functions.R
   - 1_network/src/network_dam_res_reaches.R
   - 1_network/src/reach_classification.R
+  - 1_network/src/catchment_attributes.R
 
 
 targets:
@@ -26,6 +28,8 @@ targets:
      - 1_network/out/network.json.ind
      - 1_network/out/subseg_distance_matrix.rds.ind
      - 1_network/out/subseg_reservoir_mapping.rds.ind
+     - 1_network/out/seg_attr_metadata.csv.ind
+     - 1_network/out/seg_attr_drb.feather.ind
 
   # unzip the PRMS segments shapefile
   1_network/in/delaware_stream_temp_by_segment/delaware_segments/delaware_segments.shp:
@@ -86,3 +90,20 @@ targets:
       out_ind = target_name,
       network_ind = '1_network/out/network.rds.ind',
       reservoir_ind = '1_network/out/subseg_reservoir_mapping.rds.ind')
+
+  # fetch and process catchment attributes
+  
+  # fetch and combine 6 categories of catchment attribute data
+  1_network/out/combined_categories_catch_attr_region_02.feather.ind:
+    command: download_and_combine_sb_attr_data(out_ind = target_name)
+
+  # relate attribute data to segments and subset to DRB
+  1_network/out/seg_attr_drb.feather.ind:
+    command: relate_attr_to_drb_segs(out_ind = target_name,
+       all_attr = '1_network/out/combined_categories_catch_attr_region_02.feather.ind',
+       geofabric = '1_network/in/GeospatialFabric_National.gdb.ind',
+       drb_network = '1_network/out/network.json.ind')
+  
+  # gather and combine metadata      
+  1_network/out/seg_attr_metadata.csv.ind:
+    command: fetch_combine_catch_attr_metadata(out_ind = target_name)
