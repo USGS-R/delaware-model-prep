@@ -96,6 +96,7 @@ targets:
   # fetch and combine 6 categories of catchment attribute data
   1_network/out/combined_categories_catch_attr_region_02.feather.ind:
     command: download_and_combine_sb_attr_data(out_ind = target_name)
+    depends: '1_network/src/catch_attr.py'
 
   # relate attribute data to segments and subset to DRB
   1_network/out/seg_attr_drb.feather.ind:
@@ -103,7 +104,9 @@ targets:
        all_attr = '1_network/out/combined_categories_catch_attr_region_02.feather.ind',
        geofabric = '1_network/in/GeospatialFabric_National.gdb.ind',
        drb_network = '1_network/out/network.json.ind')
+    depends: '1_network/src/catch_attr.py'
   
   # gather and combine metadata      
   1_network/out/seg_attr_metadata.csv.ind:
     command: fetch_combine_catch_attr_metadata(out_ind = target_name)
+    depends: '1_network/src/catch_attr.py'
