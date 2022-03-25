@@ -266,7 +266,9 @@ get_releases <- function(out_ind, site_ids, reservoir_names, cfs_to_cms = 0.0283
 
   out <- bind_rows(dat_cannonsville, dat_pepacton, dat_neversink) %>%
     mutate(total_releases_cms = releases_cms + spillway_cms) %>%
-    rename(date = Date)
+    rename(date = Date) %>%
+    left_join(sites) %>%
+    select(-site_no)
 
   saveRDS(out, file = as_data_file(out_ind))
   gd_put(out_ind)

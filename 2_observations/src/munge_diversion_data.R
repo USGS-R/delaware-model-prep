@@ -137,7 +137,7 @@ interpolate_diversions_to_daily <- function(out_ind, daily_ind, monthly_ind, end
     rename(source_file = filename) %>%
     mutate(diversion_cms = diversion_cfs*cfs_to_cms) %>%
     select(-storage_change_cfs, -diversion_cfs, -diversion_mgd)
-
+  browser()
   # create a dataframe with all dates in timeseries for each reservoir
   all_dates <- data.frame(date = seq(from = as.Date('1979-10-01'),
                                           to = as.Date(end_date), by = 1)) %>%
@@ -243,7 +243,6 @@ combine_release_sources <- function(out_ind, hist_rel_ind, usgs_rel_ind, modern_
     manual <- readr::read_csv(sc_retrieve(manual_rel_ind, 'getters.yml'))
 
     # bind together
-
     hist_out <- group_by(hist, date, reservoir) %>%
       summarize(release_volume_cms = sum(release_volume_cms)) %>%
       ungroup()
@@ -258,15 +257,17 @@ combine_release_sources <- function(out_ind, hist_rel_ind, usgs_rel_ind, modern_
       select(-release_volume_cfs, -Date) %>%
       filter(!is.na(release_volume_cms))
 
+    modern_out <- select(modern, reservoir, date, release_volume_cms = total_releases_cms)
+
     # group by and slice_min picks the sources in order of the bind
     # e.g., always use the historical data from the NYC DEP, and then prioritize
     # data in the order of modern pull from NWIS, manually data from ODRM,
     # and data imported from the NY WSC (NY WSC data was messies/most prone to
     # error in importing)
-    all <- bind_rows(hist_out, modern, manual_out, usgs_out, .id = 'id') %>%
+    all <- bind_rows(hist_out, modern_out, manual_out, usgs_out, .id = 'id') %>%
       group_by(reservoir, date) %>%
       slice_min(id) %>%
-      select(-id, -site_no) %>%
+      select(-id) %>%
       mutate(release_volume_cms = round(release_volume_cms, 3))
 
     readr::write_csv(all, as_data_file(out_ind))
