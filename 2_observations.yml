@@ -186,7 +186,7 @@ targets:
       monthly_ind = '2_observations/out/observed_monthly_reservoir_water_budget_components.csv.ind',
       end_date = I('2020-12-31'),
       mgd_to_cms = 0.0438, cfs_to_cms = 0.0283,
-      mg_to_cm = 4404.88, ft_to_m = 0.3048)
+      mg_to_cm = 3785.41, ft_to_m = 0.3048)
 
  # reservoir surface area data
  # You must download reservoir Monthly Shapefiles from here: 'http://umnlcc.cs.umn.edu/realsat/'.

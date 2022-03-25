@@ -137,7 +137,7 @@ interpolate_diversions_to_daily <- function(out_ind, daily_ind, monthly_ind, end
     rename(source_file = filename) %>%
     mutate(diversion_cms = diversion_cfs*cfs_to_cms) %>%
     select(-storage_change_cfs, -diversion_cfs, -diversion_mgd)
-  browser()
+
   # create a dataframe with all dates in timeseries for each reservoir
   all_dates <- data.frame(date = seq(from = as.Date('1979-10-01'),
                                           to = as.Date(end_date), by = 1)) %>%
