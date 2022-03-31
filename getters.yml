@@ -48,7 +48,11 @@ targets:
   2_observations/in/daily_temperatures_qaqc.rds:
     command: gd_get('2_observations/in/daily_temperatures_qaqc.rds.ind')
 
-  # flow sites
+  # flow sites and data
+  # national flow data and summary from https://github.com/USGS-R/national-flow-observations
+  # pushed to S3 at https://s3.console.aws.amazon.com/s3/buckets/ds-pipeline-national-flow-observations?region=us-west-2&prefix=20_data_munge/out/&showversions=false
+  # these files were uploaded to GD to the appropriate place on 22/03/30 by Sam Oliver,
+  # then used gd_confirm_posted to check and create indicator file
   2_observations/in/observation_summary.rds:
     command: gd_get('2_observations/in/observation_summary.rds.ind')
 
