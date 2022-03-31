@@ -276,6 +276,26 @@ combine_release_sources <- function(out_ind, hist_rel_ind, usgs_rel_ind, modern_
 
 }
 
+combine_releases_by_type <- function(out_ind, hist_rel_ind, modern_rel_ind) {
+  hist <- readr::read_csv(sc_retrieve(hist_rel_ind, 'getters.yml'))
+  hist_spills <- filter(hist, release_type %in% 'Spill') %>%
+    mutate(release_type = 'spillway')
+  hist_releases <- filter(hist, !release_type %in% 'Spill') %>%
+    group_by(date, reservoir, GRAND_ID) %>%
+    summarize(release_volume_cms = sum(release_volume_cms)) %>%
+    mutate(release_type = 'releases') %>% ungroup()
+  mod <- readRDS(sc_retrieve(modern_rel_ind, 'getters.yml')) %>%
+    select(date, reservoir, releases_cms, spillway_cms) %>%
+    tidyr::pivot_longer(cols = c(releases_cms, spillway_cms), names_to = 'release_type', values_to = 'release_volume_cms') %>%
+    mutate(release_type = gsub('_cms', '', release_type))
+
+  out <- bind_rows(hist_spills, hist_releases, filter(mod, !date %in% unique(hist$date))) %>%
+    select(-GRAND_ID)
+
+  readr::write_csv(out, as_data_file(out_ind))
+  gd_put(out_ind)
+}
+
 
 
 

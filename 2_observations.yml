@@ -225,3 +225,9 @@ targets:
       usgs_rel_ind = '2_observations/out/observed_daily_reservoir_water_budget_components.csv.ind',
       modern_rel_ind = '2_observations/out/modern_reservoir_releases.rds.ind',
       manual_rel_ind = '2_observations/in/manually_extracted_odrm_data.csv.ind')
+
+  2_observations/out/reservoir_releases_by_type_drb.csv.ind:
+    command: combine_releases_by_type(
+      out_ind = target_name,
+      hist_rel_ind = '2_observations/out/reservoir_releases.csv.ind',
+      modern_rel_ind = '2_observations/out/modern_reservoir_releases.rds.ind')

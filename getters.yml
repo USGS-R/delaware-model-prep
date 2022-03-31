@@ -83,6 +83,8 @@ targets:
 
   2_observations/out/modern_reservoir_releases.rds:
     command: gd_get('2_observations/out/modern_reservoir_releases.rds.ind')
+  2_observations/out/reservoir_releases_by_type_drb.csv:
+    command: gd_get('2_observations/out/reservoir_releases_by_type_drb.csv.ind')
 
 
   # list of NGWOS sites from Brian Pellerin, receieved 2020-04-18
