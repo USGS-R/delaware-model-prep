@@ -231,3 +231,9 @@ targets:
       out_ind = target_name,
       hist_rel_ind = '2_observations/out/reservoir_releases.csv.ind',
       modern_rel_ind = '2_observations/out/modern_reservoir_releases.rds.ind')
+
+  2_observations/out/reservoir_diversions.csv.ind:
+    command: extract_diversions(
+      out_ind = target_name,
+      hist_ind = '2_observations/out/interpolated_daily_reservoir_water_budget_components.csv.ind',
+      mod_ind = '2_observations/out/modern_reservoir_releases.rds.ind')

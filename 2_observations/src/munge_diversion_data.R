@@ -296,6 +296,24 @@ combine_releases_by_type <- function(out_ind, hist_rel_ind, modern_rel_ind) {
   gd_put(out_ind)
 }
 
+extract_diversions <- function(out_ind, hist_ind, mod_ind) {
+
+  hist_dat <- readr::read_csv(sc_retrieve(hist_ind))
+
+  # use historical data when we have it since that is the data
+  # source for most of the record
+  mod_dat <- readRDS(sc_retrieve(mod_ind)) %>%
+    filter(date > max(hist_dat$date))
+
+  out <- hist_dat %>%
+    select(reservoir, date, diversion_cms) %>%
+    bind_rows(select(mod_dat, reservoir, date, diversion_cms = diversions_cms)) %>%
+    filter(reservoir %in% c('Cannonsville', 'Pepacton'))
+
+  readr::write_csv(out, as_data_file(out_ind))
+  gd_put(out_ind)
+}
+
 
 
 
