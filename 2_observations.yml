@@ -79,17 +79,22 @@ targets:
   # temperature observations that have been filtered to crosswalk
   # this represent all DRB dat
   2_observations/out/all_drb_temp_obs.rds.ind:
-    command: filter_temp_data(
+    command: filter_temp_data_to_crosswalk(
       dat_ind = '2_observations/in/daily_temperatures_qaqc.rds.ind',
       cross_ind = '2_observations/out/crosswalk_site_reach.rds.ind',
       out_ind = target_name)
 
-  # keep only data in the filtered sites above,
-  # and take mean of multiple obs/reach-dat to reduce duplicate vals
-  2_observations/out/obs_temp_drb.rds.ind:
-    command: munge_split_temp_dat(
+  # keep only data in the filtered sites above
+  2_observations/out/obs_temp_drb_raw.rds.ind:
+    command: filter_temp_data_to_sites(
       sites_ind = '2_observations/out/drb_filtered_sites.rds.ind',
       dat_ind = '2_observations/out/all_drb_temp_obs.rds.ind',
+      out_ind = target_name)
+
+  # take mean of multiple obs/reach-dat to reduce duplicate vals
+  2_observations/out/obs_temp_drb.rds.ind:
+    command: munge_split_temp_dat(
+      dat_ind = '2_observations/out/obs_temp_drb_raw.rds.ind',
       holdout_water_years = holdout_water_years,
       holdout_reach_ids = holdout_reach_ids,
       out_ind = target_name)
