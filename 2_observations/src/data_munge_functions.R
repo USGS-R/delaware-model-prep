@@ -21,7 +21,7 @@ subset_sites <- function(out_ind, crosswalk_ind, dat_ind, fish_dist, bird_dist) 
 
 }
 
-filter_temp_data <- function(cross_ind, dat_ind, out_ind) {
+filter_temp_data_to_crosswalk <- function(cross_ind, dat_ind, out_ind) {
 
   sites <- readRDS(sc_retrieve(cross_ind, 'getters.yml')) %>%
     select(site_id, subseg_id, seg_id_nat) %>%
@@ -33,6 +33,28 @@ filter_temp_data <- function(cross_ind, dat_ind, out_ind) {
     mutate(mean_temp_degC = round(mean_temp_degC, 1),
            min_temp_degC = round(min_temp_degC, 1),
            max_temp_degC = round(max_temp_degC, 1))
+
+  saveRDS(drb_dat, as_data_file(out_ind))
+  gd_put(out_ind)
+
+}
+
+filter_temp_data_to_sites <- function(sites_ind, dat_ind, out_ind){
+
+  sites <- readRDS(sc_retrieve(sites_ind, 'getters.yml')) %>%
+    select(site_id, subseg_id, seg_id_nat) %>%
+    distinct()
+
+  dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
+
+  drb_dat <- filter(dat, site_id %in% unique(sites$site_id)) %>%
+    distinct(site_id, date, mean_temp_degC, .keep_all = TRUE) %>%
+    group_by(site_id, date) %>%
+    summarize(mean_temp_C = round(mean(mean_temp_degC), 1),
+              min_temp_C = min(min_temp_degC),
+              max_temp_C = max(max_temp_degC)) %>%
+    ungroup() %>%
+    left_join(sites, by = "site_id")
 
   saveRDS(drb_dat, as_data_file(out_ind))
   gd_put(out_ind)
@@ -52,25 +74,12 @@ water_year_to_days <- function(year) {
       to = as.POSIXct(paste0(year, "-09-30"), tz = 'UTC'), by="+1 day")
 }
 
-munge_split_temp_dat <- function(sites_ind, dat_ind, holdout_water_years,
+munge_split_temp_dat <- function(dat_ind, holdout_water_years,
                            holdout_reach_ids, out_ind) {
 
-  sites <- readRDS(sc_retrieve(sites_ind, 'getters.yml')) %>%
-    select(site_id, subseg_id, seg_id_nat) %>%
-    distinct()
-
-  dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
-
-  drb_dat <- filter(dat, site_id %in% unique(sites$site_id)) %>%
-    distinct(site_id, date, mean_temp_degC, .keep_all = TRUE) %>%
-    group_by(site_id, date) %>%
-    summarize(mean_temp_C = round(mean(mean_temp_degC), 1),
-              min_temp_C = min(min_temp_degC),
-              max_temp_C = max(max_temp_degC)) %>%
-    ungroup()
+  drb_dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
 
   drb_dat_by_subseg <- drb_dat %>%
-    left_join(sites) %>%
     group_by(subseg_id, seg_id_nat, date) %>%
     summarize(mean_temp_c = round(mean(mean_temp_C), 1),
               min_temp_c = min(min_temp_C),
