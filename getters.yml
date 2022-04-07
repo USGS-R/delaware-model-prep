@@ -103,7 +103,8 @@ targets:
     command: gd_get('2_observations/out/obs_temp_drb.rds.ind')
   2_observations/out/obs_flow_drb.rds:
     command: gd_get('2_observations/out/obs_flow_drb.rds.ind')
-
+  2_observations/out/obs_temp_drb_raw.rds:
+    command: gd_get('2_observations/out/obs_temp_drb_raw.rds.ind')
   # reservoir diversion data
   2_observations/out/observed_daily_reservoir_water_budget_components.csv:
     command: gd_get('2_observations/out/observed_daily_reservoir_water_budget_components.csv.ind')
