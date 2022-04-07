@@ -22,15 +22,15 @@ sources:
   - 2_observations/src/munge_diversion_data.R
   - 2_observations/src/munge_surface_area_data.R
 
-
 targets:
   2_observations:
     depends:
-     - 2_observations/out/obs_temp_drb.rds.ind
-     - 2_observations/out/obs_flow_drb.rds.ind
      - 2_observations/out/drb_temp_summary.csv
+     - 2_observations/out/drb_flow_summary.csv
      - 2_observations/out/realsat_monthly_surface_area.csv.ind
      - 2_observations/out/interpolated_daily_reservoir_water_budget_components.csv.ind
+     - 2_observations/out/reservoir_releases_by_type_drb.csv.ind
+     - 2_observations/out/reservoir_diversions.csv.ind
 
   2_observations/out/NGWOS_sites_data.rds.ind:
     command: retrieve_ngwos(

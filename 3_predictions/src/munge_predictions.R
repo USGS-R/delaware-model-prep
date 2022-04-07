@@ -62,7 +62,7 @@ calc_metrics <- function(compare_ind, out_file) {
   # make data long, filter where there are no observations
   # calculate error and squared error
   r_compare <- compare %>%
-    select(-max_temp_c, -min_temp_c) %>%
+    select(-max_temp_c, -min_temp_c, -in_time_holdout, -in_space_holdout, -test) %>%
     pivot_longer(c(-seg_id_nat, -site_id, -date, -mean_temp_c), names_to = 'model', values_to = 'predicted') %>%
     filter(!is.na(predicted)) %>%
     filter(!is.na(mean_temp_c))
