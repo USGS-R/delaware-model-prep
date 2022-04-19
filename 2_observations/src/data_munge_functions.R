@@ -78,8 +78,11 @@ water_year_to_days <- function(year) {
 #' @param prioritize_nwis_sites logical; indicates whether segment summaries should
 #' prioritize NWIS observations when available. Defaults to TRUE. If TRUE, any
 #' observations from non-NWIS sites will be omitted from the summarized data.
-munge_split_temp_dat <- function(dat_ind, holdout_water_years,
-                           holdout_reach_ids, out_ind, prioritize_nwis_sites = TRUE) {
+munge_split_temp_dat <- function(dat_ind,
+                                 holdout_water_years,
+                                 holdout_reach_ids,
+                                 out_ind,
+                                 prioritize_nwis_sites = TRUE) {
 
   drb_dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
 
@@ -89,7 +92,7 @@ munge_split_temp_dat <- function(dat_ind, holdout_water_years,
     # comes from multiple sources. If multiple distinct site id's, retain only
     # NWIS sites for that segment-date; otherwise, retain all samples
     {if(prioritize_nwis_sites){
-      filter(., if(n_distinct(site_id) > 1) grepl("USGS", site_id, ignore.case = TRUE) else TRUE)
+      filter(., if(n_distinct(site_id) > 1 & any(grepl("USGS", site_id, ignore.case = TRUE))) grepl("USGS", site_id, ignore.case = TRUE) else TRUE)
     } else {.}
     } %>%
     summarize(mean_temp_c = round(mean(mean_temp_C), 1),
