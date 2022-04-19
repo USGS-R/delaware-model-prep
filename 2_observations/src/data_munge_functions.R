@@ -74,17 +74,32 @@ water_year_to_days <- function(year) {
       to = as.POSIXct(paste0(year, "-09-30"), tz = 'UTC'), by="+1 day")
 }
 
-munge_split_temp_dat <- function(dat_ind, holdout_water_years,
-                           holdout_reach_ids, out_ind) {
+
+#' @param prioritize_nwis_sites logical; indicates whether segment summaries should
+#' prioritize NWIS observations when available. Defaults to TRUE. If TRUE, any
+#' observations from non-NWIS sites will be omitted from the summarized data.
+munge_split_temp_dat <- function(dat_ind,
+                                 holdout_water_years,
+                                 holdout_reach_ids,
+                                 out_ind,
+                                 prioritize_nwis_sites = TRUE) {
 
   drb_dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
 
   drb_dat_by_subseg <- drb_dat %>%
     group_by(subseg_id, seg_id_nat, date) %>%
+    # If prioritize_nwis_sites is TRUE, check whether data for that segment
+    # comes from multiple sources. If multiple distinct site id's, retain only
+    # NWIS sites for that segment-date; otherwise, retain all samples
+    {if(prioritize_nwis_sites){
+      filter(., if(n_distinct(site_id) > 1 & any(grepl("USGS", site_id, ignore.case = TRUE))) grepl("USGS", site_id, ignore.case = TRUE) else TRUE)
+    } else {.}
+    } %>%
     summarize(mean_temp_c = round(mean(mean_temp_C), 1),
               min_temp_c = min(min_temp_C),
               max_temp_c = max(max_temp_C),
-              site_id = paste0(site_id, collapse = ', ')) %>%
+              site_id = paste0(site_id, collapse = ', '),
+              .groups = 'keep') %>%
     ungroup() %>%
     mark_time_space_holdouts(holdout_water_years, holdout_reach_ids)
 

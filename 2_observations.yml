@@ -97,7 +97,8 @@ targets:
       dat_ind = '2_observations/out/obs_temp_drb_raw.rds.ind',
       holdout_water_years = holdout_water_years,
       holdout_reach_ids = holdout_reach_ids,
-      out_ind = target_name)
+      out_ind = target_name,
+      prioritize_nwis_sites = TRUE)
 
 
   priority_sites:
