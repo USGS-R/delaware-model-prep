@@ -62,7 +62,7 @@ calc_metrics <- function(compare_ind, out_file) {
   # make data long, filter where there are no observations
   # calculate error and squared error
   r_compare <- compare %>%
-    select(-max_temp_c, -min_temp_c) %>%
+    select(-max_temp_c, -min_temp_c, -in_time_holdout, -in_space_holdout, -test) %>%
     pivot_longer(c(-seg_id_nat, -site_id, -date, -mean_temp_c), names_to = 'model', values_to = 'predicted') %>%
     filter(!is.na(predicted)) %>%
     filter(!is.na(mean_temp_c))
@@ -118,8 +118,9 @@ calc_stats <- function(dat_compare){
 
 pull_sntemp_preds <- function(sntemp_ind, out_ind) {
   # pull out predictions from sntemp in/out file from Jake
-  dat <- feather::read_feather(sc_retrieve(sntemp_ind, 'getters.yml'))
-  preds <- select(dat, seg_id_nat, date, sntemp_temp_c = seg_tave_water)
+  dat <- arrow::read_feather(sc_retrieve(sntemp_ind, 'getters.yml'))
+
+  preds <- select(dat, seg_id_nat, date = time, sntemp_temp_c = seg_tave_water)
 
   write_csv(preds, as_data_file(out_ind))
   gd_put(out_ind)

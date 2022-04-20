@@ -22,15 +22,15 @@ sources:
   - 2_observations/src/munge_diversion_data.R
   - 2_observations/src/munge_surface_area_data.R
 
-
 targets:
   2_observations:
     depends:
-     - 2_observations/out/obs_temp_drb.rds.ind
-     - 2_observations/out/obs_flow_drb.rds.ind
      - 2_observations/out/drb_temp_summary.csv
+     - 2_observations/out/drb_flow_summary.csv
      - 2_observations/out/realsat_monthly_surface_area.csv.ind
      - 2_observations/out/interpolated_daily_reservoir_water_budget_components.csv.ind
+     - 2_observations/out/reservoir_releases_by_type_drb.csv.ind
+     - 2_observations/out/reservoir_diversions.csv.ind
 
   2_observations/out/NGWOS_sites_data.rds.ind:
     command: retrieve_ngwos(
@@ -192,7 +192,7 @@ targets:
       monthly_ind = '2_observations/out/observed_monthly_reservoir_water_budget_components.csv.ind',
       end_date = I('2020-12-31'),
       mgd_to_cms = 0.0438, cfs_to_cms = 0.0283,
-      mg_to_cm = 4404.88, ft_to_m = 0.3048)
+      mg_to_cm = 3785.41, ft_to_m = 0.3048)
 
  # reservoir surface area data
  # You must download reservoir Monthly Shapefiles from here: 'http://umnlcc.cs.umn.edu/realsat/'.
@@ -231,3 +231,15 @@ targets:
       usgs_rel_ind = '2_observations/out/observed_daily_reservoir_water_budget_components.csv.ind',
       modern_rel_ind = '2_observations/out/modern_reservoir_releases.rds.ind',
       manual_rel_ind = '2_observations/in/manually_extracted_odrm_data.csv.ind')
+
+  2_observations/out/reservoir_releases_by_type_drb.csv.ind:
+    command: combine_releases_by_type(
+      out_ind = target_name,
+      hist_rel_ind = '2_observations/out/reservoir_releases.csv.ind',
+      modern_rel_ind = '2_observations/out/modern_reservoir_releases.rds.ind')
+
+  2_observations/out/reservoir_diversions.csv.ind:
+    command: extract_diversions(
+      out_ind = target_name,
+      hist_ind = '2_observations/out/interpolated_daily_reservoir_water_budget_components.csv.ind',
+      mod_ind = '2_observations/out/modern_reservoir_releases.rds.ind')
