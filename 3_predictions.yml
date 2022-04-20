@@ -56,7 +56,7 @@ targets:
   3_predictions/in/reservoir_downstream_preds.csv.ind:
     command: get_sb_item(out_ind = target_name,
       sb_id = I('624f21fad34e21f82769a7b1'),
-      sb_names = I('downstream_preds.csv'))
+      sb_names = I('reservoir_downstream_preds.csv'))
 
   # calculate decay rates to be used to weight GLM vs PRMS-SNTemp preds
   # for Cannonsville
