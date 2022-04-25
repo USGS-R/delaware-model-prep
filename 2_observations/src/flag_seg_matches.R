@@ -1,7 +1,3 @@
-# drb_filtered_sites is an existing target in the pipeline that contains the
-# temperature sites that have been filtered to bird dist and fish dist
-# (2_observations/out/drb_filtered_sites.rds.ind)
-
 # Read in NHDPlusV2 - NHM crosswalk table from drb-network-prep
 fetch_xwalk <- function(out_ind, url) {
   GFv1_NHDv2_xwalk_url <- url
@@ -16,6 +12,8 @@ fetch_refgages <- function(out_ind, url) {
                 destfile = as_data_file(out_ind))
   gd_put(out_ind)
 }
+
+# add site-to-reach flags to site file
 site_to_reach_flags <- function(out_ind, sites_ind, cross_ind, refgages_ind) {
 
   # Add seg_match QC flags to drb_filtered_sites data frame
@@ -35,6 +33,8 @@ site_to_reach_flags <- function(out_ind, sites_ind, cross_ind, refgages_ind) {
 
 }
 
+# compare generated flags to a list of sites Lauren has
+# manually checked after they've been flagged
 check_new_flags <- function(out_ind, siteqa_ind, manualqa_ind) {
 
   # The file 2_observations/in/drb_filtered_sites_seg_match_QC.csv was manually created to
@@ -65,6 +65,8 @@ check_new_flags <- function(out_ind, siteqa_ind, manualqa_ind) {
   gd_put(out_ind)
 }
 
+# drop Lauren's recommended "drop" sites for
+# monitoring sites not on PRMS reaches
 remove_bad_matches <- function(out_ind, manualqa_ind, sites_ind) {
   sites <- readRDS(sc_retrieve(sites_ind))
 
@@ -79,8 +81,6 @@ remove_bad_matches <- function(out_ind, manualqa_ind, sites_ind) {
   saveRDS(out_sites, as_data_file(out_ind))
   gd_put(out_ind)
 }
-
-
 
 
 #' Function to append segment metadata from NHDPlus and NWIS to sites data frame
