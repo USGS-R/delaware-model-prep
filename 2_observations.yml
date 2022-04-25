@@ -21,6 +21,7 @@ sources:
   - 2_observations/src/munge_flow_dat.R
   - 2_observations/src/munge_diversion_data.R
   - 2_observations/src/munge_surface_area_data.R
+  - 2_observations/src/flag_seg_matches.R
 
 
 targets:
@@ -64,6 +65,19 @@ targets:
       boundary_ind = '1_network/out/boundary.rds.ind',
       network_ind = '1_network/out/network.rds.ind')
 
+  # do some QA on site-to-reach matches
+  # NHDPlusV2 - NHM crosswalk, download and indicate
+  2_observations/out/GFv1_NHDv2_xwalk.csv.ind:
+    command: fetch_xwalk(
+      out_ind = target_name,
+      url = I("https://raw.githubusercontent.com/USGS-R/drb-network-prep/c45f469098dfb245a2d686b807a58afa00b9d0b2/2_process/out/GFv1_NHDv2_xwalk.csv"))
+
+  # refgages - download and indicate
+  2_observations/out/usgs_nldi_gages.geojson.ind:
+    command: fetch_refgages(
+      out_ind = target_name,
+      url = I('https://github.com/internetofwater/ref_gages/releases/download/v0.6/usgs_nldi_gages.geojson'))
+
   # a subset of "useable" sites in DRB, munged by:
   # 1) filtering by bird and fish distance
   2_observations/out/drb_filtered_sites.rds.ind:
@@ -73,9 +87,37 @@ targets:
       fish_dist = I(20000),
       bird_dist = I(250))
 
+  # flag site-to-reach matches using a number of techniques,
+  # including cross-referencing refgages, independently matching
+  # to NHD reaches, looking at watershed size as it compares to reported
+  # NWIS value, and look for "tributary" in site name
+  2_observations/out/flagged_sitetoreach_matches.rds.ind:
+    command: site_to_reach_flags(
+      out_ind = target_name,
+      sites_ind = '2_observations/out/drb_filtered_sites.rds.ind',
+      cross_ind = '2_observations/out/GFv1_NHDv2_xwalk.csv.ind',
+      refgages_ind = '2_observations/out/usgs_nldi_gages.geojson.ind')
+
+  # compare the latest flagged sites to Lauren's manual/visual
+  # inspection of the originally flagged sites. Write "new flagged sites"
+  # that have not been manually inspected to a file and throw a warning.
+  2_observations/out/check_flagged_sites.rds.ind:
+    command: check_new_flags(
+      out_ind = target_name,
+      manualqa_ind = '2_observations/in/drb_filtered_sites_seg_match_QC.csv.ind',
+      siteqa_ind = '2_observations/out/flagged_sitetoreach_matches.rds.ind')
+
+  # use Lauren's "manual" decision about flagged sites to
+  # keep them in/out of dataset
+  2_observations/out/drb_filtered_sites_qa.rds.ind:
+    command: remove_bad_matches(
+      out_ind = target_name,
+      manualqa_ind = '2_observations/in/drb_filtered_sites_seg_match_QC.csv.ind',
+      sites_ind = '2_observations/out/drb_filtered_sites.rds.ind')
+
   # write a summary of matched sites to track changes
   2_observations/out/site_summary.csv:
-    command: summarize_sites(out_file = target_name, in_ind = '2_observations/out/drb_filtered_sites.rds.ind')
+    command: summarize_sites(out_file = target_name, in_ind = '2_observations/out/drb_filtered_sites_qa.rds.ind')
   # temperature observations that have been filtered to crosswalk
   # this represent all DRB dat
   2_observations/out/all_drb_temp_obs.rds.ind:
@@ -87,7 +129,7 @@ targets:
   # keep only data in the filtered sites above
   2_observations/out/obs_temp_drb_raw.rds.ind:
     command: filter_temp_data_to_sites(
-      sites_ind = '2_observations/out/drb_filtered_sites.rds.ind',
+      sites_ind = '2_observations/out/drb_filtered_sites_qa.rds.ind',
       dat_ind = '2_observations/out/all_drb_temp_obs.rds.ind',
       out_ind = target_name)
 
@@ -127,7 +169,7 @@ targets:
     command: munge_split_flow(
       out_ind = target_name,
       dat_ind = '2_observations/in/daily_flow.rds.ind',
-      sites_ind = '2_observations/out/drb_filtered_sites.rds.ind',
+      sites_ind = '2_observations/out/drb_filtered_sites_qa.rds.ind',
       holdout_water_years = holdout_water_years,
       holdout_reach_ids = holdout_reach_ids)
 

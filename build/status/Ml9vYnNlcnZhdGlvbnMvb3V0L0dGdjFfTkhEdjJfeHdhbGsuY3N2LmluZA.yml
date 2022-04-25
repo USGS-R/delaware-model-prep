@@ -1,0 +1,11 @@
+version: 0.3.0
+name: 2_observations/out/GFv1_NHDv2_xwalk.csv.ind
+type: file
+hash: 7bf6afc5d22e60eacb532e6e750eef10
+time: 2022-04-24 19:47:06 UTC
+depends: {}
+fixed: a9a6ffa5f930ce366e147a59957994ba
+code:
+  functions:
+    fetch_xwalk: beba4aeca5b7bc7c88b5a6ef29c7b8a5
+

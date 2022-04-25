@@ -1,26 +1,86 @@
-# [Lauren] adding pseudo workflow that will be translated into scipiper targets
-
 # drb_filtered_sites is an existing target in the pipeline that contains the
 # temperature sites that have been filtered to bird dist and fish dist
 # (2_observations/out/drb_filtered_sites.rds.ind)
 
 # Read in NHDPlusV2 - NHM crosswalk table from drb-network-prep
-GFv1_NHDv2_xwalk_url <- "https://raw.githubusercontent.com/USGS-R/drb-network-prep/c45f469098dfb245a2d686b807a58afa00b9d0b2/2_process/out/GFv1_NHDv2_xwalk.csv"
-crosswalk <- read_csv(GFv1_NHDv2_xwalk_url, col_types = 'cccc')
+fetch_xwalk <- function(out_ind, url) {
+  GFv1_NHDv2_xwalk_url <- url
+  crosswalk <- readr::read_csv(GFv1_NHDv2_xwalk_url, col_types = 'cccc')
+  readr::write_csv(crosswalk, as_data_file(out_ind))
+  gd_put(out_ind)
+}
 
 # Download ref-gages database from https://github.com/internetofwater/ref_gages/releases/
-ref_gages_v0.5 <- sf::st_read(dsn = "./scratch/data_in/usgs_nldi_gages.geojson", quiet = TRUE)
+fetch_refgages <- function(out_ind, url) {
+  download.file(url,
+                destfile = as_data_file(out_ind))
+  gd_put(out_ind)
+}
+site_to_reach_flags <- function(out_ind, sites_ind, cross_ind, refgages_ind) {
 
-# Add seg_match QC flags to drb_filtered_sites data frame
-drb_filtered_sites_QC <- flag_seg_matches(drb_filtered_sites,
-                              bird_dist_cutoff_m = 250,
-                              crosswalk = crosswalk,
-                              ref_gages = ref_gages_v0.5)
+  # Add seg_match QC flags to drb_filtered_sites data frame
+  drb_filtered_sites <- readRDS(sc_retrieve(sites_ind))
+  crosswalk <- readr::read_csv(sc_retrieve(cross_ind))
+  ref_gages_v0.5 <- sf::st_read(sc_retrieve(refgages_ind), quiet = TRUE)
 
-# The file 2_observations/in/drb_filtered_sites_seg_match_QC.csv was manually created to
-# log site QC decisions based on visual inspection of the sites that were flagged according
-# to the criteria implemented in flag_seg_matches()
-drb_filtered_sites_QC_w_recs <- read_csv("2_observations/in/drb_filtered_sites_seg_match_QC.csv")
+  drb_filtered_sites_QC <- flag_seg_matches(drb_filtered_sites,
+                                            bird_dist_cutoff_m = 250,
+                                            crosswalk = crosswalk,
+                                            ref_gages = ref_gages_v0.5)
+
+
+
+  saveRDS(drb_filtered_sites_QC, file = as_data_file(out_ind))
+  gd_put(out_ind)
+
+}
+
+check_new_flags <- function(out_ind, siteqa_ind, manualqa_ind) {
+
+  # The file 2_observations/in/drb_filtered_sites_seg_match_QC.csv was manually created to
+  # log site QC decisions based on visual inspection of the sites that were flagged according
+  # to the criteria implemented in flag_seg_matches()
+  # we want to throw a warning and write a site difference file that shows which sites
+  # should be manually inspected
+
+  # check flagged sites against manually checked sites from last run
+  # if there are flagged sites that weren't manually checked, send a warning message
+  manual_check <- readr::read_csv(sc_retrieve(manualqa_ind))
+  # compare and write a file of sites that are not in old flag file
+  # that Lauren manually checked. These sites should be checked to determine
+  # whether to keep or throw out matches.
+  new_qa <- readRDS(sc_retrieve(siteqa_ind))
+
+  compare <- new_qa %>%
+    filter(seg_match_flags_count > 0) %>%
+    filter(!site_id %in% manual_check$site_id)
+
+  # throw a message and write file
+  if (nrow(compare) < 1) {
+    message('ALL GOOD HERE: all flagged site-to-reach matches have been manually inspected.')
+  } else {
+    message(sprintf('WARNING: some flagged site-to-reach matches have not been manually inspected. See file %s for the list of sites to inspect.', as_data_file(manualqa_ind)))
+  }
+  saveRDS(compare, as_data_file(out_ind))
+  gd_put(out_ind)
+}
+
+remove_bad_matches <- function(out_ind, manualqa_ind, sites_ind) {
+  sites <- readRDS(sc_retrieve(sites_ind))
+
+  # find flagged + manually inspected sites that Lauren recommends dropping
+  drop_sites <- readr::read_csv(sc_retrieve(manualqa_ind)) %>%
+    filter(seg_match_recommendation %in% 'drop')
+
+  # filter out "drop" sites
+  out_sites <- sites %>%
+    filter(!site_id %in% drop_sites$site_id)
+
+  saveRDS(out_sites, as_data_file(out_ind))
+  gd_put(out_ind)
+}
+
+
 
 
 #' Function to append segment metadata from NHDPlus and NWIS to sites data frame
@@ -65,7 +125,7 @@ append_seg_match_metadata <- function(sites_df, bird_dist_cutoff_m, crosswalk, r
 
   # Convert sites_df to an sf object and transform to match projection of NHD flowlines
   sites_sf <- sites_df %>%
-    sf::st_as_sf(coords = c("longitude","latitude"), crs = 4269) %>%
+    sf::st_as_sf(coords = c("longitude","latitude"), crs = 4326) %>%
     st_transform(st_crs(nhd_flines_proj))
 
   # Match sites to NHDPlusV2 COMID (match up to 3 COMID's within search radius)

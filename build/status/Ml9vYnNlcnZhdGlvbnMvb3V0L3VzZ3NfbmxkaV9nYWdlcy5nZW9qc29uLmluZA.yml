@@ -1,0 +1,11 @@
+version: 0.3.0
+name: 2_observations/out/usgs_nldi_gages.geojson.ind
+type: file
+hash: be387226e9827e20aa517779ffc541f8
+time: 2022-04-24 19:49:33 UTC
+depends: {}
+fixed: af285d9b5189487f40761563032f5bf0
+code:
+  functions:
+    fetch_refgages: 67aaa7fd3fb4c1380823c798dfefabe6
+
