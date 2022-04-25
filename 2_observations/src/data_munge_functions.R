@@ -251,20 +251,50 @@ clean_release_dat <- function(in_ind, out_ind, mgd_to_cms) {
 }
 
 # get most recent reservoir release data
-get_releases <- function(out_ind, site_ids, reservoir_names) {
+get_releases <- function(out_ind, site_ids, reservoir_names, cfs_to_cms = 0.0283) {
+
   dataRetrieval::setAccess('internal')
   sites <- data.frame(site_no = site_ids, reservoir = reservoir_names)
-  dat <- dataRetrieval::readNWISuv(siteNumbers = site_ids,
-                                   parameterCd = '00060',
-                                   tz = "Etc/GMT+5") %>%
-    mutate(releases_cms = X_.Spill.Release._00060_00000/35.314666) %>%
-    mutate(date = as.Date(dateTime, tz = "Etc/GMT+5")) %>%
-    group_by(site_no, date) %>%
-    summarize(release_volume_cms = round(mean(releases_cms, na.rm = TRUE), 2)) %>%
-    ungroup() %>%
-    left_join(sites)
 
-  saveRDS(dat, file = as_data_file(out_ind))
+
+  # in DV, all three reservoirs have columns that represent spillway releases,
+  # controlled releases, and diversions. The numbers are returned as numbered columns,
+  # and all three have different orders that you can't ascertain from the naming convention
+  # see small text under figures for order:
+  # Cannonsville:https://nwis.waterdata.usgs.gov/ny/nwis/dv/?site_no=01436499&agency_cd=USGS&amp;referred_module=sw
+  # Pepacton:https://nwis.waterdata.usgs.gov/ny/nwis/dv?cb_00060=on&cb_00060=on&cb_00060=on&cb_72022=on&format=gif_default&site_no=01417499&referred_module=sw&period=&begin_date=2020-03-18&end_date=2022-03-23
+  # Neversink:https://waterdata.usgs.gov/nwis/dv/?site_no=01436599&agency_cd=USGS&amp;referred_module=sw
+  dat_neversink <- dataRetrieval::readNWISdv(siteNumbers = sites$site_no[sites$reservoir %in% 'Neversink'],
+                                   parameterCd = '00060') %>%
+    mutate(
+      releases_cms = cfs_to_cms*`X_ODRM.Computation_00060_00003`,
+      diversions_cms = cfs_to_cms*`X_ODRM.Computation....2.._00060_00003`,
+      spillway_cms = cfs_to_cms*`X_ODRM.Computation....3.._00060_00003`) %>%
+    select(site_no, Date, releases_cms, diversions_cms, spillway_cms)
+
+  dat_cannonsville <- dataRetrieval::readNWISdv(siteNumbers = sites$site_no[sites$reservoir %in% 'Cannonsville'],
+                                                parameterCd = '00060') %>%
+    mutate(
+      spillway_cms = cfs_to_cms*`X_ODRM.Computations_00060_00003`,
+      releases_cms = cfs_to_cms*`X_ODRM.Computations....2.._00060_00003`,
+      diversions_cms = cfs_to_cms*`X_ODRM.Computations....3.._00060_00003`) %>%
+    select(site_no, Date, releases_cms, diversions_cms, spillway_cms)
+
+  dat_pepacton <- dataRetrieval::readNWISdv(siteNumbers = sites$site_no[sites$reservoir %in% 'Pepacton'],
+                                                parameterCd = '00060') %>%
+    mutate(
+      diversions_cms = cfs_to_cms*`X_ODRM.Computations_00060_00003`,
+      spillway_cms = cfs_to_cms*`X_ODRM.Computations....2.._00060_00003`,
+      releases_cms = cfs_to_cms*`X_ODRM.Computations....3.._00060_00003`) %>%
+    select(site_no, Date, releases_cms, diversions_cms, spillway_cms)
+
+  out <- bind_rows(dat_cannonsville, dat_pepacton, dat_neversink) %>%
+    mutate(total_releases_cms = releases_cms + spillway_cms) %>%
+    rename(date = Date) %>%
+    left_join(sites) %>%
+    select(-site_no)
+
+  saveRDS(out, file = as_data_file(out_ind))
   gd_put(out_ind)
 
 }

@@ -1,0 +1,13 @@
+version: 0.3.0
+name: 2_observations/out/reservoir_diversions.csv.ind
+type: file
+hash: 5e884c75f38a6f332a6c7979eebe6e8f
+time: 2022-04-03 18:18:22 UTC
+depends:
+  2_observations/out/interpolated_daily_reservoir_water_budget_components.csv.ind: f17869dcad0794c4d56b756a9c6e4e8c
+  2_observations/out/modern_reservoir_releases.rds.ind: e591009c4cf8befac703d9d91c92fc77
+fixed: 239728767b5f3cff99c09917c0827f9d
+code:
+  functions:
+    extract_diversions: cf1ee5c68b5e890d28cd8d05eb99b26f
+

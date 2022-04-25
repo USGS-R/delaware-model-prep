@@ -24,7 +24,7 @@ calc_decay <- function(segs_downstream,
   segs_keep <- segs_downstream
 
   # get PRMS-SNTemp predictions and paired observations
-  compare <- feather::read_feather(sc_retrieve(preds_obs_ind)) %>%
+  compare <- arrow::read_feather(sc_retrieve(preds_obs_ind)) %>%
     mutate(date = as.Date(date)) %>%
     filter(seg_id_nat %in% segs_keep) %>%
     mutate(doy = lubridate::yday(date),
@@ -209,7 +209,7 @@ combine_dwallin_models <- function(
   weights <- left_join(distances_west, distances_east) %>%
     select(seg_id_nat, res_weight_east, res_weight_west)
 
-  preds <- feather::read_feather(sc_retrieve(preds_obs_ind))
+  preds <- arrow::read_feather(sc_retrieve(preds_obs_ind))
 
   # get GLM reservoir predictions
   glm_preds <- readr::read_csv(sc_retrieve(glm_preds_ind, 'getters.yml')) %>%

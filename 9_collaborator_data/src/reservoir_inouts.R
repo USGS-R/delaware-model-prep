@@ -174,13 +174,11 @@ get_inout_sntemp <- function(inouts_raw, inflow_segs, outflow_segs) {
     return()
 }
 
-get_inout_sntemp_all <- function(
-  out_ind = '9_collaborator_data/res/res_io_sntemp.feather.ind',
-  sntemp_ind = '3_predictions/out/uncal_sntemp_input_output.feather') {
+get_inout_sntemp_all <- function(out_ind, sntemp_ind) {
 
   # read in the raw-ish SNTemp output
-  preds <- arrow::read_feather(sntemp_ind) %>%
-    select(seg_id_nat, date, seg_outflow, seg_tave_water)
+  preds <- arrow::read_feather(sc_retrieve(sntemp_ind)) %>%
+    select(seg_id_nat, date = time, seg_outflow, seg_tave_water)
 
   # do reservoir-specific processing. I used the DRB internal viz to identify
   # the inflow and outflow segments for each reservoir

@@ -243,7 +243,6 @@ combine_release_sources <- function(out_ind, hist_rel_ind, usgs_rel_ind, modern_
     manual <- readr::read_csv(sc_retrieve(manual_rel_ind, 'getters.yml'))
 
     # bind together
-
     hist_out <- group_by(hist, date, reservoir) %>%
       summarize(release_volume_cms = sum(release_volume_cms)) %>%
       ungroup()
@@ -258,21 +257,61 @@ combine_release_sources <- function(out_ind, hist_rel_ind, usgs_rel_ind, modern_
       select(-release_volume_cfs, -Date) %>%
       filter(!is.na(release_volume_cms))
 
+    modern_out <- select(modern, reservoir, date, release_volume_cms = total_releases_cms)
+
     # group by and slice_min picks the sources in order of the bind
     # e.g., always use the historical data from the NYC DEP, and then prioritize
     # data in the order of modern pull from NWIS, manually data from ODRM,
     # and data imported from the NY WSC (NY WSC data was messies/most prone to
     # error in importing)
-    all <- bind_rows(hist_out, modern, manual_out, usgs_out, .id = 'id') %>%
+    all <- bind_rows(hist_out, modern_out, manual_out, usgs_out, .id = 'id') %>%
       group_by(reservoir, date) %>%
       slice_min(id) %>%
-      select(-id, -site_no) %>%
+      select(-id) %>%
       mutate(release_volume_cms = round(release_volume_cms, 3))
 
     readr::write_csv(all, as_data_file(out_ind))
     gd_put(out_ind)
 
 
+}
+
+combine_releases_by_type <- function(out_ind, hist_rel_ind, modern_rel_ind) {
+  hist <- readr::read_csv(sc_retrieve(hist_rel_ind, 'getters.yml'))
+  hist_spills <- filter(hist, release_type %in% 'Spill') %>%
+    mutate(release_type = 'spillway')
+  hist_releases <- filter(hist, !release_type %in% 'Spill') %>%
+    group_by(date, reservoir, GRAND_ID) %>%
+    summarize(release_volume_cms = sum(release_volume_cms)) %>%
+    mutate(release_type = 'releases') %>% ungroup()
+  mod <- readRDS(sc_retrieve(modern_rel_ind, 'getters.yml')) %>%
+    select(date, reservoir, releases_cms, spillway_cms) %>%
+    tidyr::pivot_longer(cols = c(releases_cms, spillway_cms), names_to = 'release_type', values_to = 'release_volume_cms') %>%
+    mutate(release_type = gsub('_cms', '', release_type))
+
+  out <- bind_rows(hist_spills, hist_releases, filter(mod, !date %in% unique(hist$date))) %>%
+    select(-GRAND_ID)
+
+  readr::write_csv(out, as_data_file(out_ind))
+  gd_put(out_ind)
+}
+
+extract_diversions <- function(out_ind, hist_ind, mod_ind) {
+
+  hist_dat <- readr::read_csv(sc_retrieve(hist_ind))
+
+  # use historical data when we have it since that is the data
+  # source for most of the record
+  mod_dat <- readRDS(sc_retrieve(mod_ind)) %>%
+    filter(date > max(hist_dat$date))
+
+  out <- hist_dat %>%
+    select(reservoir, date, diversion_cms) %>%
+    bind_rows(select(mod_dat, reservoir, date, diversion_cms = diversions_cms)) %>%
+    filter(reservoir %in% c('Cannonsville', 'Pepacton'))
+
+  readr::write_csv(out, as_data_file(out_ind))
+  gd_put(out_ind)
 }
 
 
