@@ -97,8 +97,27 @@ targets:
     command: gd_get('2_observations/out/crosswalk_site_reach.rds.ind')
   2_observations/out/drb_filtered_sites.rds:
     command: gd_get('2_observations/out/drb_filtered_sites.rds.ind')
+  2_observations/out/GFv1_NHDv2_xwalk.csv:
+    command: gd_get('2_observations/out/GFv1_NHDv2_xwalk.csv.ind')
+  2_observations/out/usgs_nldi_gages.geojson:
+    command: gd_get('2_observations/out/usgs_nldi_gages.geojson.ind')
+  2_observations/out/flagged_sitetoreach_matches.rds:
+    command: gd_get('2_observations/out/flagged_sitetoreach_matches.rds.ind')
+  2_observations/out/check_flagged_sites.rds:
+    command: gd_get('2_observations/out/check_flagged_sites.rds.ind')
+  2_observations/out/drb_filtered_sites_qa.rds:
+    command: gd_get('2_observations/out/drb_filtered_sites_qa.rds.ind')
+  # this file was manually created by Lauren Koenig in April 2022
+  # This represents manual/visual inspection and decisions about whether
+  # to keep or throw site to reach matches that were flagged in file
+  # 2_observations/out/sites_flags.rds.ind. Uploaded to GD and indicated
+  # with gd_confirm_posted()
+  2_observations/in/drb_filtered_sites_seg_match_QC.csv:
+    command: gd_get('2_observations/in/drb_filtered_sites_seg_match_QC.csv.ind')
   2_observations/out/all_drb_temp_obs.rds:
     command: gd_get('2_observations/out/all_drb_temp_obs.rds.ind')
+  2_observations/out/obs_temp_drb_raw.rds:
+    command: gd_get('2_observations/out/obs_temp_drb_raw.rds.ind')
   2_observations/out/obs_temp_drb.rds:
     command: gd_get('2_observations/out/obs_temp_drb.rds.ind')
   2_observations/out/obs_flow_drb.rds:

@@ -1,0 +1,16 @@
+version: 0.3.0
+name: 2_observations/out/flagged_sitetoreach_matches.rds.ind
+type: file
+hash: ba96a6f77ee0160d5710ec560210add1
+time: 2022-04-25 02:57:56 UTC
+depends:
+  2_observations/out/drb_filtered_sites.rds.ind: 32e4780c4a6fb6d4331472cf618c5dbf
+  2_observations/out/GFv1_NHDv2_xwalk.csv.ind: 7bf6afc5d22e60eacb532e6e750eef10
+  2_observations/out/usgs_nldi_gages.geojson.ind: be387226e9827e20aa517779ffc541f8
+fixed: d6a0d3bbddfe407411171cc50bf36fb9
+code:
+  functions:
+    append_seg_match_metadata: 43a4c6b2c74d641dda26aa263396dc0b
+    flag_seg_matches: cbc600e581cbce406558ce4def680f50
+    site_to_reach_flags: 29bf745a368a30ed6c4a324d9d12b307
+
