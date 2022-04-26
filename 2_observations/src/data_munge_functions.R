@@ -49,11 +49,6 @@ filter_temp_data_to_sites <- function(sites_ind, dat_ind, out_ind){
 
   drb_dat <- filter(dat, site_id %in% unique(sites$site_id)) %>%
     distinct(site_id, date, mean_temp_degC, .keep_all = TRUE) %>%
-    group_by(site_id, date) %>%
-    summarize(mean_temp_C = round(mean(mean_temp_degC), 1),
-              min_temp_C = min(min_temp_degC),
-              max_temp_C = max(max_temp_degC)) %>%
-    ungroup() %>%
     left_join(sites, by = "site_id")
 
   saveRDS(drb_dat, as_data_file(out_ind))
@@ -85,22 +80,54 @@ munge_split_temp_dat <- function(dat_ind,
                                  prioritize_nwis_sites = TRUE) {
 
   drb_dat <- readRDS(sc_retrieve(dat_ind, 'getters.yml'))
+  # first find sites that have the same site_id but have a sub-location
+  # this is restricted to NWIS sites that returned multiple columns per site
+  # can be multiple sensors (concurrently measuring at different locations), or could represent
+  # different sensors through time. Some sensors we do not want to keep (piezometers)
 
-  drb_dat_by_subseg <- drb_dat %>%
+  # first handle multiple sub_locations
+  # that are causing >1 obs per site_id-date
+  sub_location_res <- drb_dat %>%
+    filter(!grepl('piezometer', sub_location, ignore.case = TRUE)) %>%
+    filter(!is.na(sub_location)) %>%
+    group_by(site_id, sub_location) %>%
+    mutate(n_sub = n()) %>% ungroup() %>%
+    group_by(site_id, date) %>%
+    slice_max(order_by = n_sub, n = 1, with_ties = FALSE) %>% ungroup()
+
+  # bind back with data without sub_location data
+  # resolve remaining site_ids with mutliple obs
+
+  drb_dat2 <- bind_rows(sub_location_res,
+                        filter(drb_dat, is.na(sub_location)))
+
+  # resolve remaining site_ids with >1 obs per date
+  # take the site_id with the most n_obs
+
+  drb_dat_dup_resolved <- drb_dat2 %>%
+    group_by(site_id, date) %>%
+    slice_max(order_by = n_obs, n = 1, with_ties = FALSE)
+
+  drb_dat_by_subseg <- drb_dat_dup_resolved %>%
     group_by(subseg_id, seg_id_nat, date) %>%
     # If prioritize_nwis_sites is TRUE, check whether data for that segment
     # comes from multiple sources. If multiple distinct site id's, retain only
     # NWIS sites for that segment-date; otherwise, retain all samples
     {if(prioritize_nwis_sites){
-      filter(., if(n_distinct(site_id) > 1 & any(grepl("USGS", site_id, ignore.case = TRUE))) grepl("USGS", site_id, ignore.case = TRUE) else TRUE)
+      filter(., if(n_distinct(site_id) > 1 & any(grepl("nwis", source, ignore.case = TRUE))) grepl("nwis", source, ignore.case = TRUE) else TRUE)
     } else {.}
     } %>%
-    summarize(mean_temp_c = round(mean(mean_temp_C), 1),
-              min_temp_c = min(min_temp_C),
-              max_temp_c = max(max_temp_C),
-              site_id = paste0(site_id, collapse = ', '),
+    summarize(site_id = paste0(site_id, collapse = ', '),
+              source = paste0(unique(source), collapse = ', '),
+              time = ifelse(n() > 1, NA, time), # keep timestamp if represents a single value
+              mean_temp_c = round(mean(mean_temp_degC), 1),
+              min_temp_c = min(min_temp_degC),
+              max_temp_c = max(max_temp_degC),
+              flag = paste(unique(flag)[!is.na(unique(flag))], '; '),
               .groups = 'keep') %>%
     ungroup() %>%
+    rowwise() %>%
+    mutate(flag = paste(unique(unlist(strsplit(flag, '; '))), collapse = '; ')) %>%
     mark_time_space_holdouts(holdout_water_years, holdout_reach_ids)
 
   saveRDS(drb_dat_by_subseg, as_data_file(out_ind))

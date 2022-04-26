@@ -34,10 +34,9 @@ crosswalk_sites_to_reaches <- function(network_ind, boundary_ind, temp_sites_ind
 
   # Subset to sites in the Delaware River Basin
   #st_crs(drb_boundary) <- 4326
-  drb_sites <- obs_sites[st_intersects(drb_boundary, obs_sites)[[1]], ] # 5028 rows
+  drb_sites <- obs_sites[st_intersects(drb_boundary, obs_sites)[[1]], ] # 6280 rows
 
   #### Match sites to reaches ####
-
   source('2_observations/src/subset_closest.R')
   system.time({ # 97 seconds
     crosswalk <- subset_closest(sites=drb_sites, reaches=drb_net$edges, vertices=drb_net$vertices)
