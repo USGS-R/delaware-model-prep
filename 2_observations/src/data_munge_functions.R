@@ -49,7 +49,8 @@ filter_temp_data_to_sites <- function(sites_ind, dat_ind, out_ind){
 
   drb_dat <- filter(dat, site_id %in% unique(sites$site_id)) %>%
     distinct(site_id, date, mean_temp_degC, .keep_all = TRUE) %>%
-    left_join(sites, by = "site_id")
+    left_join(sites, by = "site_id") %>%
+    mutate(date = as.Date(date))
 
   saveRDS(drb_dat, as_data_file(out_ind))
   gd_put(out_ind)
@@ -87,6 +88,8 @@ munge_split_temp_dat <- function(dat_ind,
 
   # first handle multiple sub_locations
   # that are causing >1 obs per site_id-date
+  # slice_max on n_sub selects the sub-location
+  # with the most observations
   sub_location_res <- drb_dat %>%
     filter(!grepl('piezometer', sub_location, ignore.case = TRUE)) %>%
     filter(!is.na(sub_location)) %>%
@@ -106,7 +109,8 @@ munge_split_temp_dat <- function(dat_ind,
 
   drb_dat_dup_resolved <- drb_dat2 %>%
     group_by(site_id, date) %>%
-    slice_max(order_by = n_obs, n = 1, with_ties = FALSE)
+    slice_max(order_by = n_obs, n = 1, with_ties = FALSE) %>%
+    ungroup()
 
   drb_dat_by_subseg <- drb_dat_dup_resolved %>%
     group_by(subseg_id, seg_id_nat, date) %>%
@@ -123,9 +127,9 @@ munge_split_temp_dat <- function(dat_ind,
               mean_temp_c = round(mean(mean_temp_degC), 1),
               min_temp_c = min(min_temp_degC),
               max_temp_c = max(max_temp_degC),
-              flag = paste(unique(flag)[!is.na(unique(flag))], '; '),
-              .groups = 'keep') %>%
-    ungroup() %>%
+              sd_mean_temp_c = round(sd(mean_temp_degC), 1), # provide an indicator of variability across sites
+              flag = paste(unique(flag)[!is.na(unique(flag))], collapse = '; '),
+              .groups = 'drop') %>%
     rowwise() %>%
     mutate(flag = paste(unique(unlist(strsplit(flag, '; '))), collapse = '; ')) %>%
     mark_time_space_holdouts(holdout_water_years, holdout_reach_ids)
