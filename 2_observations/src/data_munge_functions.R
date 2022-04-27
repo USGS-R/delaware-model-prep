@@ -99,7 +99,7 @@ munge_split_temp_dat <- function(dat_ind,
     slice_max(order_by = n_sub, n = 1, with_ties = FALSE) %>% ungroup()
 
   # bind back with data without sub_location data
-  # resolve remaining site_ids with mutliple obs
+  # resolve remaining site_ids with multiple obs
 
   drb_dat2 <- bind_rows(sub_location_res,
                         filter(drb_dat, is.na(sub_location)))
