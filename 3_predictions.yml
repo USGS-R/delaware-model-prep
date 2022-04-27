@@ -71,6 +71,8 @@ targets:
      segs_downstream = I(c('1566', '1563', '1565' , '1571', '1572')),
      reservoir_nhdid = I('nhdhr_120022743'),
      glm_preds_file = '3_predictions/in/reservoir_downstream_preds.csv.ind',
+     preds_obs_ind = '3_predictions/out/compare_predictions_obs.feather.ind',
+     crosswalk_ind = '2_observations/out/crosswalk_site_reach.rds.ind',
      reservoir_subseg = I('128_1'),
      test_period = test_period)
 
@@ -79,6 +81,8 @@ targets:
      segs_downstream = I(c('1444', '1450', '1459', '1461', '1462', '1463')),
      reservoir_nhdid = I('nhdhr_151957878'),
      glm_preds_file = '3_predictions/in/reservoir_downstream_preds.csv.ind',
+     preds_obs_ind = '3_predictions/out/compare_predictions_obs.feather.ind',
+     crosswalk_ind = '2_observations/out/crosswalk_site_reach.rds.ind',
      reservoir_subseg = I('15_1'),
      test_period = test_period)
 

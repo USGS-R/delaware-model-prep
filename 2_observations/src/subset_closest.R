@@ -53,9 +53,8 @@ subset_closest <- function(sites, reaches, vertices) {
           }
           site_sf <- site_sf[1,] # just keep one
         }
-
         # Start the site processing
-        # message(site_sf$site_id)
+        message(site_sf$site_id)
         site <- tibble(site_id = site_sf$site_id) # initialize a new non-sf tibble to return
 
         # Calculate distances to the downstream and upstream vertices of the

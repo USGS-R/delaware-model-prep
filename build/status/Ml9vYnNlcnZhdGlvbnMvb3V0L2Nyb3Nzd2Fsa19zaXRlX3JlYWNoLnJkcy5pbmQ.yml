@@ -1,10 +1,10 @@
 version: 0.3.0
 name: 2_observations/out/crosswalk_site_reach.rds.ind
 type: file
-hash: 971b98b14c16aa7e6231ab36bc291f22
-time: 2022-04-03 19:18:57 UTC
+hash: 114c98737fe0ab897eabb7415fa6beaf
+time: 2022-04-25 17:58:03 UTC
 depends:
-  2_observations/in/stream_sites_us.rds.ind: 4eba2c320134fb554ccca1a211a23bd0
+  2_observations/in/stream_sites_us.rds.ind: 822cd3a5e059f1e3a1e0b110e74af8cc
   2_observations/in/observation_summary.rds.ind: fda10168a219bdbe753a0a7962083c44
   1_network/out/boundary.rds.ind: 0a1bc6cd40a17b76b33bf32dc407a909
   1_network/out/network.rds.ind: 67bc625285a9a5e2430b5b8adee07a95
@@ -12,5 +12,5 @@ fixed: 8c7c06704515b69a18aaf879f7581f05
 code:
   functions:
     crosswalk_sites_to_reaches: 0535bd76acf48e650c2d02d943030737
-    subset_closest: cf756a60abe4536128304649eba64a23
+    subset_closest: b5fdb546b03dd39ca77d771be4e392ad
 
